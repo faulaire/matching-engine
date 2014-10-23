@@ -1,0 +1,26 @@
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>Fabien</groupId>
+   <artifactId>common</artifactId>
+   <version>0.0.1-BETA</version>
+   <packaging>pom</packaging>
+   <name>common</name>
+   <build>
+        <sourceDirectory>.</sourceDirectory>
+   </build>
+   <properties>
+      <sonar.language>c++</sonar.language>
+      <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+      <sonar.sources>src,include</sonar.sources>
+      <sonar.verbose>true</sonar.verbose>
+      <sonar.cxx.cppcheck.reportPath>bin/cppcheck-report.xml</sonar.cxx.cppcheck.reportPath>
+      <!--sonar.cxx.pclint.reportPath>build/pclint-report.xml</sonar.cxx.pclint.reportPath-->
+      <sonar.cxx.coverage.reportPath>bin/gcovr-report*.xml</sonar.cxx.coverage.reportPath>
+      <!--sonar.cxx.coverage.itReportPath>tests/output/gcovr-report*.xml</sonar.cxx.coverage.itReportPath -->
+      <!--sonar.cxx.coverage.overallReportPath>tests/output/gcovr-report*.xml</sonar.cxx.coverage.overallReportPath -->
+      <sonar.cxx.valgrind.reportPath>bin/valgrind*.xml</sonar.cxx.valgrind.reportPath>
+      <sonar.cxx.vera.reportPath>bin/vera++-report.xml</sonar.cxx.vera.reportPath>
+      <sonar.cxx.rats.reportPath>bin/rats-report.xml</sonar.cxx.rats.reportPath>
+      <sonar.cxx.xunit.reportPath>bin/xunit*.xml</sonar.cxx.xunit.reportPath>
+   </properties>
+</project>

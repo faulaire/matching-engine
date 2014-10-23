@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30110.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "common", "common.vcxproj", "{9FE61443-ACAF-4B40-B2D5-BFB05A7DF18A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{06803407-282A-49B3-8451-0F74B6E8FE4C}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\wscript = ..\..\..\wscript
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9FE61443-ACAF-4B40-B2D5-BFB05A7DF18A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9FE61443-ACAF-4B40-B2D5-BFB05A7DF18A}.Debug|Win32.Build.0 = Debug|Win32
+		{9FE61443-ACAF-4B40-B2D5-BFB05A7DF18A}.Release|Win32.ActiveCfg = Release|Win32
+		{9FE61443-ACAF-4B40-B2D5-BFB05A7DF18A}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

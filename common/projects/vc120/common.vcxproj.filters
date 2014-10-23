@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\logger">
+      <UniqueIdentifier>{6f233b9b-2666-4613-bb3c-c6bed3cebd8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\logger">
+      <UniqueIdentifier>{d5d1c297-c4e1-45ae-9ed9-d82a7a900022}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\database">
+      <UniqueIdentifier>{9d74b65f-ba93-4756-b2f3-ae239e8bd298}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\database">
+      <UniqueIdentifier>{5d1f8cc7-38f8-4ba7-bdd3-0386ba8de8e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{62e97a4a-6bbd-4afc-a074-3473dc43ec22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Source Files">
+      <UniqueIdentifier>{57bc1a52-a17c-4d20-a657-419eab2895aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Configuration">
+      <UniqueIdentifier>{c114dc28-62a5-482f-8ce9-19e8e940570d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\logger\ILogger.h">
+      <Filter>Header Files\logger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\logger\Logger.h">
+      <Filter>Header Files\logger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\logger\LoggerConsole.h">
+      <Filter>Header Files\logger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\logger\LoggerFile.h">
+      <Filter>Header Files\logger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\logger\LoggerHolder.h">
+      <Filter>Header Files\logger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CSingleton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Tools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ConfigurationMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\database\MariaDB_Connector.h">
+      <Filter>Header Files\database</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Tools.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Tools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ConfigurationMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\database\MariaDB_Connector.cpp">
+      <Filter>Source Files\database</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\logger\LoggerFile.cpp">
+      <Filter>Source Files\logger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\src\test_mariadb.cpp">
+      <Filter>Tests\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\src\test_logger.cpp">
+      <Filter>Tests\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\src\test_ConfigurationMgr.cpp">
+      <Filter>Tests\Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\tests\config\config.ini">
+      <Filter>Tests\Configuration</Filter>
+    </None>
+    <None Include="..\..\tests\config\LogConfiguration.ini">
+      <Filter>Tests\Configuration</Filter>
+    </None>
+    <None Include="..\..\wscript" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\..\tests\config\pom.xml">
+      <Filter>Tests\Configuration</Filter>
+    </Xml>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,29 @@
+#! /usr/bin/env python
+# encoding: utf-8
+import sys
+
+def run_test(ctx):
+    sys.path.append(ctx.top_dir)
+    import waf_tools
+    
+    waf_tools.run_tests(ctx)
+
+
+def configure(cfg):
+    pass
+
+def build(bld):
+
+    sys.path.append(bld.top_dir)
+    import waf_tools
+
+    IncludePaths = waf_tools.get_module_include_dirs(bld,'common')
+    IncludePaths.append('include')
+
+    #Build the static library
+    # find all .cpp files ( exclude unit tests )
+    sources_files =  bld.path.ant_glob('**/*.cpp',excl=['**/test_*.cpp'])
+    bld.stlib( source = sources_files, target="matching-engine", use="common", includes=IncludePaths )
+    
+    if bld.env.with_unittest:
+        waf_tools.build_tests(bld, "common matching-engine GTEST", IncludePaths)
