@@ -19,8 +19,8 @@ def configure(cfg):
     
     cfg.env.DEFINES_BOOST     = ['BOOST']
     cfg.env.LIB_BOOST         = ['boost_system', 'boost_thread', 'boost_filesystem', 'boost_date_time']
-    cfg.env.LIBPATH_BOOST     = ['/export/boost/105500/libs/']
-    cfg.env.INCLUDES_BOOST    = ['/export/boost/105500/include/']
+    cfg.env.LIBPATH_BOOST     = ['/export/boost/105600/libs/']
+    cfg.env.INCLUDES_BOOST    = ['/export/boost/105600/include/']
 
     cfg.env.DEFINES_MARIADB   = ['MARIADB']
     cfg.env.STLIB_MARIADB     = ['mariadbclient']
