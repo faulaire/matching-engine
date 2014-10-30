@@ -17,15 +17,15 @@ typedef boost::fusion::vector<exch_logger::LoggerConsole, exch_logger::LoggerFil
 typedef exch_logger::LoggerHolder<ExchangeLoggers>                                 LoggerHolder;
 
 
-#define EXINFO(MSG)  LoggerHolder::GetInstance() << exch_logger::header_info  << MSG << exch_logger::eos;
-#define EXWARN(MSG)  LoggerHolder::GetInstance() << exch_logger::header_warn  << MSG << exch_logger::eos;
-#define EXERR(MSG)   LoggerHolder::GetInstance() << exch_logger::header_err   << MSG << exch_logger::eos;
-#define EXPANIC(MSG) LoggerHolder::GetInstance() << exch_logger::header_panic << MSG << exch_logger::eos;
+#define EXINFO(MSG)  do { LoggerHolder::GetInstance() << exch_logger::header_info  << MSG << exch_logger::eos; } while (0)
+#define EXWARN(MSG)  do { LoggerHolder::GetInstance() << exch_logger::header_warn  << MSG << exch_logger::eos; } while (0)
+#define EXERR(MSG)   do { LoggerHolder::GetInstance() << exch_logger::header_err   << MSG << exch_logger::eos; } while (0)
+#define EXPANIC(MSG) do { LoggerHolder::GetInstance() << exch_logger::header_panic << MSG << exch_logger::eos; } while (0)
 
 #define EXLOG(Category, Verbosity, MSG)                                                    \
-    if ( LoggerHolder::GetInstance().IsReporting( Category, Verbosity ) )                  \
+    do { if ( LoggerHolder::GetInstance().IsReporting( Category, Verbosity ) )                  \
     {                                                                                      \
         LoggerHolder::GetInstance() << exch_logger::header_info << MSG << exch_logger::eos;\
-    }
+    } } while (0)
 
 #endif
