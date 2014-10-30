@@ -22,12 +22,18 @@ def options(opt):
     opt.add_option('--coverage', action='store_true', default=False, help='Activate coverage')
     opt.add_option('--with_unittest', action='store_true', default=False, help='Activate unittest building')
     opt.add_option('--with_sanitizer', action='store_true', default=False, help='Activate address sanitizer')
-    
+
 def configure(cfg):
     cfg.check_waf_version(mini='1.7.5')
     cfg.load('gxx')
     cfg.check(features='cxx cxxprogram', lib=['pthread'], uselib_store='PTHREAD')
-     
+    cfg.check(features='cxx cxxprogram', lib=['z'], uselib_store='Z')
+    cfg.check(features='cxx cxxprogram', lib=['m'], uselib_store='M')
+    cfg.check(features='cxx cxxprogram', lib=['dl'], uselib_store='DL')
+    cfg.check(header_name='gtest/gtest.h', features='cxx cxxprogram')
+    
+    cfg.find_program("mysql_config", var="mysql_config")
+
     cfg.env.with_unittest = cfg.options.with_unittest
 
     cfg.env.append_value('CXXFLAGS', ['-std=c++11','-W','-Wall','-Wno-unused-local-typedefs'])
@@ -44,7 +50,6 @@ def configure(cfg):
         if cfg.options.with_sanitizer:
             cfg.env.append_value('CXXFLAGS', ['-fsanitize=address'])
             cfg.env.append_value('LINKFLAGS', ['-fsanitize=address'])
-
         
         if cfg.options.coverage:
             cfg.env.append_value('CXXFLAGS', ['--coverage','-fPIC'])

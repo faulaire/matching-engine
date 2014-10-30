@@ -86,7 +86,7 @@ TEST_F(MatchingEngineTest, InsertAuction)
     m_Engine.EngineListen();
 
     ASSERT_TRUE(m_Engine.Insert(o, 1));
-    ASSERT_FALSE(m_Engine.Insert(o, 17));
+    ASSERT_FALSE(m_Engine.Insert(o, 1));
 
     OrderReplace Replace(BUY, 2000, 1234, 1, 2, 5);
     ASSERT_TRUE(m_Engine.Modify(Replace, 1));

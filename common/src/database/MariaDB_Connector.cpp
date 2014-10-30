@@ -8,12 +8,8 @@
 
 #include <Logger.h>
 
-extern "C"
-{
-    #include <my_global.h>
-    #include <mysql.h>
-}
-
+#include <my_global.h>
+#include <mysql.h>
 
 namespace exchange 
 {
