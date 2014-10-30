@@ -5,6 +5,41 @@ import glob
 import os
 import ntpath
 import sys
+import subprocess
+import string
+
+def run_command(Cmd, Arg):
+    p = subprocess.Popen([Cmd, Arg], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    return out.rstrip('\r\n')
+
+def configure_mysql_client(cfg):
+    if 'mysql_config' in os.environ:
+        mysql_config = os.environ['mysql_config']
+    else:
+        mysql_config = 'mysql_config'
+
+    print mysql_config 
+    cfg.env.CFLAGS_MARIADB = []
+    cfg.env.LIB_MARIADB  = []
+    cfg.env.LIBPATH_MARIADB = []
+    cfg.env.INCLUDES_MARIADB  = []
+
+    cflags = run_command(mysql_config, "--cflags")
+    tokens = string.split(cflags, " ")
+    for token in tokens:
+        if token.find("-I") != -1:
+            cfg.env.INCLUDES_MARIADB.append(token[2:])
+        else:
+            cfg.env.CFLAGS_MARIADB.append(token[1:])
+
+    libs   = run_command(mysql_config, "--libs")
+    tokens = string.split(libs, " ")
+    for token in tokens:
+        if token.find("-L") != -1:
+            cfg.env.LIBPATH_MARIADB.append(token[2:])
+        else:
+            cfg.env.LIB_MARIADB.append(token[2:])
 
 def run_test(ctx):
     sys.path.append(ctx.top_dir)
@@ -15,23 +50,17 @@ def run_test(ctx):
 def configure(cfg):
     #system lib
     cfg.env.append_value('LIB',['ssl','crypto','dl','z'])
+
+    if cfg.env.with_unittest:
+        cfg.env.append_value('LIB',['gtest'])
+
     #boost lib
-    
     cfg.env.DEFINES_BOOST     = ['BOOST']
     cfg.env.LIB_BOOST         = ['boost_system', 'boost_thread', 'boost_filesystem', 'boost_date_time']
-    cfg.env.LIBPATH_BOOST     = ['/export/boost/105600/libs/']
+    cfg.env.LIBPATH_BOOST     = ['/export/boost/105600/lib/']
     cfg.env.INCLUDES_BOOST    = ['/export/boost/105600/include/']
 
-    cfg.env.DEFINES_MARIADB   = ['MARIADB']
-    cfg.env.STLIB_MARIADB     = ['mariadbclient']
-    cfg.env.STLIBPATH_MARIADB = ['/export/mariadb/libs/']
-    cfg.env.INCLUDES_MARIADB  = ['/export/mariadb/include/']
-    
-    cfg.env.DEFINES_GTEST     = ['GTEST']
-    cfg.env.STLIB_GTEST       = ['gtest']
-    cfg.env.STLIBPATH_GTEST   = ['/export/gtest/libs/']
-    cfg.env.INCLUDES_GTEST    = ['/export/gtest/include/']
-    
+    configure_mysql_client(cfg)
 
 def build(bld):
     
@@ -45,8 +74,9 @@ def build(bld):
     # find all .cpp files ( exclude unit tests )
     sources_files =  bld.path.ant_glob('**/*.cpp',excl=['**/test_*.cpp'])
     bld.stlib( source = sources_files, target="common", use="MARIADB BOOST", includes=IncludePaths )
-    
+
     #Unit test related stuff
     
     if bld.env.with_unittest:
-        waf_tools.build_tests(bld, "common MARIADB GTEST", IncludePaths)
+        waf_tools.build_tests(bld, "common MARIADB", IncludePaths)
+
