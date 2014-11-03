@@ -144,6 +144,10 @@ namespace exchange
 
                 /**
                 */
+                void ByOrderView(std::vector<TOrder> & BidContainer, std::vector<TOrder> & AskContainer) const;
+
+                /**
+                */
                 std::tuple<UInt32, UInt64> GetTheoriticalOpenInformations() const;
             
             public:

@@ -25,9 +25,13 @@ namespace exchange
 
         bool Deal::operator == (const Deal & rhs) const
         {
-            return ( m_Price == rhs.GetPrice() ) && ( m_Qty == rhs.GetQuantity() ) &&
-                   (m_BuyerClientID == rhs.GetBuyerClientID()) && (m_BuyerOrderID == rhs.GetBuyerOrderID()) &&
-                   (m_SellerClientID == rhs.GetSellerClientID()) && (m_SellerOrderID == rhs.GetSellerOrderID());
+            if( &rhs != this )
+            {
+                return ( m_Price == rhs.GetPrice() ) && ( m_Qty == rhs.GetQuantity() ) &&
+                       (m_BuyerClientID == rhs.GetBuyerClientID()) && (m_BuyerOrderID == rhs.GetBuyerOrderID()) &&
+                    (m_SellerClientID == rhs.GetSellerClientID()) && (m_SellerOrderID == rhs.GetSellerOrderID());
+            }
+            return true;
         }
 
         std::ostream& operator<<(std::ostream& o, const Deal & x)

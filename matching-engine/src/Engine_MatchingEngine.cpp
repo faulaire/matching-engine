@@ -1,3 +1,8 @@
+/*
+* Copyright (C) 2014, Fabien Aulaire
+* All rights reserved.
+*/
+
 #include <Engine_MatchingEngine.h>
 #include <ConfigurationMgr.h>
 
@@ -7,7 +12,7 @@ namespace exchange
     {
 
         MatchingEngine::MatchingEngine() :
-            m_StartTime(), m_StopTime(), m_AuctionStart(), m_AuctionDuration(), m_GlobalPhase(CLOSE)
+            m_StartTime(), m_StopTime(), m_AuctionStart(), m_AuctionDuration(), m_GlobalPhase(TradingPhase::CLOSE)
         {}
 
         MatchingEngine::~MatchingEngine()
@@ -138,12 +143,12 @@ namespace exchange
 
         bool MatchingEngine::SetGlobalPhase(TradingPhase iNewPhase)
         {
-            if (iNewPhase >= INTRADAY_AUCTION || iNewPhase < OPENING_AUCTION)
+            if (iNewPhase >= TradingPhase::INTRADAY_AUCTION || iNewPhase < TradingPhase::OPENING_AUCTION)
             {
                 return false;
             }
 
-            if (iNewPhase == OPENING_AUCTION || iNewPhase == CLOSING_AUCTION)
+            if (iNewPhase == TradingPhase::OPENING_AUCTION || iNewPhase == TradingPhase::CLOSING_AUCTION)
             {
                 m_AuctionStart = boost::posix_time::second_clock::local_time();
             }
@@ -160,43 +165,43 @@ namespace exchange
 
             switch (GetGlobalPhase())
             {
-                case CLOSE:
+                case TradingPhase::CLOSE:
                     {
                         if (bInOpenPeriod)
                         {
                             m_AuctionStart = now;
-                            UpdateInstrumentsPhase(OPENING_AUCTION);
+                            UpdateInstrumentsPhase(TradingPhase::OPENING_AUCTION);
                         }
                     }
                     break;
-                case OPENING_AUCTION:
+                case TradingPhase::OPENING_AUCTION:
                     {
                         auto AuctionEnd = m_AuctionStart + boost::posix_time::seconds(m_AuctionDuration);
                         if (now > AuctionEnd)
                         {
-                            UpdateInstrumentsPhase(CONTINUOUS_TRADING);
+                            UpdateInstrumentsPhase(TradingPhase::CONTINUOUS_TRADING);
                         }
                     }
                     break;
-                case CONTINUOUS_TRADING:
+                case TradingPhase::CONTINUOUS_TRADING:
                     {
                         if (!bInOpenPeriod)
                         {
                             m_AuctionStart = now;
-                            UpdateInstrumentsPhase(CLOSING_AUCTION);
+                            UpdateInstrumentsPhase(TradingPhase::CLOSING_AUCTION);
                         }
                     }
                     break;
-                case CLOSING_AUCTION:
+                case TradingPhase::CLOSING_AUCTION:
                     {
                         auto AuctionEnd = m_AuctionStart + boost::posix_time::seconds(m_AuctionDuration);
                         if (now > AuctionEnd)
                         {
-                            UpdateInstrumentsPhase(CLOSE);
+                            UpdateInstrumentsPhase(TradingPhase::CLOSE);
                         }
                     }
                     break;
-                case INTRADAY_AUCTION:
+                case TradingPhase::INTRADAY_AUCTION:
                     /* Intraday auction state is managed at OrderBook level */
                     break;
                 default:

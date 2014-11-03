@@ -21,7 +21,7 @@ namespace exchange
         *  All market available states
         *  Based on Xetra trading phases
         */
-        enum TradingPhase
+        enum class TradingPhase
         {
             OPENING_AUCTION = 0,
             CONTINUOUS_TRADING,
@@ -76,7 +76,7 @@ namespace exchange
                 Getter/Setter
                 */
                 inline UInt64 GetTurnover() const { return m_Turnover;             }
-                inline UInt64 GetDailyVolume() { return m_DailyVolume;             }
+                inline UInt64 GetDailyVolume() const { return m_DailyVolume;       }
                 inline UInt32 GetOpenPrice() const { return m_OpenPrice;           }
                 inline UInt32 GetLastClosePrice() const { return m_LastClosePrice; }
 
@@ -101,10 +101,10 @@ namespace exchange
                 template <typename Msg>
                 bool CheckOrder(const Msg & iMsg) const;
 
+                inline bool IsAuctionPhase(const TradingPhase iPhase) const;
+
             private:
                 
-                static const bool   MatchingMapping[PHASES_SIZE];
-
                 std::string         m_SecurityName;
 
                 OrderContainerType  m_Orders;

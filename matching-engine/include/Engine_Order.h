@@ -79,6 +79,8 @@ namespace exchange
                                   
                 inline void       RemoveQuantity(qty_type iDelta);
 
+                inline bool operator==(const Order & rhs) const;
+
             protected:
 
                 Layout m_Layout;
@@ -129,6 +131,20 @@ namespace exchange
         inline void Order::RemoveQuantity(qty_type iDelta)
         {
             m_Layout.m_Qty -= iDelta;
+        }
+
+
+        inline bool Order::operator==(const Order & rhs) const
+        {
+            if( &rhs != this)
+            {
+                return ( GetPrice() == rhs.GetPrice() )       &&
+                       ( GetQuantity() == rhs.GetQuantity() ) &&
+                       ( GetWay() == rhs.GetWay() )           &&
+                       ( GetClientID() == rhs.GetClientID())  &&
+                       ( GetOrderID() == rhs.GetOrderID());
+            }
+            return true;
         }
 
         /*!

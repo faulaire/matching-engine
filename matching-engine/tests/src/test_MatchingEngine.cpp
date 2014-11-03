@@ -37,26 +37,26 @@ TEST_F(MatchingEngineTest, PhaseSwitching)
 {
     ASSERT_TRUE(m_Engine.Configure(m_Connector));
     
-    ASSERT_EQ(m_Engine.GetGlobalPhase(), CLOSE);
+    ASSERT_EQ(m_Engine.GetGlobalPhase(), TradingPhase::CLOSE);
     m_Engine.EngineListen();
-    ASSERT_EQ(m_Engine.GetGlobalPhase(), OPENING_AUCTION);
+    ASSERT_EQ(m_Engine.GetGlobalPhase(), TradingPhase::OPENING_AUCTION);
 
     for (auto x = 0; x < 5; x++)
     {
         m_Engine.EngineListen();
         sleep(1);
     }
-    ASSERT_EQ(m_Engine.GetGlobalPhase(), CONTINUOUS_TRADING);
+    ASSERT_EQ(m_Engine.GetGlobalPhase(), TradingPhase::CONTINUOUS_TRADING);
 
-    m_Engine.SetGlobalPhase(CLOSING_AUCTION);
+    m_Engine.SetGlobalPhase(TradingPhase::CLOSING_AUCTION);
 
-    ASSERT_EQ(m_Engine.GetGlobalPhase(), CLOSING_AUCTION);
+    ASSERT_EQ(m_Engine.GetGlobalPhase(), TradingPhase::CLOSING_AUCTION);
     for (auto x = 0; x < 5; x++)
     {
         m_Engine.EngineListen();
         sleep(1);
     }
-    ASSERT_EQ(m_Engine.GetGlobalPhase(), CLOSE);
+    ASSERT_EQ(m_Engine.GetGlobalPhase(), TradingPhase::CLOSE);
 }
 
 TEST_F(MatchingEngineTest, InsertClose)

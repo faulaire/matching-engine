@@ -1,3 +1,8 @@
+/*
+* Copyright (C) 2014, Fabien Aulaire
+* All rights reserved.
+*/
+
 #include <Engine_OrderBook.h>
 
 namespace exchange
@@ -9,19 +14,19 @@ namespace exchange
         {
             switch (iPhase)
             {
-                case OPENING_AUCTION:
+                case TradingPhase::OPENING_AUCTION:
                     return "OPENING_AUCTION";
                     break;
-                case CONTINUOUS_TRADING:
+                case TradingPhase::CONTINUOUS_TRADING:
                     return "CONTINUOUS_TRADING";
                     break;
-                case CLOSING_AUCTION:
+                case TradingPhase::CLOSING_AUCTION:
                     return "CLOSING_AUCTION";
                     break;
-                case CLOSE:
+                case TradingPhase::CLOSE:
                     return "CLOSE";
                     break;
-                case INTRADAY_AUCTION:
+                case TradingPhase::INTRADAY_AUCTION:
                     return "INTRADAY_AUCTION";
                     break;
                 default:

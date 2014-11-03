@@ -134,6 +134,20 @@ TEST_F(OrderContainerTest, AuctionInsert)
 
     m_Container.AggregatedView(BidContainer, AskContainer);
 
+    std::vector<Order> ByOrderBidContainer;
+    std::vector<Order> ByOrderAskContainer;
+
+    m_Container.ByOrderView(ByOrderBidContainer, ByOrderAskContainer);
+
+    ASSERT_EQ(ByOrderAskContainer.size(), 6);
+    ASSERT_EQ(ByOrderBidContainer.size(), 6);
+
+    ASSERT_EQ(ByOrderAskContainer[0], Order(SELL, 8000, 4321, 2, 1));
+    ASSERT_EQ(ByOrderAskContainer[1], Order(SELL, 7000, 4321, 2, 2));
+
+    ASSERT_EQ(ByOrderBidContainer[0], Order(BUY, 5000, 2185, 1, 9));
+    ASSERT_EQ(ByOrderBidContainer[1], Order(BUY, 6000, 2185, 1, 10));
+
     ASSERT_TRUE(BidContainer == m_BidContainerReference);
     ASSERT_TRUE(AskContainer == m_AskContainerReference);
 }
@@ -438,6 +452,8 @@ TEST_F(OrderContainerTest, InsertMatching)
 
 TEST_F(OrderContainerTest, ModifyMatching)
 {
+    auto & DealContainer = m_DealHandler.GetDealContainer();
+
     m_Container.Reset();
 
     m_BidOrders = {
@@ -472,6 +488,10 @@ TEST_F(OrderContainerTest, ModifyMatching)
 
     DisplayOrders();
 
+    ASSERT_EQ( DealContainer.size(), 2 );
+    ASSERT_EQ( *DealContainer.at(0), Deal(91, 1200, 8, 5, 1, 4) );
+    ASSERT_EQ( *DealContainer.at(1), Deal(91, 650, 8, 5, 2, 2)  );
+
     SellReplace = OrderReplace(SELL, 500, 91, 2, 8, 4);
 
     ASSERT_TRUE(m_Container.Modify(SellReplace, true));
@@ -490,7 +510,9 @@ TEST_F(OrderContainerTest, ModifyMatching)
     ASSERT_TRUE(BidContainer == m_BidContainerReference);
     ASSERT_TRUE(AskContainer == m_AskContainerReference);
 
-    // TODO : Add a check for all deals generated
+    ASSERT_EQ( DealContainer.size(), 3 );
+    ASSERT_EQ( *DealContainer.at(2), Deal(91, 150, 8, 5, 4, 8) );
+
     m_DealHandler.Reset();
 }
 

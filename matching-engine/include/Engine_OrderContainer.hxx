@@ -361,6 +361,25 @@ namespace exchange
         }
 
         template <typename TOrder, typename TDealHandler>
+        void OrderContainer<TOrder, TDealHandler>::ByOrderView(std::vector<TOrder> & BidContainer, std::vector<TOrder> & AskContainer) const
+        {
+            BidContainer.reserve( GetBidIndex().size() );
+            AskContainer.reserve( GetAskIndex().size() );
+
+            auto AskIterator = GetAskIndex().begin();
+            for(; AskIterator!=GetAskIndex().end(); AskIterator++)
+            {
+                AskContainer.push_back(*AskIterator);
+            }
+
+            auto BidIterator = GetBidIndex().begin();
+            for(; BidIterator!=GetBidIndex().end(); BidIterator++)
+            {
+                BidContainer.push_back(*BidIterator);
+            }
+        }
+
+        template <typename TOrder, typename TDealHandler>
         void OrderContainer<TOrder, TDealHandler>::AggregatedView(LimitContainer & BidContainer, LimitContainer & AskContainer) const
         {
             auto AggregatedViewHelper = [&](price_index_iterator begin, price_index_iterator end, LimitContainer & Container)
