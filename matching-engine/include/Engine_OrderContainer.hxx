@@ -74,7 +74,7 @@ namespace exchange
             }
         }
 
-        template <typename Msg, bool bIsOrder>
+        template <typename Msg, bool bIsReplaceOrder>
         struct AggressorIDHelper
         {
             static UInt32 get(Msg & t) { return t.GetOrderID(); }

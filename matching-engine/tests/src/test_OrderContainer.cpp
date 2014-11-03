@@ -327,7 +327,7 @@ TEST_F(OrderContainerTest, AuctionMatching)
 
     ASSERT_EQ(DealContainer.size(), 1);
 
-    ASSERT_EQ( *DealContainer.at(0) , Deal(90, 900, 1, 2, 5, 1) );
+    ASSERT_EQ( *DealContainer.at(0) , Deal(90, 900, 5, 1, 1, 2) );
 
     DisplayOrders();
 
@@ -356,12 +356,12 @@ TEST_F(OrderContainerTest, AuctionMatching)
 
     ASSERT_EQ(DealContainer.size(), 6);
 
-    ASSERT_EQ(*DealContainer.at(0), Deal(39, 100, 1, 2, 5, 1));
-    ASSERT_EQ(*DealContainer.at(1), Deal(39, 100, 2, 2, 5, 1));
-    ASSERT_EQ(*DealContainer.at(2), Deal(39, 100, 2, 2, 6, 1));
-    ASSERT_EQ(*DealContainer.at(3), Deal(39, 50, 3, 2, 6, 1));
-    ASSERT_EQ(*DealContainer.at(4), Deal(39, 150, 4, 2, 6, 1));
-    ASSERT_EQ(*DealContainer.at(5), Deal(39, 50, 4, 2, 7, 1));
+    ASSERT_EQ(*DealContainer.at(0), Deal(39, 100, 5, 1, 1, 2));
+    ASSERT_EQ(*DealContainer.at(1), Deal(39, 100, 5, 1, 2, 2));
+    ASSERT_EQ(*DealContainer.at(2), Deal(39, 100, 6, 1, 2, 2));
+    ASSERT_EQ(*DealContainer.at(3), Deal(39, 50, 6, 1, 3, 2));
+    ASSERT_EQ(*DealContainer.at(4), Deal(39, 150, 6, 1, 4, 2));
+    ASSERT_EQ(*DealContainer.at(5), Deal(39, 50, 7, 1, 4, 2));
 
     DisplayOrders();
 

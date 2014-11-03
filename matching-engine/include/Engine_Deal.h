@@ -102,12 +102,12 @@ namespace exchange
 
         inline UInt32 Deal::GetBuyerClientID() const
         {
-            return m_BuyerOrderID;
+            return m_BuyerClientID;
         }
 
         inline void   Deal::SetBuyerClientID(UInt32 iId)
         {
-            m_BuyerOrderID = iId;
+            m_BuyerClientID = iId;
         }
 
         inline UInt32 Deal::GetSellerClientID() const
