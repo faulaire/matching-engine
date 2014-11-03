@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef  TYPES_DEF_HEADER
-#define  TYPES_DEF_HEADER
+#pragma once
 
 typedef unsigned char       UInt8;
 typedef signed char         SInt8;
@@ -17,5 +16,3 @@ typedef signed int          SInt32;
 
 typedef unsigned long long  UInt64;
 typedef signed long long    SInt64;
-
-#endif

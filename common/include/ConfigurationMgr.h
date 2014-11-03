@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef ENGINE_CONFIGURATION_H
-#define ENGINE_CONFIGURATION_H
+#pragma once
 
 #include <MariaDB_Connector.h>
 #include <CSingleton.h>
@@ -120,6 +119,3 @@ namespace exchange
         }
     }
 }
-
-
-#endif // ENGINE_CONFIGURATION_H

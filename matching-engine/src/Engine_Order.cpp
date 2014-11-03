@@ -14,10 +14,10 @@ namespace exchange
         {
             switch (iPhase)
             {
-            case BUY:
+            case OrderWay::BUY:
                 return "BUY";
                 break;
-            case SELL:
+            case OrderWay::SELL:
                 return "SELL";
                 break;
             default:

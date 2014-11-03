@@ -59,12 +59,12 @@ namespace exchange
         {
             switch (iWay)
             {
-                case BUY:
+                case OrderWay::BUY:
                 {
                     UInt64 MaxQty = GetExecutableQuantity(m_AskOrders, iMsg.GetPrice());
                     return (std::min)(MaxQty, static_cast<UInt64>(iMsg.GetQuantity()));
                 }
-                case SELL:
+                case OrderWay::SELL:
                 {
                     UInt64 MaxQty = GetExecutableQuantity(m_BidOrders, iMsg.GetPrice());
                     return (std::min)(MaxQty, static_cast<UInt64>(iMsg.GetQuantity()));
@@ -116,7 +116,7 @@ namespace exchange
                 // Generate the deal
                 Deal * pDeal = nullptr;
 
-                if (OrderToHit->GetWay() == BUY)
+                if (OrderToHit->GetWay() == OrderWay::BUY)
                 {
                     pDeal = new Deal(ExecPrice, ExecQty, OrderToHit->GetClientID(), OrderToHit->GetOrderID(), iMsg.GetClientID(), GetAggressorID(iMsg));
                 }
@@ -140,10 +140,10 @@ namespace exchange
         {
             switch (iWay)
             {
-                case BUY:
+                case OrderWay::BUY:
                     ProcessDeals(m_AskOrders, iMsg, iMatchQty);
                     break;
-                case SELL:
+                case OrderWay::SELL:
                     ProcessDeals(m_BidOrders, iMsg, iMatchQty);
                     break;
                 default:
@@ -188,9 +188,9 @@ namespace exchange
             */
             switch (iOrder.GetWay())
             {
-                case BUY:
+                case OrderWay::BUY:
                     return m_BidOrders.insert(iOrder).second;
-                case SELL:
+                case OrderWay::SELL:
                     return m_AskOrders.insert(iOrder).second;
                 default:
                     return false;
@@ -209,9 +209,9 @@ namespace exchange
             */
             switch (iWay)
             {
-                case BUY:
+                case OrderWay::BUY:
                     return (1 == m_BidOrders.erase(OrderIDGenerator<TOrder>()(iClientId, iOrderId)));
-                case SELL:
+                case OrderWay::SELL:
                     return (1 == m_AskOrders.erase(OrderIDGenerator<TOrder>()(iClientId, iOrderId)));
                 default:
                     assert(false);
@@ -247,7 +247,7 @@ namespace exchange
 
             switch (iOrderReplace.GetWay())
             {
-                case BUY:
+                case OrderWay::BUY:
                     {
                         auto BidOrder = m_BidOrders.find(OrderID);
                         if (BidOrder != m_BidOrders.end())
@@ -264,7 +264,7 @@ namespace exchange
                         }
                     }
                     break;
-                case SELL:
+                case OrderWay::SELL:
                     {
                         auto AskOrder = m_AskOrders.find(OrderID);
                         if (AskOrder != m_AskOrders.end())
@@ -412,13 +412,13 @@ namespace exchange
         {
             switch (iOrders.GetViewMode())
             {
-                case OrderContainer<TOrder, TDealHandler>::VM_BY_ORDER:
+                case OrderContainer<TOrder, TDealHandler>::ViewMode::VM_BY_ORDER:
                     iOrders.StreamByOrder(oss);
                     break;
-                case OrderContainer<TOrder, TDealHandler>::VM_BY_PRICE:
+                case OrderContainer<TOrder, TDealHandler>::ViewMode::VM_BY_PRICE:
                     iOrders.StreamByPrice(oss);
                     break;
-                case OrderContainer<TOrder, TDealHandler>::VM_UNKNOWN:
+                case OrderContainer<TOrder, TDealHandler>::ViewMode::VM_UNKNOWN:
                     assert(false);
                     break;
             };

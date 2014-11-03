@@ -7,7 +7,7 @@ namespace exchange
 
         template <typename TOrder>
         OrderBook<TOrder>::OrderBook(const std::string & iSecurityName, UInt32 iInstrumentID)
-            : DealHandler(iInstrumentID), m_SecurityName(iSecurityName), m_Orders(*this), m_Phase(TradingPhase::CLOSE), m_Turnover(0),
+            : DealHandlerType(iInstrumentID), m_SecurityName(iSecurityName), m_Orders(*this), m_Phase(TradingPhase::CLOSE), m_Turnover(0),
             m_DailyVolume(0), m_OpenPrice(0), m_LastClosePrice(0)
         {
         }
@@ -94,6 +94,13 @@ namespace exchange
                 return m_Orders.Delete(iOrderID, iClientID, iWay);
             }
             return false;
+        }
+
+        template<typename TOrder>
+        void OrderBook<TOrder>::ProcessDeal(Deal * ipDeal)
+        {
+            SetTurnover( GetTurnover() + ipDeal->GetQuantity()*ipDeal->GetPrice() );
+            SetDailyVolume( GetDailyVolume() + ipDeal->GetQuantity() );
         }
 
         template<typename TOrder>

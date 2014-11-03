@@ -3,9 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef ENGINE_TOOLS_INCLUDE
-#define ENGINE_TOOLS_INCLUDE
-
+#pragma once
 
 namespace exchange
 {
@@ -26,5 +24,3 @@ namespace exchange
         > : std::true_type{};
     }
 }
-
-#endif

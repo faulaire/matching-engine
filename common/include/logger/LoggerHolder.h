@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef LOGGERHOLDER_HH
-#define LOGGERHOLDER_HH
+#pragma once
 
 #include <vector>
 #include <string>
@@ -330,5 +329,3 @@ namespace exchange
     }
 
 }
-
-#endif // LOGGERHOLDER_HH

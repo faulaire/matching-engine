@@ -6,8 +6,7 @@
 #include <limits>
 #include <Types.h>
 
-#ifndef ENGINE_DEFINES_H
-#define ENGINE_DEFINES_H
+#pragma once
 
 namespace exchange
 {
@@ -22,7 +21,4 @@ namespace exchange
             static const UInt32 MinQty = std::numeric_limits<UInt32>::min() + 1;
         }
     }
-};
-
-
-#endif // ENGINE_DEFINES_H
+}

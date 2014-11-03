@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef MARIA_DB_CONNECTOR_HH
-#define MARIA_DB_CONNECTOR_HH
+#pragma once
 
 #include <string>
 #include <vector>
@@ -64,6 +63,4 @@ namespace exchange
                 MYSQL *m_cnx;
         };
     }
-};
-
-#endif
+}

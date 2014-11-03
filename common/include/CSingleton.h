@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef SINGLETON_HH
-#define SINGLETON_HH
+#pragma once
 
 namespace exchange
 {
@@ -50,5 +49,3 @@ namespace exchange
 
     }
 }
-
-#endif

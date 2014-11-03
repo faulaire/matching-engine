@@ -63,24 +63,24 @@ TEST_F(MatchingEngineTest, InsertClose)
 {
     ASSERT_TRUE(m_Engine.Configure(m_Connector));
 
-    Order o(BUY, 1000, 1234, 1, 5);
+    Order o(OrderWay::BUY, 1000, 1234, 1, 5);
 
     ASSERT_FALSE(m_Engine.Insert(o, 1));
     ASSERT_FALSE(m_Engine.Insert(o, 17));
 
-    OrderReplace Replace(BUY, 2000, 1234, 1, 2, 5);
+    OrderReplace Replace(OrderWay::BUY, 2000, 1234, 1, 2, 5);
     ASSERT_FALSE(m_Engine.Modify(Replace, 1));
     ASSERT_FALSE(m_Engine.Modify(Replace, 2));
 
-    ASSERT_FALSE(m_Engine.Delete(2, 5, BUY, 1));
-    ASSERT_FALSE(m_Engine.Delete(2, 5, BUY, 1));
+    ASSERT_FALSE(m_Engine.Delete(2, 5, OrderWay::BUY, 1));
+    ASSERT_FALSE(m_Engine.Delete(2, 5, OrderWay::BUY, 1));
 }
 
 TEST_F(MatchingEngineTest, InsertAuction)
 {
     ASSERT_TRUE(m_Engine.Configure(m_Connector));
 
-    Order o(BUY, 1000, 1234, 1, 5);
+    Order o(OrderWay::BUY, 1000, 1234, 1, 5);
 
     // Switching to auction phase
     m_Engine.EngineListen();
@@ -88,12 +88,12 @@ TEST_F(MatchingEngineTest, InsertAuction)
     ASSERT_TRUE(m_Engine.Insert(o, 1));
     ASSERT_FALSE(m_Engine.Insert(o, 1));
 
-    OrderReplace Replace(BUY, 2000, 1234, 1, 2, 5);
+    OrderReplace Replace(OrderWay::BUY, 2000, 1234, 1, 2, 5);
     ASSERT_TRUE(m_Engine.Modify(Replace, 1));
     ASSERT_FALSE(m_Engine.Modify(Replace, 2));
 
-    ASSERT_TRUE(m_Engine.Delete(2, 5, BUY, 1));
-    ASSERT_FALSE(m_Engine.Delete(2, 5, BUY, 1));
+    ASSERT_TRUE(m_Engine.Delete(2, 5, OrderWay::BUY, 1));
+    ASSERT_FALSE(m_Engine.Delete(2, 5, OrderWay::BUY, 1));
 }
 
 int main(int argc, char ** argv)

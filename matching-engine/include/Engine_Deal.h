@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef ENGINE_DEAL_INCLUDE
-#define ENGINE_DEAL_INCLUDE
+#pragma once
 
 #include <array>
 #include <cstring>
@@ -90,7 +89,7 @@ namespace exchange
             m_Price = iPrice;
         }
 
-        inline Deal::qty_type   Deal::GetQuantity() const
+        inline Deal::qty_type Deal::GetQuantity() const
         {
             return m_Qty;
         }
@@ -156,5 +155,3 @@ namespace exchange
         }
     }
 }
-
-#endif

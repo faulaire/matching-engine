@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef LOGGERCONSOLE_HH
-#define LOGGERCONSOLE_HH
+#pragma once
 
 #include <string>
 #include <iostream>
@@ -38,5 +37,3 @@ namespace exchange
         }
     }
 }
-
-#endif

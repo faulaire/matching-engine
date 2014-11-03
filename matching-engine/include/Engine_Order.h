@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef ENGINE_ORDER_INCLUDE
-#define ENGINE_ORDER_INCLUDE
+#pragma once
 
 #include <sstream>
 
@@ -18,7 +17,7 @@ namespace exchange
         /*!
         *   OrderWay
         */
-        enum OrderWay
+        enum class OrderWay
         {
             BUY = 0,
             SELL,
@@ -52,7 +51,7 @@ namespace exchange
                         :m_Way(iWay), m_Qty(iQty), m_Price(iPrice), m_OrderID(iOrderID), m_ClientID(iClientID)
                     {}
 
-                    OrderWay   m_Way      = MAX_WAY;
+                    OrderWay   m_Way      = OrderWay::MAX_WAY;
                     qty_type   m_Qty      = 0;
                     price_type m_Price    = 0;
                     UInt32     m_OrderID  = 0;
@@ -170,7 +169,7 @@ namespace exchange
                              m_ReplacedOrderID(iReplacedID), m_ClientID(iClientID)
                         {}
                 
-                        OrderWay   m_Way             = MAX_WAY;
+                        OrderWay   m_Way             = OrderWay::MAX_WAY;
                         qty_type   m_Qty             = 0;
                         price_type m_Price           = 0;
                         UInt32     m_ExistingOrderID = 0;
@@ -337,6 +336,3 @@ namespace exchange
 
     }
 }
-
-
-#endif

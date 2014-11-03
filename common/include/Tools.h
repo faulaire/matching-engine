@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef COMMON_TOOLS_HH
-#define COMMON_TOOLS_HH
+#pragma once
 
 #include <string>
 #include <Types.h>
@@ -25,5 +24,3 @@ namespace exchange
 }
 
 #include <Tools.hxx>
-
-#endif

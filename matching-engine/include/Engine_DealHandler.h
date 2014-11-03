@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef ENGINE_DEAL_HANDLER_INCLUDE
-#define ENGINE_DEAL_HANDLER_INCLUDE
+#pragma once
 
 #include <Engine_Deal.h>
 
@@ -21,6 +20,7 @@ namespace exchange
     {
         namespace bmi = boost::multi_index;
 
+        template <typename TDealProcessor>
         class DealHandler
         {
             protected:
@@ -68,16 +68,46 @@ namespace exchange
                 UInt64            m_DealCounter;
         };
 
-        inline UInt32 DealHandler::GetInstrumentID() const
+
+        template <typename TDealProcessor>
+        DealHandler<TDealProcessor>::DealHandler(UInt32 iInstrumentID):
+            m_InstrumentID(iInstrumentID), m_DealCounter(0)
+        {}
+
+        template <typename TDealProcessor>
+        DealHandler<TDealProcessor>::~DealHandler()
+        {
+            for( auto && Deal : m_DealContainer)
+            {
+                delete Deal;
+            }
+        }
+
+        template <typename TDealProcessor>
+        inline UInt32 DealHandler<TDealProcessor>::GetInstrumentID() const
         {
             return m_InstrumentID;
         }
 
-        inline UInt64 DealHandler::GetDealCounter() const
+        template <typename TDealProcessor>
+        inline UInt64 DealHandler<TDealProcessor>::GetDealCounter() const
         {
             return m_DealCounter;
         }
+
+        template <typename TDealProcessor>
+        void DealHandler<TDealProcessor>::OnDeal(Deal * ipDeal)
+        {
+            m_DealCounter++;
+
+            std::ostringstream  oss("");
+            oss << m_InstrumentID << "_" << ipDeal->GetTimeStamp().time_since_epoch().count();
+            oss << "_" << m_DealCounter;
+            ipDeal->SetReference(oss.str());
+
+            m_DealContainer.insert(ipDeal);
+
+            static_cast<TDealProcessor*>(this)->ProcessDeal(ipDeal);
+        }
     }
 }
-
-#endif

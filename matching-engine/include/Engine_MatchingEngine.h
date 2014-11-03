@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef ENGINE_MATCHING_ENGINES_H
-#define ENGINE_MATCHING_ENGINES_H
+#pragma once
 
 #include <Types.h>
 
@@ -81,5 +80,3 @@ namespace exchange
         };
     }
 }
-
-#endif

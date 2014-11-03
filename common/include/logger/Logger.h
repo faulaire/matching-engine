@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef LOGGER_INTERFACE_HH
-#define LOGGER_INTERFACE_HH
+#pragma once
 
 
 #include <LoggerHolder.h>
@@ -28,4 +27,3 @@ typedef exch_logger::LoggerHolder<ExchangeLoggers>                              
         LoggerHolder::GetInstance() << exch_logger::header_info << MSG << exch_logger::eos;\
     } } while (0)
 
-#endif

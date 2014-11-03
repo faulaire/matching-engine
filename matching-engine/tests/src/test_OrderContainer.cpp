@@ -63,10 +63,10 @@ class OrderContainerTest : public testing::Test
 
         void DisplayOrders()
         {
-            m_Container.SetViewMode(OrderContainerType::VM_BY_ORDER);
+            m_Container.SetViewMode(OrderContainerType::ViewMode::VM_BY_ORDER);
             std::cout << m_Container << std::endl;
 
-            m_Container.SetViewMode(OrderContainerType::VM_BY_PRICE);
+            m_Container.SetViewMode(OrderContainerType::ViewMode::VM_BY_PRICE);
             std::cout << m_Container << std::endl;
         }
 
@@ -100,15 +100,15 @@ class OrderContainerTest : public testing::Test
                                       };
 
             m_BidOrders = {
-                             { BUY, 1000, 1234, 1, 5 }, { BUY, 2000, 1234, 1, 6 },
-                             { BUY, 3000, 1321, 1, 7 }, { BUY, 4000, 1325, 1, 8 },
-                             { BUY, 5000, 2185, 1, 9 }, { BUY, 6000, 2185, 1, 10 }
+                             { OrderWay::BUY, 1000, 1234, 1, 5 }, { OrderWay::BUY, 2000, 1234, 1, 6 },
+                             { OrderWay::BUY, 3000, 1321, 1, 7 }, { OrderWay::BUY, 4000, 1325, 1, 8 },
+                             { OrderWay::BUY, 5000, 2185, 1, 9 }, { OrderWay::BUY, 6000, 2185, 1, 10 }
                           };
 
             m_AskOrders = {
-                             { SELL, 8000, 4321, 2, 1 }, { SELL, 7000, 4321, 2, 2 },
-                             { SELL, 6000, 4526, 2, 3 }, { SELL, 5000, 4580, 2, 4 },
-                             { SELL, 4000, 8526, 2, 5 }, { SELL, 3000, 8526, 2, 6 }
+                             { OrderWay::SELL, 8000, 4321, 2, 1 }, { OrderWay::SELL, 7000, 4321, 2, 2 },
+                             { OrderWay::SELL, 6000, 4526, 2, 3 }, { OrderWay::SELL, 5000, 4580, 2, 4 },
+                             { OrderWay::SELL, 4000, 8526, 2, 5 }, { OrderWay::SELL, 3000, 8526, 2, 6 }
                           };
         }
 
@@ -142,11 +142,11 @@ TEST_F(OrderContainerTest, AuctionInsert)
     ASSERT_EQ(ByOrderAskContainer.size(), 6);
     ASSERT_EQ(ByOrderBidContainer.size(), 6);
 
-    ASSERT_EQ(ByOrderAskContainer[0], Order(SELL, 8000, 4321, 2, 1));
-    ASSERT_EQ(ByOrderAskContainer[1], Order(SELL, 7000, 4321, 2, 2));
+    ASSERT_EQ(ByOrderAskContainer[0], Order(OrderWay::SELL, 8000, 4321, 2, 1));
+    ASSERT_EQ(ByOrderAskContainer[1], Order(OrderWay::SELL, 7000, 4321, 2, 2));
 
-    ASSERT_EQ(ByOrderBidContainer[0], Order(BUY, 5000, 2185, 1, 9));
-    ASSERT_EQ(ByOrderBidContainer[1], Order(BUY, 6000, 2185, 1, 10));
+    ASSERT_EQ(ByOrderBidContainer[0], Order(OrderWay::BUY, 5000, 2185, 1, 9));
+    ASSERT_EQ(ByOrderBidContainer[1], Order(OrderWay::BUY, 6000, 2185, 1, 10));
 
     ASSERT_TRUE(BidContainer == m_BidContainerReference);
     ASSERT_TRUE(AskContainer == m_AskContainerReference);
@@ -158,15 +158,15 @@ TEST_F(OrderContainerTest, AuctionDelete)
     
     DisplayOrders();
 
-    ASSERT_TRUE(m_Container.Delete(1, 5, BUY));
-    ASSERT_FALSE(m_Container.Delete(1, 5, BUY));
+    ASSERT_TRUE(m_Container.Delete(1, 5, OrderWay::BUY));
+    ASSERT_FALSE(m_Container.Delete(1, 5, OrderWay::BUY));
 
-    ASSERT_TRUE(m_Container.Delete(1, 10, BUY));
+    ASSERT_TRUE(m_Container.Delete(1, 10, OrderWay::BUY));
 
-    ASSERT_TRUE(m_Container.Delete(2, 3, SELL));
-    ASSERT_FALSE(m_Container.Delete(2, 3, SELL));
+    ASSERT_TRUE(m_Container.Delete(2, 3, OrderWay::SELL));
+    ASSERT_FALSE(m_Container.Delete(2, 3, OrderWay::SELL));
 
-    ASSERT_TRUE(m_Container.Delete(2, 4, SELL));
+    ASSERT_TRUE(m_Container.Delete(2, 4, OrderWay::SELL));
 
     DisplayOrders();
 
@@ -218,10 +218,10 @@ TEST_F(OrderContainerTest, AuctionModify)
     DisplayOrders();
 
     /* OrderWay iWay, qty_type iQty, price_type iPrice, UInt32 iExistingOrderID, UInt32 iReplacedID, UInt32 iClientID */
-    OrderReplace ReplaceBuy(BUY, 1337, 2185, 1, 2, 8);
+    OrderReplace ReplaceBuy(OrderWay::BUY, 1337, 2185, 1, 2, 8);
     ASSERT_TRUE(m_Container.Modify(ReplaceBuy));
 
-    OrderReplace ReplaceSell(SELL, 3000, 4526, 2, 12, 4);
+    OrderReplace ReplaceSell(OrderWay::SELL, 3000, 4526, 2, 12, 4);
     ASSERT_TRUE(m_Container.Modify(ReplaceSell));
 
     DisplayOrders();
@@ -272,14 +272,14 @@ TEST_F(OrderContainerTest, AuctionFixing)
     m_Container.Reset();
 
     m_BidOrders = {
-                     { BUY, 1200, 90, 1, 5 }, { BUY, 350, 89, 1, 6 },
-                     { BUY, 150, 88, 1, 7 }, { BUY, 230, 87, 1, 8 }
+                     { OrderWay::BUY, 1200, 90, 1, 5 }, { OrderWay::BUY, 350, 89, 1, 6 },
+                     { OrderWay::BUY, 150, 88, 1, 7 }, { OrderWay::BUY, 230, 87, 1, 8 }
                   };
 
     m_AskOrders = {
-                     { SELL, 900, 90, 2, 1 }, { SELL, 650, 91, 2, 2 },
-                     { SELL, 500, 92, 2, 3 }, { SELL, 350, 93, 2, 4 },
-                     { SELL, 400, 94, 2, 5 }
+                     { OrderWay::SELL, 900, 90, 2, 1 }, { OrderWay::SELL, 650, 91, 2, 2 },
+                     { OrderWay::SELL, 500, 92, 2, 3 }, { OrderWay::SELL, 350, 93, 2, 4 },
+                     { OrderWay::SELL, 400, 94, 2, 5 }
                   };
 
     InsertOrders();
@@ -295,15 +295,15 @@ TEST_F(OrderContainerTest, AuctionFixing)
 
 
     m_BidOrders = {
-                     { BUY, 200, 41, 1, 5 }, { BUY, 300, 40, 1, 6 },
-                     { BUY, 150, 39, 1, 7 }, { BUY, 50, 38, 1, 8 },
-                     { BUY, 10, 37, 1, 9 }
+                     { OrderWay::BUY, 200, 41, 1, 5 }, { OrderWay::BUY, 300, 40, 1, 6 },
+                     { OrderWay::BUY, 150, 39, 1, 7 }, { OrderWay::BUY, 50, 38, 1, 8 },
+                     { OrderWay::BUY, 10, 37, 1, 9 }
                   };
 
     m_AskOrders = {
-                     { SELL, 100, 35, 2, 1 }, { SELL, 200, 36, 2, 2 },
-                     { SELL, 50, 37, 2, 3 }, { SELL, 200, 39, 2, 4 },
-                     { SELL, 20, 40, 2, 5 }
+                     { OrderWay::SELL, 100, 35, 2, 1 }, { OrderWay::SELL, 200, 36, 2, 2 },
+                     { OrderWay::SELL, 50, 37, 2, 3 }, { OrderWay::SELL, 200, 39, 2, 4 },
+                     { OrderWay::SELL, 20, 40, 2, 5 }
                   };
 
     InsertOrders();
@@ -321,14 +321,14 @@ TEST_F(OrderContainerTest, AuctionMatching)
     m_Container.Reset();
 
     m_BidOrders = {
-                      { BUY, 1200, 90, 1, 5 }, { BUY, 350, 89, 1, 6 },
-                      { BUY, 150, 88, 1, 7 }, { BUY, 230, 87, 1, 8 }
+                      { OrderWay::BUY, 1200, 90, 1, 5 }, { OrderWay::BUY, 350, 89, 1, 6 },
+                      { OrderWay::BUY, 150, 88, 1, 7 }, { OrderWay::BUY, 230, 87, 1, 8 }
                   };
 
     m_AskOrders = {
-                     { SELL, 900, 90, 2, 1 }, { SELL, 650, 91, 2, 2 },
-                     { SELL, 500, 92, 2, 3 }, { SELL, 350, 93, 2, 4 },
-                     { SELL, 400, 94, 2, 5 }
+                     { OrderWay::SELL, 900, 90, 2, 1 }, { OrderWay::SELL, 650, 91, 2, 2 },
+                     { OrderWay::SELL, 500, 92, 2, 3 }, { OrderWay::SELL, 350, 93, 2, 4 },
+                     { OrderWay::SELL, 400, 94, 2, 5 }
                   };
 
     InsertOrders();
@@ -352,15 +352,15 @@ TEST_F(OrderContainerTest, AuctionMatching)
     m_Container.Reset();
 
     m_BidOrders = {
-                     { BUY, 200, 41, 1, 5 }, { BUY, 300, 40, 1, 6 },
-                     { BUY, 150, 39, 1, 7 }, { BUY, 50, 38, 1, 8 },
-                     { BUY, 10, 37, 1, 9 }
+                     { OrderWay::BUY, 200, 41, 1, 5 }, { OrderWay::BUY, 300, 40, 1, 6 },
+                     { OrderWay::BUY, 150, 39, 1, 7 }, { OrderWay::BUY, 50, 38, 1, 8 },
+                     { OrderWay::BUY, 10, 37, 1, 9 }
                   };
 
     m_AskOrders = {
-                     { SELL, 100, 35, 2, 1 }, { SELL, 200, 36, 2, 2 },
-                     { SELL, 50, 37, 2, 3 }, { SELL, 200, 39, 2, 4 },
-                     { SELL, 20, 40, 2, 5 }
+                     { OrderWay::SELL, 100, 35, 2, 1 }, { OrderWay::SELL, 200, 36, 2, 2 },
+                     { OrderWay::SELL, 50, 37, 2, 3 }, { OrderWay::SELL, 200, 39, 2, 4 },
+                     { OrderWay::SELL, 20, 40, 2, 5 }
                   };
 
     InsertOrders();
@@ -390,21 +390,21 @@ TEST_F(OrderContainerTest, InsertMatching)
     m_Container.Reset();
 
     m_BidOrders = {
-                     { BUY, 350, 89, 1, 6 }, { BUY, 150, 88, 1, 7 },
-                     { BUY, 230, 87, 1, 8 }
+                     { OrderWay::BUY, 350, 89, 1, 6 }, { OrderWay::BUY, 150, 88, 1, 7 },
+                     { OrderWay::BUY, 230, 87, 1, 8 }
                   };
 
     m_AskOrders = {
-                    { SELL, 900, 90, 2, 1 }, { SELL, 650, 91, 2, 2 },
-                    { SELL, 500, 92, 2, 3 }, { SELL, 350, 93, 2, 4 }
+                    { OrderWay::SELL, 900, 90, 2, 1 }, { OrderWay::SELL, 650, 91, 2, 2 },
+                    { OrderWay::SELL, 500, 92, 2, 3 }, { OrderWay::SELL, 350, 93, 2, 4 }
                   };
 
     InsertOrders();
 
     DisplayOrders();
 
-    Order BuyOrder(BUY, 123, 88, 5, 1);
-    Order SellOrder(SELL, 123, 91, 5, 1);
+    Order BuyOrder(OrderWay::BUY, 123, 88, 5, 1);
+    Order SellOrder(OrderWay::SELL, 123, 91, 5, 1);
 
     ASSERT_TRUE(m_Container.Insert(BuyOrder, true));
     ASSERT_TRUE(m_Container.Insert(SellOrder, true));
@@ -413,8 +413,8 @@ TEST_F(OrderContainerTest, InsertMatching)
 
     ASSERT_EQ(DealContainer.size(), 0);
 
-    BuyOrder   = Order(BUY, 500, 91, 6, 1);
-    SellOrder  = Order(SELL, 150, 89, 6, 1);
+    BuyOrder   = Order(OrderWay::BUY, 500, 91, 6, 1);
+    SellOrder  = Order(OrderWay::SELL, 150, 89, 6, 1);
 
     ASSERT_TRUE(m_Container.Insert(BuyOrder, true));
     ASSERT_TRUE(m_Container.Insert(SellOrder, true));
@@ -423,8 +423,8 @@ TEST_F(OrderContainerTest, InsertMatching)
     
     DisplayOrders();
 
-    BuyOrder = Order(BUY, 2500, 93, 10, 1);
-    SellOrder = Order(SELL, 1500, 87, 10, 1);
+    BuyOrder = Order(OrderWay::BUY, 2500, 93, 10, 1);
+    SellOrder = Order(OrderWay::SELL, 1500, 87, 10, 1);
 
     ASSERT_TRUE(m_Container.Insert(BuyOrder, true));
 
@@ -457,21 +457,21 @@ TEST_F(OrderContainerTest, ModifyMatching)
     m_Container.Reset();
 
     m_BidOrders = {
-                     { BUY, 350, 89, 1, 6 }, { BUY, 150, 88, 1, 7 },
-                     { BUY, 230, 87, 1, 8 }
+                     { OrderWay::BUY, 350, 89, 1, 6 }, { OrderWay::BUY, 150, 88, 1, 7 },
+                     { OrderWay::BUY, 230, 87, 1, 8 }
                   };
 
     m_AskOrders = {
-                     { SELL, 900, 90, 2, 1 }, { SELL, 650, 91, 2, 2 },
-                     { SELL, 500, 92, 2, 3 }, { SELL, 350, 93, 2, 4 }
+                     { OrderWay::SELL, 900, 90, 2, 1 }, { OrderWay::SELL, 650, 91, 2, 2 },
+                     { OrderWay::SELL, 500, 92, 2, 3 }, { OrderWay::SELL, 350, 93, 2, 4 }
                   };
 
     InsertOrders();
 
     DisplayOrders();
 
-    OrderReplace BuyReplace(BUY, 500, 88, 1, 2, 6);
-    OrderReplace SellReplace(SELL, 1200, 91, 2, 4, 1);
+    OrderReplace BuyReplace(OrderWay::BUY, 500, 88, 1, 2, 6);
+    OrderReplace SellReplace(OrderWay::SELL, 1200, 91, 2, 4, 1);
 
 
     ASSERT_TRUE(m_Container.Modify(BuyReplace, true));
@@ -482,7 +482,7 @@ TEST_F(OrderContainerTest, ModifyMatching)
 
     DisplayOrders();
     
-    BuyReplace = OrderReplace(BUY, 2000, 91, 1, 5, 8);
+    BuyReplace = OrderReplace(OrderWay::BUY, 2000, 91, 1, 5, 8);
 
     ASSERT_TRUE(m_Container.Modify(BuyReplace, true));
 
@@ -492,7 +492,7 @@ TEST_F(OrderContainerTest, ModifyMatching)
     ASSERT_EQ( *DealContainer.at(0), Deal(91, 1200, 8, 5, 1, 4) );
     ASSERT_EQ( *DealContainer.at(1), Deal(91, 650, 8, 5, 2, 2)  );
 
-    SellReplace = OrderReplace(SELL, 500, 91, 2, 8, 4);
+    SellReplace = OrderReplace(OrderWay::SELL, 500, 91, 2, 8, 4);
 
     ASSERT_TRUE(m_Container.Modify(SellReplace, true));
 

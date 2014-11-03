@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef LOGGERFILE_HH
-#define LOGGERFILE_HH
+#pragma once
 
 #include <algorithm>
 #include <string>
@@ -45,5 +44,3 @@ namespace exchange
     }
 
 }
-
-#endif // LOGGERFILE_HH

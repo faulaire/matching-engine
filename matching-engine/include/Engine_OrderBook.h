@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef ENGINE_ORDER_BOOK_INCLUDE_
-#define ENGINE_ORDER_BOOK_INCLUDE_
+#pragma once
 
 #include <logger/Logger.h>
 
@@ -41,7 +40,7 @@ namespace exchange
 
 
         template <typename TOrder>
-        class OrderBook : public DealHandler
+        class OrderBook : public DealHandler<OrderBook<TOrder> >
         {
             private:
 
@@ -49,6 +48,7 @@ namespace exchange
                 friend std::ostream& operator<< <> (std::ostream& o, const OrderBook<TOrder> & x);
                 /**/
                 using OrderContainerType = OrderContainer<TOrder, OrderBook>;
+                using DealHandlerType = DealHandler<OrderBook<TOrder> >;
 
             public:
 
@@ -69,6 +69,9 @@ namespace exchange
 
                 /**/
                 bool Delete(UInt32 iOrderID, UInt32 iClientID, OrderWay iWay);
+
+                /**/
+                void ProcessDeal(Deal * ipDeal);
                 
             public:
 
@@ -120,5 +123,3 @@ namespace exchange
 }
 
 #include <Engine_OrderBook.hxx>
-
-#endif

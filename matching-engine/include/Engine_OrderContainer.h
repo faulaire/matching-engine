@@ -3,8 +3,7 @@
 * All rights reserved.
 */
 
-#ifndef ENGINE_ORDER_CONTAINER_INCLUDE_
-#define ENGINE_ORDER_CONTAINER_INCLUDE_
+#pragma once
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/ordered_index.hpp>
@@ -78,12 +77,12 @@ namespace exchange
 
             public:
 
-                typedef enum
+                enum class ViewMode
                 {
                     VM_BY_PRICE = 0,
                     VM_BY_ORDER,
                     VM_UNKNOWN
-                } ViewMode;
+                };
 
             public:
 
@@ -114,7 +113,7 @@ namespace exchange
                 /**
                 */
                 OrderContainer(TDealHandler & iDealHandler):
-                    m_DealHandler(iDealHandler), m_ViewMode(VM_BY_ORDER)
+                    m_DealHandler(iDealHandler), m_ViewMode(ViewMode::VM_BY_ORDER)
                 {}
 
                 /**
@@ -207,5 +206,3 @@ namespace exchange
 }
 
 #include <Engine_OrderContainer.hxx>
-
-#endif
