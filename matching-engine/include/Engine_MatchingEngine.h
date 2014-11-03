@@ -6,6 +6,7 @@
 #pragma once
 
 #include <Types.h>
+#include <Tools.h>
 
 #include <database/MariaDB_Connector.h>
 #include <logger/Logger.h>
@@ -65,6 +66,19 @@ namespace exchange
 
             private:
 
+                enum class InstrumentField
+                {
+                    ID = 0,
+                    NAME,
+                    ISIN,
+                    SECURITY_CODE,
+                    TYPE,
+                    CURRENCY,
+                    CLOSE_PRICE
+                };
+
+            private:
+
                 /* Contain all registered products */
                 OrderBookMap m_OrderBookContainer;
                 /* Time of the Close -> Opening Auction transition */
@@ -73,8 +87,12 @@ namespace exchange
                 TimeType     m_StopTime;
                 /* Start time of any auction phase */
                 TimeType     m_AuctionStart;
-                /* Duration of the auction state */
-                UInt16       m_AuctionDuration;
+                /* Duration of the intraday auction state */
+                UInt16       m_IntradayAuctionDuration;
+                /* Duration of the open auction state */
+                UInt16       m_OpeningAuctionDuration;
+                /* Duration of the close auction state */
+                UInt16       m_ClosingAuctionDuration;
                 /* Trading phase of all products ( but Intraday Auction ) */
                 TradingPhase m_GlobalPhase;
         };

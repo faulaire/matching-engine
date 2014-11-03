@@ -12,13 +12,15 @@ namespace exchange
     {
 
         MatchingEngine::MatchingEngine() :
-            m_StartTime(), m_StopTime(), m_AuctionStart(), m_AuctionDuration(), m_GlobalPhase(TradingPhase::CLOSE)
+            m_StartTime(), m_StopTime(), m_AuctionStart(),
+            m_IntradayAuctionDuration(), m_OpeningAuctionDuration(), m_ClosingAuctionDuration(),
+            m_GlobalPhase(TradingPhase::CLOSE)
         {}
 
         MatchingEngine::~MatchingEngine()
         {
             /* Delete all OrderBook */
-            for (auto & OrderBook : m_OrderBookContainer)
+            for (auto && OrderBook : m_OrderBookContainer)
             {
                 delete OrderBook.second;
             }
@@ -36,23 +38,29 @@ namespace exchange
 
                 iConnector.Query("SELECT * from instruments", Instruments);
 
+                using namespace exchange::common::tools;
+
                 /* Create all instrument */
                 for (auto & Instrument : Instruments)
                 {
-                    UInt32 aSecurityCode = boost::lexical_cast<UInt32>(Instrument[3]);
-                    std::string InstrumentName = Instrument[1];
+                    UInt32 aSecurityCode = boost::lexical_cast<UInt32>(Instrument[to_underlying(InstrumentField::SECURITY_CODE)]);
+                    std::string InstrumentName = Instrument[to_underlying(InstrumentField::NAME)];
 
                     OrderBookType* pBook = new OrderBookType(InstrumentName, aSecurityCode);
-                    pBook->SetLastClosePrice(boost::lexical_cast<UInt32>(Instrument[6]));
+                    pBook->SetLastClosePrice(boost::lexical_cast<UInt32>(Instrument[to_underlying(InstrumentField::CLOSE_PRICE)]));
 
                     EXINFO("MatchingEngine::Configure : Adding Instrument : " << InstrumentName);
 
-                    m_OrderBookContainer.insert(OrderBookValueType(aSecurityCode, pBook));
+                    auto pIterator = m_OrderBookContainer.insert(OrderBookValueType(aSecurityCode, pBook));
+                    if( !pIterator.second )
+                    {
+                        EXERR("MatchingEngine::Configure : Corrupted database, failed to insert instrument : " << InstrumentName);
+                        return false;
+                    }
                 }
 
                 /*
-                Read the configuration (Start/Stop time and auction duration
-                TODO : The auction duration may depend of the auction type (closing, opening or volatile)
+                    Read the configuration (Start/Stop time and auction duration
                 */
 
                 std::string sTmpRes;
@@ -80,7 +88,9 @@ namespace exchange
                 TmpDuration = boost::posix_time::duration_from_string(sTmpRes);
                 m_StopTime = today_midnight + TmpDuration;
 
-                bRes &= CfgMgr.GetField("engine", "intraday_auction_duration", m_AuctionDuration);
+                bRes &= CfgMgr.GetField("engine", "intraday_auction_duration", m_IntradayAuctionDuration);
+                bRes &= CfgMgr.GetField("engine", "opening_auction_duration", m_OpeningAuctionDuration);
+                bRes &= CfgMgr.GetField("engine", "closing_auction_duration", m_ClosingAuctionDuration);
 
                 return bRes;
             }
@@ -176,7 +186,7 @@ namespace exchange
                     break;
                 case TradingPhase::OPENING_AUCTION:
                     {
-                        auto AuctionEnd = m_AuctionStart + boost::posix_time::seconds(m_AuctionDuration);
+                        auto AuctionEnd = m_AuctionStart + boost::posix_time::seconds(m_OpeningAuctionDuration);
                         if (now > AuctionEnd)
                         {
                             UpdateInstrumentsPhase(TradingPhase::CONTINUOUS_TRADING);
@@ -194,7 +204,7 @@ namespace exchange
                     break;
                 case TradingPhase::CLOSING_AUCTION:
                     {
-                        auto AuctionEnd = m_AuctionStart + boost::posix_time::seconds(m_AuctionDuration);
+                        auto AuctionEnd = m_AuctionStart + boost::posix_time::seconds(m_ClosingAuctionDuration);
                         if (now > AuctionEnd)
                         {
                             UpdateInstrumentsPhase(TradingPhase::CLOSE);

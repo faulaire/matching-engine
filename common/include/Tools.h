@@ -19,6 +19,13 @@ namespace exchange
 
             template <typename Array>
             void to_base64(UInt64 iToEncode, Array & oEncoded, size_t FirstPos);
+
+            template <typename E>
+            typename std::underlying_type<E>::type to_underlying(E e)
+            {
+                return static_cast<typename std::underlying_type<E>::type>(e);
+            }
+
         }
     }
 }
