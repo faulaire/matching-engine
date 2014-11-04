@@ -81,6 +81,7 @@ namespace exchange
             {
                 delete Deal;
             }
+            m_DealContainer.clear();
         }
 
         template <typename TDealProcessor>

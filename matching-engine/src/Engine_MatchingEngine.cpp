@@ -14,7 +14,7 @@ namespace exchange
         MatchingEngine::MatchingEngine() :
             m_StartTime(), m_StopTime(), m_AuctionStart(),
             m_IntradayAuctionDuration(), m_OpeningAuctionDuration(), m_ClosingAuctionDuration(),
-            m_GlobalPhase(TradingPhase::CLOSE)
+            m_MaxPriceDeviation(), m_GlobalPhase(TradingPhase::CLOSE)
         {}
 
         MatchingEngine::~MatchingEngine()
@@ -29,11 +29,23 @@ namespace exchange
 
         bool MatchingEngine::Configure(common::DataBaseConnector & iConnector)
         {
+            // TODO : Add robustness for database reading
+
             using namespace boost::posix_time;
             using namespace boost::gregorian;
 
             if (iConnector.Connect())
             {
+                auto && CfgMgr = common::ConfigurationMgr::GetInstance();
+
+                if (!CfgMgr.IsConfigured())
+                {
+                    if (!CfgMgr.Init(iConnector))
+                    {
+                        return false;
+                    }
+                }
+
                 common::DataBaseConnector::ResultArray Instruments;
 
                 iConnector.Query("SELECT * from instruments", Instruments);
@@ -41,13 +53,13 @@ namespace exchange
                 using namespace exchange::common::tools;
 
                 /* Create all instrument */
-                for (auto & Instrument : Instruments)
+                for (auto && Instrument : Instruments)
                 {
                     UInt32 aSecurityCode = boost::lexical_cast<UInt32>(Instrument[to_underlying(InstrumentField::SECURITY_CODE)]);
                     std::string InstrumentName = Instrument[to_underlying(InstrumentField::NAME)];
 
-                    OrderBookType* pBook = new OrderBookType(InstrumentName, aSecurityCode);
-                    pBook->SetLastClosePrice(boost::lexical_cast<UInt32>(Instrument[to_underlying(InstrumentField::CLOSE_PRICE)]));
+                    Order::price_type ClosePrice = boost::lexical_cast<Order::price_type>(Instrument[to_underlying(InstrumentField::CLOSE_PRICE)]);
+                    OrderBookType* pBook = new OrderBookType(InstrumentName, aSecurityCode, ClosePrice, *this);
 
                     EXINFO("MatchingEngine::Configure : Adding Instrument : " << InstrumentName);
 
@@ -71,15 +83,6 @@ namespace exchange
                 //Get the date part out of the time
                 boost::posix_time::ptime today_midnight(now.date());
 
-                auto & CfgMgr = common::ConfigurationMgr::GetInstance();
-                if (!CfgMgr.IsConfigured())
-                {
-                    if (!CfgMgr.Init(iConnector))
-                    {
-                        return false;
-                    }
-                }
-
                 bRes &= CfgMgr.GetField("engine", "start_time", sTmpRes);
                 boost::posix_time::time_duration TmpDuration = boost::posix_time::duration_from_string(sTmpRes);
                 m_StartTime = today_midnight + TmpDuration;
@@ -92,11 +95,13 @@ namespace exchange
                 bRes &= CfgMgr.GetField("engine", "opening_auction_duration", m_OpeningAuctionDuration);
                 bRes &= CfgMgr.GetField("engine", "closing_auction_duration", m_ClosingAuctionDuration);
 
+                bRes &= CfgMgr.GetField("engine", "max_price_deviation",m_MaxPriceDeviation);
+
                 return bRes;
             }
             else
             {
-                EXERR("MatchingEngine::Configure  : Could not connect to DataBase");
+                EXERR("MatchingEngine::Configure : Could not connect to DataBase");
                 return false;
             }
             return true;
@@ -141,16 +146,6 @@ namespace exchange
             }
         }
 
-        void MatchingEngine::UpdateInstrumentsPhase(TradingPhase iNewPhase)
-        {
-            m_GlobalPhase = iNewPhase;
-
-            for (auto & OrderBook : m_OrderBookContainer)
-            {
-                OrderBook.second->SetTradingPhase(iNewPhase);
-            }
-        }
-
         bool MatchingEngine::SetGlobalPhase(TradingPhase iNewPhase)
         {
             if (iNewPhase >= TradingPhase::INTRADAY_AUCTION || iNewPhase < TradingPhase::OPENING_AUCTION)
@@ -167,10 +162,44 @@ namespace exchange
             return true;
         }
 
+        void MatchingEngine::UpdateInstrumentsPhase(TradingPhase iNewPhase)
+        {
+            if( iNewPhase != m_GlobalPhase)
+            {
+                EXINFO("MatchingEngine::UpdateInstrumentsPhase : Switching from phase[" << TradingPhaseToString(m_GlobalPhase)
+                       << " to phase[" << TradingPhaseToString(iNewPhase) ) ;
+
+                m_GlobalPhase = iNewPhase;
+
+                for (auto && OrderBook : m_OrderBookContainer)
+                {
+                    OrderBook.second->SetTradingPhase(iNewPhase);
+                }
+            }
+        }
+
+        void MatchingEngine::CheckOrderBooks(const TimeType Now)
+        {
+            auto iterator = m_MonitoredOrderBook.begin();
+            while (iterator != m_MonitoredOrderBook.end())
+            {
+                auto && pBook = *iterator;
+                auto AuctionEnd = pBook->GetAuctionStart() + boost::posix_time::seconds(GetIntradayAuctionDuration());
+                if (Now > AuctionEnd)
+                {
+                    pBook->SetTradingPhase(m_GlobalPhase);
+                    m_MonitoredOrderBook.erase(iterator++);
+                }
+            }
+        }
+
         void MatchingEngine::EngineListen()
         {
-            const boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
-            
+            const TimeType now = boost::posix_time::second_clock::local_time();
+
+            /* Verify if some orderbook are in intraday auction state */
+            CheckOrderBooks(now);
+
             const bool bInOpenPeriod = (now < m_StopTime) && (now > m_StartTime);
 
             switch (GetGlobalPhase())
@@ -212,7 +241,10 @@ namespace exchange
                     }
                     break;
                 case TradingPhase::INTRADAY_AUCTION:
-                    /* Intraday auction state is managed at OrderBook level */
+                    /*
+                     * The global phase can't be INTRADAY_AUCTION
+                     */
+                    assert(false);
                     break;
                 default:
                     break;

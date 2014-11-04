@@ -38,8 +38,8 @@ namespace exchange
 
             public:
 
-                typedef   UInt32 price_type;
-                typedef   UInt32 qty_type;
+                using price_type = UInt32;
+                using qty_type   = UInt32;
             
             protected:
 
