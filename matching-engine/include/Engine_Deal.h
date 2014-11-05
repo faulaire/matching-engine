@@ -36,8 +36,10 @@ namespace exchange
 
             public:
 
-                Deal();
                 Deal(price_type iPrice, qty_type iQty, UInt32 iBuyerClientID, UInt32 iBuyerOrderID, UInt32 iSellerClientID, UInt32 iSellerOrderID);
+
+                Deal() = delete;
+                Deal(const Deal & rhs) = delete;
 
                 bool operator==(const Deal & rhs) const;
 

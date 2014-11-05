@@ -135,7 +135,7 @@ namespace exchange
 
         inline bool Order::operator==(const Order & rhs) const
         {
-            if( &rhs != this)
+            if(&rhs != this)
             {
                 return ( GetPrice() == rhs.GetPrice() )       &&
                        ( GetQuantity() == rhs.GetQuantity() ) &&
