@@ -67,7 +67,7 @@ namespace exchange
                 UInt16 GetIntradayAuctionDuration() const { return m_IntradayAuctionDuration; }
 
                 /**/
-                UInt8 GetMaxPriceDeviation() const { return m_MaxPriceDeviation; }
+                UInt16 GetMaxPriceDeviation() const { return m_MaxPriceDeviation; }
             
             protected:
 
@@ -109,7 +109,7 @@ namespace exchange
                 /* Duration of the close auction state */
                 UInt16        m_ClosingAuctionDuration;
                 /* Maximum Price deviation before switching to intraday auction */
-                UInt8         m_MaxPriceDeviation;
+                UInt16        m_MaxPriceDeviation;
                 /* Trading phase of all products ( but Intraday Auction ) */
                 TradingPhase  m_GlobalPhase;
         };
