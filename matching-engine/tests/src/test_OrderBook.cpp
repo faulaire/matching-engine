@@ -25,6 +25,8 @@ protected:
 
 TEST_F(OrderBookTest, InvalidOrders)
 {
+    ASSERT_TRUE(m_OrderBook.SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
+
     Order OrderBuy(OrderWay::BUY, 0, 1000, 1, 5);
     std::cout << OrderBuy << std::endl;
 

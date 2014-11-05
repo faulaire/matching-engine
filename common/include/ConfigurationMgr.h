@@ -36,6 +36,7 @@ namespace exchange
             public:
 
                 bool Init(common::DataBaseConnector & iConnector);
+                inline void Reset();
 
             public:
 
@@ -116,6 +117,12 @@ namespace exchange
         {
             GetFieldHelper<T> aHelper;
             return aHelper(iSection, iKey, m_KeyMap, ovalue);
+        }
+
+        inline void ConfigurationMgr::Reset()
+        {
+            m_IsConfigured = false;
+            m_KeyMap.clear();
         }
     }
 }

@@ -4,6 +4,8 @@
 
 #include <Engine_MatchingEngine.h>
 
+#include <ConfigurationMgr.h>
+
 using namespace exchange::engine;
 
 // To use a test fixture, derive a class from testing::Test.
@@ -13,6 +15,9 @@ class MatchingEngineTest : public testing::Test
 
         virtual void SetUp()
         {
+            auto & CfgManager = exchange::common::ConfigurationMgr::GetInstance();
+            CfgManager.Reset();
+
             boost::property_tree::ptree aConfig;
             if (boost::filesystem::exists("config.ini"))
             {
@@ -86,6 +91,32 @@ TEST_F(MatchingEngineTest, PhaseSwitching)
     m_Engine.EngineListen();
 
     ASSERT_EQ(m_Engine.GetGlobalPhase(), TradingPhase::CLOSE);
+}
+
+TEST_F(MatchingEngineTest, ContinousToClose)
+{
+    boost::property_tree::ptree aConfig;
+    if (boost::filesystem::exists("config_always_closed.ini"))
+    {
+        boost::property_tree::ini_parser::read_ini("config_always_closed.ini", aConfig);
+
+        ASSERT_TRUE(m_Connector.Configure(aConfig));
+        ASSERT_TRUE(m_Engine.Configure(m_Connector));
+
+        m_Engine.SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING);
+        m_Engine.EngineListen();
+
+        ASSERT_EQ(m_Engine.GetGlobalPhase(), TradingPhase::CLOSING_AUCTION);
+
+        sleep(5);
+        m_Engine.EngineListen();
+
+        ASSERT_EQ(m_Engine.GetGlobalPhase(), TradingPhase::CLOSE);
+    }
+    else
+    {
+        ASSERT_FALSE(true);
+    }
 }
 
 TEST_F(MatchingEngineTest, Phases)
