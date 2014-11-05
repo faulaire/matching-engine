@@ -86,16 +86,17 @@ namespace exchange
             public:
 
                 /*!
-                Getter/Setter
+                    Getter/Setter
                 */
-                inline UInt64 GetTurnover() const { return m_Turnover;             }
-                inline UInt64 GetDailyVolume() const { return m_DailyVolume;       }
+                inline UInt64 GetTurnover() const { return m_Turnover;                 }
+                inline UInt64 GetDailyVolume() const { return m_DailyVolume;           }
                 inline price_type GetOpenPrice() const { return m_OpenPrice;           }
                 inline price_type GetLastClosePrice() const { return m_LastClosePrice; }
+                inline TradingPhase GetTradingPhase() const { return m_Phase;          }
 
-                inline void SetTurnover(UInt64 iTurnOver) { m_Turnover = iTurnOver; }
+                inline void SetTurnover(UInt64 iTurnOver) { m_Turnover = iTurnOver;             }
                 inline void SetDailyVolume(UInt64 iDailyVolume) { m_DailyVolume = iDailyVolume; }
-                inline void SetOpenPrice(price_type iOpenPrice) { m_OpenPrice = iOpenPrice; }
+                inline void SetOpenPrice(price_type iOpenPrice) { m_OpenPrice = iOpenPrice;     }
 
                 /*
                 */

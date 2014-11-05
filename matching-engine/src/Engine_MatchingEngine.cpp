@@ -14,7 +14,7 @@ namespace exchange
         MatchingEngine::MatchingEngine() :
             m_StartTime(), m_StopTime(), m_AuctionStart(),
             m_IntradayAuctionDuration(), m_OpeningAuctionDuration(), m_ClosingAuctionDuration(),
-            m_MaxPriceDeviation(), m_GlobalPhase(TradingPhase::CLOSE)
+            m_PriceDeviationFactor(), m_GlobalPhase(TradingPhase::CLOSE)
         {}
 
         MatchingEngine::~MatchingEngine()
@@ -95,7 +95,11 @@ namespace exchange
                 bRes &= CfgMgr.GetField("engine", "opening_auction_duration", m_OpeningAuctionDuration);
                 bRes &= CfgMgr.GetField("engine", "closing_auction_duration", m_ClosingAuctionDuration);
 
-                bRes &= CfgMgr.GetField("engine", "max_price_deviation",m_MaxPriceDeviation);
+                UInt32 MaxPriceDeviation;
+                bRes &= CfgMgr.GetField("engine", "max_price_deviation",MaxPriceDeviation);
+
+                m_PriceDeviationFactor = std::make_tuple(1-(double)MaxPriceDeviation*0.01,
+                                                         1+(double)MaxPriceDeviation*0.01);
 
                 return bRes;
             }
@@ -148,8 +152,13 @@ namespace exchange
 
         bool MatchingEngine::SetGlobalPhase(TradingPhase iNewPhase)
         {
-            if (iNewPhase >= TradingPhase::INTRADAY_AUCTION || iNewPhase < TradingPhase::OPENING_AUCTION)
+            /*
+             * INTRADAY_AUCTION can't be set because it's managed at OrderBook level
+             */
+            if (iNewPhase > TradingPhase::CLOSE || iNewPhase < TradingPhase::OPENING_AUCTION)
             {
+                EXERR("MatchingEngine::SetGlobalPhase [" <<  TradingPhaseToString(iNewPhase) <<
+                      " is not a valid global phase");
                 return false;
             }
 
@@ -167,7 +176,7 @@ namespace exchange
             if( iNewPhase != m_GlobalPhase)
             {
                 EXINFO("MatchingEngine::UpdateInstrumentsPhase : Switching from phase[" << TradingPhaseToString(m_GlobalPhase)
-                       << " to phase[" << TradingPhaseToString(iNewPhase) ) ;
+                       << "] to phase[" << TradingPhaseToString(iNewPhase) << "]") ;
 
                 m_GlobalPhase = iNewPhase;
 
@@ -189,6 +198,10 @@ namespace exchange
                 {
                     pBook->SetTradingPhase(m_GlobalPhase);
                     m_MonitoredOrderBook.erase(iterator++);
+                }
+                else
+                {
+                    iterator++;
                 }
             }
         }
@@ -239,12 +252,6 @@ namespace exchange
                             UpdateInstrumentsPhase(TradingPhase::CLOSE);
                         }
                     }
-                    break;
-                case TradingPhase::INTRADAY_AUCTION:
-                    /*
-                     * The global phase can't be INTRADAY_AUCTION
-                     */
-                    assert(false);
                     break;
                 default:
                     break;

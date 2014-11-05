@@ -30,6 +30,12 @@ namespace exchange
             {
                 return false;
             }
+
+            if( iMsg.GetWay() != OrderWay::BUY && iMsg.GetWay() != OrderWay::SELL)
+            {
+                return false;
+            }
+
             return true;
         }
 
@@ -44,7 +50,7 @@ namespace exchange
             if (iNewPhase < TradingPhase::PHASES_SIZE && iNewPhase >= TradingPhase::OPENING_AUCTION)
             {
                 EXINFO("OrderBook::SetTradingPhase " << m_SecurityName << " : switching from phase " << TradingPhaseToString(m_Phase) <<
-                    " to phase " << TradingPhaseToString(iNewPhase));
+                    " to phase " << TradingPhaseToString(iNewPhase) << "]");
 
                 if( IsAuctionPhase(m_Phase) && !IsAuctionPhase(iNewPhase) )
                 {
@@ -52,6 +58,7 @@ namespace exchange
                 }
                 m_Phase = iNewPhase;
                 // TODO : Register the close price if we switch to CLOSE
+                // TODO : Register the OPEN PRICE for opening_auction -> continuous trading switch
                 return true;
             }
             else
@@ -104,10 +111,12 @@ namespace exchange
             SetTurnover( GetTurnover() + ipDeal->GetQuantity()*ipDeal->GetPrice() );
             SetDailyVolume( GetDailyVolume() + ipDeal->GetQuantity() );
 
-            /* */
-            price_type Threshold = GetLastClosePrice()*m_rMatchingEngine.GetMaxPriceDeviation()*0.01;
+            auto && PriceDevFactors = m_rMatchingEngine.GetPriceDevFactors();
 
-            if( ipDeal->GetPrice() > Threshold)
+            price_type min_price = GetLastClosePrice() * std::get<0>(PriceDevFactors);
+            price_type max_price = GetLastClosePrice() * std::get<1>(PriceDevFactors);
+
+            if( ipDeal->GetPrice() > max_price || ipDeal->GetPrice() < min_price)
             {
                 SetTradingPhase(TradingPhase::INTRADAY_AUCTION);
                 m_AuctionStart = boost::posix_time::second_clock::local_time();

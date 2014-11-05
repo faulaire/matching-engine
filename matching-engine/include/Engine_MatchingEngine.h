@@ -32,6 +32,7 @@ namespace exchange
                 using OrderBookIterator   = OrderBookMap::iterator;
 
                 using OrderBookList       = std::list<OrderBookType*>;
+                using PriceDevFactors     = std::tuple<double, double>;
 
             public:
 
@@ -67,8 +68,11 @@ namespace exchange
                 UInt16 GetIntradayAuctionDuration() const { return m_IntradayAuctionDuration; }
 
                 /**/
-                UInt16 GetMaxPriceDeviation() const { return m_MaxPriceDeviation; }
+                const PriceDevFactors& GetPriceDevFactors() const { return m_PriceDeviationFactor; }
             
+                /**/
+                inline const OrderBookType* GetOrderBook(UInt32 iProductID) const;
+
             protected:
 
                 /**/
@@ -93,26 +97,39 @@ namespace exchange
             private:
 
                 /* Contain all registered products */
-                OrderBookMap  m_OrderBookContainer;
+                OrderBookMap    m_OrderBookContainer;
                 /* OrderBook that must be monitored because of their state ( IntradayAuction ) */
-                OrderBookList m_MonitoredOrderBook;
+                OrderBookList   m_MonitoredOrderBook;
                 /* Time of the Close -> Opening Auction transition */
-                TimeType      m_StartTime;
+                TimeType        m_StartTime;
                 /* Time of the Continuout Trading -> Closing Auction transition */
-                TimeType      m_StopTime;
+                TimeType        m_StopTime;
                 /* Start time of any auction phase but intraday */
-                TimeType      m_AuctionStart;
+                TimeType        m_AuctionStart;
                 /* Duration of the intraday auction state */
-                UInt16        m_IntradayAuctionDuration;
+                UInt16          m_IntradayAuctionDuration;
                 /* Duration of the open auction state */
-                UInt16        m_OpeningAuctionDuration;
+                UInt16          m_OpeningAuctionDuration;
                 /* Duration of the close auction state */
-                UInt16        m_ClosingAuctionDuration;
-                /* Maximum Price deviation before switching to intraday auction */
-                UInt16        m_MaxPriceDeviation;
+                UInt16          m_ClosingAuctionDuration;
+                /* Price deviation factors to compute minimum and maximum price */
+                PriceDevFactors m_PriceDeviationFactor;
                 /* Trading phase of all products ( but Intraday Auction ) */
-                TradingPhase  m_GlobalPhase;
+                TradingPhase    m_GlobalPhase;
         };
+
+        inline const MatchingEngine::OrderBookType* MatchingEngine::GetOrderBook(UInt32 iProductID) const
+        {
+            auto It = m_OrderBookContainer.find(iProductID);
+            if( It != m_OrderBookContainer.end())
+            {
+                return It->second;
+            }
+            else
+            {
+                return nullptr;
+            }
+        }
 
         inline void MatchingEngine::MonitorOrderBook(OrderBookType * pOrderBook)
         {
