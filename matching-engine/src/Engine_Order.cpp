@@ -3,6 +3,7 @@
 * All rights reserved.
 */
 
+#include <ostream>
 #include <Engine_Order.h>
 
 namespace exchange

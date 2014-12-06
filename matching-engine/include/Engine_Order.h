@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <sstream>
+#include <iosfwd>
 
 #include <Types.h>
 

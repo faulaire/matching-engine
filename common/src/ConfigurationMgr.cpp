@@ -22,7 +22,7 @@ namespace exchange
                 {
                     EXINFO("Configuration::Init : Inserting entry : " << Entry[1] << "<=>" << Entry[2] <<
                         " into ConfigurationMgr");
-                    m_KeyMap.insert(KeyValueType(Entry[1], Entry[2]));
+                    m_KeyMap.emplace(Entry[1], Entry[2]);
                 }
                 m_IsConfigured = true;
                 return true;

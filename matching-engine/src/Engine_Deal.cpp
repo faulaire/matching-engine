@@ -3,6 +3,7 @@
 * All rights reserved.
 */
 
+#include <ostream>
 #include <Engine_Deal.h>
 
 namespace exchange

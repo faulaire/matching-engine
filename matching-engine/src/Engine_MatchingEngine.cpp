@@ -24,7 +24,7 @@ namespace exchange
             {
                 delete OrderBook.second;
             }
-            m_OrderBookContainer.clear();
+            // m_OrderBookContainer.clear();
         }
 
         bool MatchingEngine::Configure(common::DataBaseConnector & iConnector)
@@ -63,7 +63,7 @@ namespace exchange
 
                     EXINFO("MatchingEngine::Configure : Adding Instrument : " << InstrumentName);
 
-                    auto pIterator = m_OrderBookContainer.insert(OrderBookValueType(aSecurityCode, pBook));
+                    auto pIterator = m_OrderBookContainer.emplace(aSecurityCode, pBook);
                     if( !pIterator.second )
                     {
                         EXERR("MatchingEngine::Configure : Corrupted database, failed to insert instrument : " << InstrumentName);
