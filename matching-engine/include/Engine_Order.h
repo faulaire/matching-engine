@@ -323,7 +323,7 @@ namespace exchange
                     m_OrderReplace(iOrderReplace)
                 {}
 
-                void operator()(Order& iOrder)
+                void operator()(Order& iOrder) const
                 {
                     iOrder.SetOrderID(m_OrderReplace.GetReplacedOrderID());
                     iOrder.SetQuantity(m_OrderReplace.GetQuantity());

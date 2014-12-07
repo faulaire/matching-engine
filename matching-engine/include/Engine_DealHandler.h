@@ -93,12 +93,20 @@ namespace exchange
         {
             std::ostringstream  oss("");
             oss << m_InstrumentID << "_" << ipDeal->GetTimeStamp().time_since_epoch().count();
-            oss << "_" << m_DealContainer.size();
+            oss << "_" << GetDealCounter()+1;
             ipDeal->SetReference(oss.str());
 
-            static_cast<TDealProcessor*>(this)->ProcessDeal(ipDeal.get());
+            auto insertion = m_DealContainer.insert(std::move(ipDeal));
 
-            m_DealContainer.insert(std::move(ipDeal));
+            if (insertion.second)
+            {
+                static_cast<TDealProcessor*>(this)->ProcessDeal((*insertion.first).get());
+            }
+            else
+            {
+                EXERR("DealHandler : Failed to insert and process deal [" << (*insertion.first).get());
+                assert(false);
+            }
         }
     }
 }

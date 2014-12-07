@@ -78,7 +78,7 @@ namespace exchange
                 bool Delete(UInt32 iOrderID, UInt32 iClientID, OrderWay iWay);
 
                 /**/
-                void ProcessDeal(Deal * ipDeal);
+                void ProcessDeal(const Deal * ipDeal);
 
                 /**/
                 TimeType GetAuctionStart() const { return m_AuctionStart; }
