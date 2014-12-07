@@ -176,7 +176,7 @@ namespace exchange
             if( iNewPhase != m_GlobalPhase)
             {
                 EXINFO("MatchingEngine::UpdateInstrumentsPhase : Switching from phase[" << TradingPhaseToString(m_GlobalPhase)
-                       << "] to phase[" << TradingPhaseToString(iNewPhase) << "]") ;
+                       << "] to phase[" << TradingPhaseToString(iNewPhase) << "]");
 
                 m_GlobalPhase = iNewPhase;
 

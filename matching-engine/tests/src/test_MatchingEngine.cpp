@@ -195,10 +195,10 @@ TEST_F(MatchingEngineTest, InsertContinousTrading)
     ASSERT_TRUE(m_Engine.Insert(OrderBuy, 1));
     ASSERT_TRUE(m_Engine.Insert(OrderSell, 1));
 
-    // TODO : Add mechanism to compute OpenPrice
     ASSERT_EQ(pOrderBook->GetDealCounter(), 1);
     ASSERT_EQ(pOrderBook->GetDailyVolume(), 1000);
     ASSERT_EQ(pOrderBook->GetTurnover(), 1254000);
+    ASSERT_EQ(pOrderBook->GetLastPrice(), 1254);
 
     ASSERT_EQ(pOrderBook->GetTradingPhase(), TradingPhase::CONTINUOUS_TRADING);
 
@@ -213,6 +213,7 @@ TEST_F(MatchingEngineTest, InsertContinousTrading)
     ASSERT_EQ(pOrderBook->GetDealCounter(), 2);
     ASSERT_EQ(pOrderBook->GetDailyVolume(), 2000);
     ASSERT_EQ(pOrderBook->GetTurnover(), 2799000);
+    ASSERT_EQ(pOrderBook->GetLastPrice(), 1545);
 
     m_Engine.EngineListen();
     sleep(5);

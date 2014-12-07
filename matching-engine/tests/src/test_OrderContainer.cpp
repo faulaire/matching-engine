@@ -28,6 +28,8 @@ class DealHandler
             std::cout << "DealHandler : " << *ipDeal << std::endl;
             m_Deals.emplace(m_DealCounter, ipDeal);
             m_DealCounter++;
+
+            ASSERT_EQ(*ipDeal, *ipDeal);
         }
 
         void Reset()
@@ -284,7 +286,7 @@ TEST_F(OrderContainerTest, AuctionFixing)
 
     InsertOrders();
 
-    auto OpenPrice = m_Container.GetTheoriticalOpenInformations();
+    auto OpenPrice = m_Container.GetTheoriticalAuctionInformations();
 
     ASSERT_EQ(std::get<0>(OpenPrice), 90);
     ASSERT_EQ(std::get<1>(OpenPrice), 900);
@@ -310,7 +312,7 @@ TEST_F(OrderContainerTest, AuctionFixing)
 
     DisplayOrders();
 
-    OpenPrice = m_Container.GetTheoriticalOpenInformations();
+    OpenPrice = m_Container.GetTheoriticalAuctionInformations();
 
     ASSERT_EQ(std::get<0>(OpenPrice), 39);
     ASSERT_EQ(std::get<1>(OpenPrice), 550);
