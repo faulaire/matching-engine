@@ -18,14 +18,7 @@ namespace exchange
         {}
 
         MatchingEngine::~MatchingEngine()
-        {
-            /* Delete all OrderBook */
-            for (auto && OrderBook : m_OrderBookContainer)
-            {
-                delete OrderBook.second;
-            }
-            // m_OrderBookContainer.clear();
-        }
+        {}
 
         bool MatchingEngine::Configure(common::DataBaseConnector & iConnector)
         {
@@ -59,11 +52,12 @@ namespace exchange
                     std::string InstrumentName = Instrument[to_underlying(InstrumentField::NAME)];
 
                     Order::price_type ClosePrice = boost::lexical_cast<Order::price_type>(Instrument[to_underlying(InstrumentField::CLOSE_PRICE)]);
-                    OrderBookType* pBook = new OrderBookType(InstrumentName, aSecurityCode, ClosePrice, *this);
+
+                    std::unique_ptr<OrderBookType> pBook = std::make_unique<OrderBookType>(InstrumentName, aSecurityCode, ClosePrice, *this);
 
                     EXINFO("MatchingEngine::Configure : Adding Instrument : " << InstrumentName);
 
-                    auto pIterator = m_OrderBookContainer.emplace(aSecurityCode, pBook);
+                    auto pIterator = m_OrderBookContainer.emplace(aSecurityCode, std::move(pBook));
                     if( !pIterator.second )
                     {
                         EXERR("MatchingEngine::Configure : Corrupted database, failed to insert instrument : " << InstrumentName);

@@ -27,7 +27,7 @@ namespace exchange
                 using TimeType            = boost::posix_time::ptime;
                 using OrderBookType       = OrderBook<Order,MatchingEngine>;
 
-                using OrderBookMap        = std::unordered_map<UInt32, OrderBookType*>;
+                using OrderBookMap        = std::unordered_map<UInt32, std::unique_ptr<OrderBookType> >;
                 using OrderBookValueType  = OrderBookMap::value_type;
                 using OrderBookIterator   = OrderBookMap::iterator;
 
@@ -123,7 +123,7 @@ namespace exchange
             auto It = m_OrderBookContainer.find(iProductID);
             if( It != m_OrderBookContainer.end())
             {
-                return It->second;
+                return It->second.get();
             }
             else
             {
