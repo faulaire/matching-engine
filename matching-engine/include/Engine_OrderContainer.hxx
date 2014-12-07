@@ -24,13 +24,13 @@ namespace exchange
         template <typename TOrder, typename SortingPredicate>
         struct ExecutableQtyPredHelper
         {
-            typedef std::greater_equal<typename TOrder::price_type>    type;
+            typedef std::greater_equal<typename TOrder::price_type>    value;
         };
 
         template <typename TOrder>
         struct ExecutableQtyPredHelper<TOrder, std::less<typename TOrder::price_type> >
         {
-            typedef std::less_equal<typename TOrder::price_type>       type;
+            typedef std::less_equal<typename TOrder::price_type>       value;
         };
 
         template <typename TOrder, typename TDealHandler>
@@ -41,7 +41,7 @@ namespace exchange
             UInt64 Qty = 0;
 
             typedef decltype(Index.key_comp())                                          SortingPredicate;
-            typedef typename ExecutableQtyPredHelper<TOrder, SortingPredicate>::type   Predicate;
+            typedef typename ExecutableQtyPredHelper<TOrder, SortingPredicate>::value   Predicate;
 
             for (auto & order : Index)
             {
@@ -114,18 +114,18 @@ namespace exchange
                 iMatchQty -= ExecQty;
 
                 // Generate the deal
-                Deal * pDeal = nullptr;
+                std::unique_ptr<Deal> pDeal = nullptr;
 
                 if (OrderToHit->GetWay() == OrderWay::BUY)
                 {
-                    pDeal = new Deal(ExecPrice, ExecQty, OrderToHit->GetClientID(), OrderToHit->GetOrderID(), iMsg.GetClientID(), GetAggressorID(iMsg));
+                    pDeal = std::make_unique<Deal>(ExecPrice, ExecQty, OrderToHit->GetClientID(), OrderToHit->GetOrderID(), iMsg.GetClientID(), GetAggressorID(iMsg));
                 }
                 else
                 {
-                    pDeal = new Deal(ExecPrice, ExecQty, iMsg.GetClientID(), GetAggressorID(iMsg), OrderToHit->GetClientID(), OrderToHit->GetOrderID());
+                    pDeal = std::make_unique<Deal>(ExecPrice, ExecQty, iMsg.GetClientID(), GetAggressorID(iMsg), OrderToHit->GetClientID(), OrderToHit->GetOrderID());
                 }
 
-                m_DealHandler.OnDeal(pDeal);
+                m_DealHandler.OnDeal(std::move(pDeal));
 
                 if (0 == OrderToHit->GetQuantity())
                 {
@@ -342,8 +342,8 @@ namespace exchange
                     AskIndex.modify(AskOrder, OrderUpdaterSingle<&Order::SetQuantity>(AskOrder->GetQuantity() - ExecutedQty));
                     BidIndex.modify(BidOrder, OrderUpdaterSingle<&Order::SetQuantity>(BidOrder->GetQuantity() - ExecutedQty));
 
-                    Deal * pDeal = new Deal(MatchingPrice, ExecutedQty, BidOrder->GetClientID(), BidOrder->GetOrderID(), AskOrder->GetClientID(), AskOrder->GetOrderID());
-                    m_DealHandler.OnDeal(pDeal);
+                    std::unique_ptr<Deal> pDeal = std::make_unique<Deal>(MatchingPrice, ExecutedQty, BidOrder->GetClientID(), BidOrder->GetOrderID(), AskOrder->GetClientID(), AskOrder->GetOrderID());
+                    m_DealHandler.OnDeal(std::move(pDeal));
 
                     MatchingQty -= ExecutedQty;
 
@@ -378,18 +378,18 @@ namespace exchange
                 price_type CurrentPrice = std::numeric_limits<price_type>::max();
                 size_t     ContainerIndex = 0;
 
-                for (; begin != end; ++begin)
+                for (; begin != end; begin++)
                 {
                     price_type Price = begin->GetPrice();
                     if (Price != CurrentPrice)
                     {
-                        ++ContainerIndex;
+                        ContainerIndex++;
                         CurrentPrice = Price;
                         Container.emplace_back(0, 0, Price);
                     }
 
                     LimitType & Limit = Container[ContainerIndex - 1];
-                    ++std::get<0>(Limit);
+                    std::get<0>(Limit)++;
                     std::get<1>(Limit) += begin->GetQuantity();
                 }
             };
@@ -433,7 +433,7 @@ namespace exchange
                 if (Entry != end)
                 {
                     oss << "|" << std::setw(13) << MakeString(Entry->GetQuantity(), Entry->GetPrice()) << end_string;
-                    ++Entry;
+                    Entry++;
                 }
                 else
                 {
@@ -447,7 +447,7 @@ namespace exchange
             auto AskIterator = GetAskIndex().begin();
             auto BidIterator = GetBidIndex().begin();
 
-            for (UInt64 Index = 0; Index < MaxIndex; ++Index)
+            for (UInt64 Index = 0; Index < MaxIndex; Index++)
             {
                 StreamEntry(BidIterator, GetBidIndex().end(), "       ");
                 StreamEntry(AskIterator, GetAskIndex().end(), "      |");
@@ -491,7 +491,7 @@ namespace exchange
             oss << "|         BID          |         ASK         |" << std::endl;
             oss << "|                      |                     |" << std::endl;
 
-            for (UInt64 Index = 0; Index < MaxIndex; ++Index)
+            for (UInt64 Index = 0; Index < MaxIndex; Index++)
             {
                 StreamEntry(Index, BidContainer, "       ");
                 StreamEntry(Index, AskContainer, "      |");

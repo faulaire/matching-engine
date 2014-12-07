@@ -17,29 +17,23 @@ class DealHandler
 {
     public:
 
-        typedef std::map<UInt32, Deal*> DealContainerType;
+        typedef std::map<UInt32, std::unique_ptr<Deal> > DealContainerType;
 
     public:
         DealHandler():m_DealCounter(0)
         {}
 
-        void OnDeal(Deal * ipDeal)
+        void OnDeal(std::unique_ptr<Deal> ipDeal)
         {
             std::cout << "DealHandler : " << *ipDeal << std::endl;
-            m_Deals.emplace(m_DealCounter, ipDeal);
-            ++m_DealCounter;
+            m_Deals.emplace(m_Deals.size(), std::move(ipDeal));
 
             ASSERT_EQ(*ipDeal, *ipDeal);
         }
 
         void Reset()
         {
-            for (auto pDeal : m_Deals)
-            {
-                delete pDeal.second;
-            }
             m_Deals.clear();
-            m_DealCounter = 0;
         }
 
         const DealContainerType & GetDealContainer() const { return m_Deals; }

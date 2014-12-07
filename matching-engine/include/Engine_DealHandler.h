@@ -32,7 +32,7 @@ namespace exchange
                 
                 using DealContainerType = boost::multi_index_container
                                     <
-                                        Deal*,
+                                        std::unique_ptr<Deal>,
                                         bmi::indexed_by
                                             <
                                                 bmi::hashed_unique<
@@ -54,35 +54,27 @@ namespace exchange
             public:
 
                 /**/
-                void OnDeal(Deal * ipDeal);
+                void OnDeal(std::unique_ptr<Deal> ipDeal);
 
             public:
 
                 inline UInt32 GetInstrumentID() const;
                 inline UInt64 GetDealCounter() const;
-
             
             protected:
                 DealContainerType m_DealContainer;
                 UInt32            m_InstrumentID;
-                UInt64            m_DealCounter;
         };
 
 
         template <typename TDealProcessor>
         DealHandler<TDealProcessor>::DealHandler(UInt32 iInstrumentID):
-            m_InstrumentID(iInstrumentID), m_DealCounter(0)
+            m_InstrumentID(iInstrumentID)
         {}
 
         template <typename TDealProcessor>
         DealHandler<TDealProcessor>::~DealHandler()
-        {
-            for( auto && Deal : m_DealContainer)
-            {
-                delete Deal;
-            }
-            m_DealContainer.clear();
-        }
+        {}
 
         template <typename TDealProcessor>
         inline UInt32 DealHandler<TDealProcessor>::GetInstrumentID() const
@@ -93,22 +85,20 @@ namespace exchange
         template <typename TDealProcessor>
         inline UInt64 DealHandler<TDealProcessor>::GetDealCounter() const
         {
-            return m_DealCounter;
+            return m_DealContainer.size();
         }
 
         template <typename TDealProcessor>
-        void DealHandler<TDealProcessor>::OnDeal(Deal * ipDeal)
+        void DealHandler<TDealProcessor>::OnDeal(std::unique_ptr<Deal> ipDeal)
         {
-            ++m_DealCounter;
-
             std::ostringstream  oss("");
             oss << m_InstrumentID << "_" << ipDeal->GetTimeStamp().time_since_epoch().count();
-            oss << "_" << m_DealCounter;
+            oss << "_" << m_DealContainer.size();
             ipDeal->SetReference(oss.str());
 
-            m_DealContainer.insert(ipDeal);
+            static_cast<TDealProcessor*>(this)->ProcessDeal(ipDeal.get());
 
-            static_cast<TDealProcessor*>(this)->ProcessDeal(ipDeal);
+            m_DealContainer.insert(std::move(ipDeal));
         }
     }
 }
