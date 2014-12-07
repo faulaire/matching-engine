@@ -32,7 +32,7 @@ namespace exchange
                 SHA256_Final(hash, &sha256);
                 
                 std::string output = "";
-                for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+                for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i)
                 {
                     output += to_hex(hash[i]);
                 }

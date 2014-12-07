@@ -252,7 +252,7 @@ namespace exchange
 
                     bool bChange = false;
                     auto It = m_Categories.begin();
-                    for (; It != m_Categories.end(); It++)
+                    for (; It != m_Categories.end(); ++It)
                     {
                         if (!(*It).GetName().empty())
                         {

@@ -27,7 +27,7 @@ class DealHandler
         {
             std::cout << "DealHandler : " << *ipDeal << std::endl;
             m_Deals.emplace(m_DealCounter, ipDeal);
-            m_DealCounter++;
+            ++m_DealCounter;
 
             ASSERT_EQ(*ipDeal, *ipDeal);
         }

@@ -24,13 +24,13 @@ namespace exchange
         template <typename TOrder, typename SortingPredicate>
         struct ExecutableQtyPredHelper
         {
-            typedef std::greater_equal<typename TOrder::price_type>    value;
+            typedef std::greater_equal<typename TOrder::price_type>    type;
         };
 
         template <typename TOrder>
         struct ExecutableQtyPredHelper<TOrder, std::less<typename TOrder::price_type> >
         {
-            typedef std::less_equal<typename TOrder::price_type>       value;
+            typedef std::less_equal<typename TOrder::price_type>       type;
         };
 
         template <typename TOrder, typename TDealHandler>
@@ -41,7 +41,7 @@ namespace exchange
             UInt64 Qty = 0;
 
             typedef decltype(Index.key_comp())                                          SortingPredicate;
-            typedef typename ExecutableQtyPredHelper<TOrder, SortingPredicate>::value   Predicate;
+            typedef typename ExecutableQtyPredHelper<TOrder, SortingPredicate>::type   Predicate;
 
             for (auto & order : Index)
             {
@@ -378,18 +378,18 @@ namespace exchange
                 price_type CurrentPrice = std::numeric_limits<price_type>::max();
                 size_t     ContainerIndex = 0;
 
-                for (; begin != end; begin++)
+                for (; begin != end; ++begin)
                 {
                     price_type Price = begin->GetPrice();
                     if (Price != CurrentPrice)
                     {
-                        ContainerIndex++;
+                        ++ContainerIndex;
                         CurrentPrice = Price;
                         Container.emplace_back(0, 0, Price);
                     }
 
                     LimitType & Limit = Container[ContainerIndex - 1];
-                    std::get<0>(Limit)++;
+                    ++std::get<0>(Limit);
                     std::get<1>(Limit) += begin->GetQuantity();
                 }
             };
@@ -433,7 +433,7 @@ namespace exchange
                 if (Entry != end)
                 {
                     oss << "|" << std::setw(13) << MakeString(Entry->GetQuantity(), Entry->GetPrice()) << end_string;
-                    Entry++;
+                    ++Entry;
                 }
                 else
                 {
@@ -447,7 +447,7 @@ namespace exchange
             auto AskIterator = GetAskIndex().begin();
             auto BidIterator = GetBidIndex().begin();
 
-            for (UInt64 Index = 0; Index < MaxIndex; Index++)
+            for (UInt64 Index = 0; Index < MaxIndex; ++Index)
             {
                 StreamEntry(BidIterator, GetBidIndex().end(), "       ");
                 StreamEntry(AskIterator, GetAskIndex().end(), "      |");
@@ -491,7 +491,7 @@ namespace exchange
             oss << "|         BID          |         ASK         |" << std::endl;
             oss << "|                      |                     |" << std::endl;
 
-            for (UInt64 Index = 0; Index < MaxIndex; Index++)
+            for (UInt64 Index = 0; Index < MaxIndex; ++Index)
             {
                 StreamEntry(Index, BidContainer, "       ");
                 StreamEntry(Index, AskContainer, "      |");
