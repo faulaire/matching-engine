@@ -159,14 +159,14 @@ namespace exchange
             UInt32 RowIndex = 0;
             while ((row = mysql_fetch_row(result))) 
             { 
-                for (UInt32 Field = 0; Field < num_fields; Field++) 
+                for (UInt32 Field = 0; Field < num_fields; ++Field)
                 { 
                     if ( row[Field] )
                     {
                         oResults[RowIndex][Field] = row[Field];
                     }
                 } 
-                RowIndex++;
+                ++RowIndex;
             }
             
             mysql_free_result(result);

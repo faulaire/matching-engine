@@ -99,7 +99,7 @@ namespace exchange
         template <typename TDealProcessor>
         void DealHandler<TDealProcessor>::OnDeal(Deal * ipDeal)
         {
-            m_DealCounter++;
+            ++m_DealCounter;
 
             std::ostringstream  oss("");
             oss << m_InstrumentID << "_" << ipDeal->GetTimeStamp().time_since_epoch().count();

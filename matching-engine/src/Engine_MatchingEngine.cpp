@@ -201,7 +201,7 @@ namespace exchange
                 }
                 else
                 {
-                    iterator++;
+                    ++iterator;
                 }
             }
         }
