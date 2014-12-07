@@ -110,6 +110,7 @@ namespace exchange
         {
             SetTurnover( GetTurnover() + ipDeal->GetQuantity()*ipDeal->GetPrice() );
             SetDailyVolume( GetDailyVolume() + ipDeal->GetQuantity() );
+            SetLastPrice( ipDeal->GetPrice() );
 
             auto && PriceDevFactors = m_rMatchingEngine.GetPriceDevFactors();
 
@@ -118,12 +119,14 @@ namespace exchange
 
             if( ipDeal->GetPrice() > max_price || ipDeal->GetPrice() < min_price)
             {
-                SetTradingPhase(TradingPhase::INTRADAY_AUCTION);
-                m_AuctionStart = boost::posix_time::second_clock::local_time();
+                if( GetTradingPhase() != TradingPhase::INTRADAY_AUCTION)
+                {
+                    SetTradingPhase(TradingPhase::INTRADAY_AUCTION);
+                    m_AuctionStart = boost::posix_time::second_clock::local_time();
 
-                m_rMatchingEngine.MonitorOrderBook(this);
+                    m_rMatchingEngine.MonitorOrderBook(this);
+                }
             }
-            m_LastClosePrice = ipDeal->GetPrice();
         }
 
         template <typename TOrder, typename TMatchingEngine>
