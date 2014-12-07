@@ -113,19 +113,21 @@ namespace exchange
                 // Decrease the matching quantity
                 iMatchQty -= ExecQty;
 
-                // Generate the deal
-                Deal * pDeal = nullptr;
-
-                if (OrderToHit->GetWay() == OrderWay::BUY)
                 {
-                    pDeal = new Deal(ExecPrice, ExecQty, OrderToHit->GetClientID(), OrderToHit->GetOrderID(), iMsg.GetClientID(), GetAggressorID(iMsg));
-                }
-                else
-                {
-                    pDeal = new Deal(ExecPrice, ExecQty, iMsg.GetClientID(), GetAggressorID(iMsg), OrderToHit->GetClientID(), OrderToHit->GetOrderID());
-                }
+                    // Generate the deal
+                    std::unique_ptr<Deal> pDeal;
 
-                m_DealHandler.OnDeal(pDeal);
+                    if (OrderToHit->GetWay() == OrderWay::BUY)
+                    {
+                        pDeal = std::unique_ptr<Deal>(new Deal(ExecPrice, ExecQty, OrderToHit->GetClientID(), OrderToHit->GetOrderID(), iMsg.GetClientID(), GetAggressorID(iMsg)));
+                    }
+                    else
+                    {
+                        pDeal = std::unique_ptr<Deal>(new Deal(ExecPrice, ExecQty, iMsg.GetClientID(), GetAggressorID(iMsg), OrderToHit->GetClientID(), OrderToHit->GetOrderID()));
+                    }
+
+                    m_DealHandler.OnDeal(std::move(pDeal));
+                }
 
                 if (0 == OrderToHit->GetQuantity())
                 {
@@ -342,8 +344,8 @@ namespace exchange
                     AskIndex.modify(AskOrder, OrderUpdaterSingle<&Order::SetQuantity>(AskOrder->GetQuantity() - ExecutedQty));
                     BidIndex.modify(BidOrder, OrderUpdaterSingle<&Order::SetQuantity>(BidOrder->GetQuantity() - ExecutedQty));
 
-                    Deal * pDeal = new Deal(MatchingPrice, ExecutedQty, BidOrder->GetClientID(), BidOrder->GetOrderID(), AskOrder->GetClientID(), AskOrder->GetOrderID());
-                    m_DealHandler.OnDeal(pDeal);
+                    auto pDeal = std::unique_ptr<Deal>(new Deal(MatchingPrice, ExecutedQty, BidOrder->GetClientID(), BidOrder->GetOrderID(), AskOrder->GetClientID(), AskOrder->GetOrderID()));
+                    m_DealHandler.OnDeal(std::move(pDeal));
 
                     MatchingQty -= ExecutedQty;
 

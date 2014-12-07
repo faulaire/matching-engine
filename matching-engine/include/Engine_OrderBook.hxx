@@ -106,7 +106,7 @@ namespace exchange
         }
 
         template <typename TOrder, typename TMatchingEngine>
-        void OrderBook<TOrder,TMatchingEngine>::ProcessDeal(Deal * ipDeal)
+        void OrderBook<TOrder,TMatchingEngine>::ProcessDeal(const Deal * ipDeal)
         {
             SetTurnover( GetTurnover() + ipDeal->GetQuantity()*ipDeal->GetPrice() );
             SetDailyVolume( GetDailyVolume() + ipDeal->GetQuantity() );

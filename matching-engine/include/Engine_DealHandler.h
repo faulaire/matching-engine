@@ -6,7 +6,10 @@
 #pragma once
 
 #include <Engine_Deal.h>
+#include "Logger.h"
 
+#include <memory>
+#include <utility>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/identity.hpp>
@@ -32,7 +35,7 @@ namespace exchange
                 
                 using DealContainerType = boost::multi_index_container
                                     <
-                                        Deal*,
+                                        std::unique_ptr<Deal>,
                                         bmi::indexed_by
                                             <
                                                 bmi::hashed_unique<
@@ -54,34 +57,27 @@ namespace exchange
             public:
 
                 /**/
-                void OnDeal(Deal * ipDeal);
+                void OnDeal(typename DealContainerType::value_type ipDeal);
 
-            public:
+        protected:
+            DealContainerType m_DealContainer;
+            UInt32            m_InstrumentID;
+
+        public:
 
                 inline UInt32 GetInstrumentID() const;
-                inline UInt64 GetDealCounter() const;
-
-            
-            protected:
-                DealContainerType m_DealContainer;
-                UInt32            m_InstrumentID;
-                UInt64            m_DealCounter;
+                inline decltype(std::declval<DealContainerType>().size()) GetDealCounter() const;
         };
 
 
         template <typename TDealProcessor>
         DealHandler<TDealProcessor>::DealHandler(UInt32 iInstrumentID):
-            m_InstrumentID(iInstrumentID), m_DealCounter(0)
+            m_InstrumentID(iInstrumentID)
         {}
 
         template <typename TDealProcessor>
         DealHandler<TDealProcessor>::~DealHandler()
         {
-            for( auto && Deal : m_DealContainer)
-            {
-                delete Deal;
-            }
-            m_DealContainer.clear();
         }
 
         template <typename TDealProcessor>
@@ -91,24 +87,33 @@ namespace exchange
         }
 
         template <typename TDealProcessor>
-        inline UInt64 DealHandler<TDealProcessor>::GetDealCounter() const
+        inline decltype(std::declval<typename DealHandler<TDealProcessor>::DealContainerType>().size()) DealHandler<TDealProcessor>::GetDealCounter() const
         {
-            return m_DealCounter;
+            return m_DealContainer.size();
         }
 
         template <typename TDealProcessor>
-        void DealHandler<TDealProcessor>::OnDeal(Deal * ipDeal)
+        void DealHandler<TDealProcessor>::OnDeal(typename DealHandler<TDealProcessor>::DealContainerType::value_type ipDeal)
         {
-            ++m_DealCounter;
-
+            /* TODO: Now that we check insertion inside the deal container,
+             * check if the non-incremented deal counter in case of failure is actually normal or if we still want to increment
+             */
             std::ostringstream  oss("");
             oss << m_InstrumentID << "_" << ipDeal->GetTimeStamp().time_since_epoch().count();
-            oss << "_" << m_DealCounter;
+            oss << "_" << GetDealCounter() + 1;
             ipDeal->SetReference(oss.str());
 
-            m_DealContainer.insert(ipDeal);
+            auto insertion = m_DealContainer.insert(std::move(ipDeal));
 
-            static_cast<TDealProcessor*>(this)->ProcessDeal(ipDeal);
+            if (insertion.second)
+            {
+                static_cast<TDealProcessor*>(this)->ProcessDeal((*insertion.first).get());
+            }
+            else
+            {
+                EXERR("DealHandler : Failed to insert and process deal [" << *ipDeal);
+                assert(false);
+            }
         }
     }
 }

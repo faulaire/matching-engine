@@ -1,3 +1,4 @@
+#include <memory>
 #include <gtest/gtest.h>
 
 #include <Logger.h>
@@ -62,7 +63,7 @@ TEST(DataBaseConnectorTest, Connect)
     boost::property_tree::ptree aConfig;
     if (boost::filesystem::exists("config.ini"))
     {
-        DataBaseConnector* pConnector = new DataBaseConnector();
+        auto pConnector = std::unique_ptr<DataBaseConnector>(new DataBaseConnector());
 
         boost::property_tree::ini_parser::read_ini("config.ini", aConfig);
 
@@ -82,7 +83,6 @@ TEST(DataBaseConnectorTest, Connect)
         ASSERT_TRUE(pConnector->Configure(aConfig));
 
         ASSERT_TRUE(pConnector->Connect());
-        delete pConnector;
     }
     else
     {
