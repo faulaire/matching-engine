@@ -26,7 +26,7 @@ class DealHandler
         void OnDeal(Deal * ipDeal)
         {
             std::cout << "DealHandler : " << *ipDeal << std::endl;
-            m_Deals.insert(std::make_pair(m_DealCounter, ipDeal));
+            m_Deals.emplace(m_DealCounter, ipDeal);
             m_DealCounter++;
         }
 

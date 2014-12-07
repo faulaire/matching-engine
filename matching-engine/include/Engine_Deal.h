@@ -9,6 +9,9 @@
 #include <cstring>
 #include <cassert>
 #include <chrono>
+#include <iosfwd>
+#include <utility>
+#include <boost/noncopyable.hpp>
 
 #include <Types.h>
 
@@ -22,7 +25,7 @@ namespace exchange
         /*!
         *  \brief Deal
         */
-        class Deal
+        class Deal : boost::noncopyable
         {
 
             friend std::ostream& operator<<(std::ostream& o, const Deal & x);
@@ -39,7 +42,6 @@ namespace exchange
                 Deal(price_type iPrice, qty_type iQty, UInt32 iBuyerClientID, UInt32 iBuyerOrderID, UInt32 iSellerClientID, UInt32 iSellerOrderID);
 
                 Deal() = delete;
-                Deal(const Deal & rhs) = delete;
 
                 bool operator==(const Deal & rhs) const;
 
@@ -66,7 +68,7 @@ namespace exchange
                 inline TimestampType         GetTimeStamp() const;
 
                 inline const std::string &   GetReference() const;
-                inline void                  SetReference(const std::string &);
+                inline void                  SetReference(std::string);
 
             protected:
                 std::string   m_Reference;
@@ -88,7 +90,7 @@ namespace exchange
 
         inline void Deal::SetPrice(price_type iPrice)
         {
-            m_Price = iPrice;
+            m_Price = std::move(iPrice);
         }
 
         inline Deal::qty_type Deal::GetQuantity() const
@@ -98,7 +100,7 @@ namespace exchange
 
         inline void Deal::SetQuantity(qty_type iQty)
         {
-            m_Qty = iQty;
+            m_Qty = std::move(iQty);
         }
 
         inline UInt32 Deal::GetBuyerClientID() const
@@ -108,7 +110,7 @@ namespace exchange
 
         inline void   Deal::SetBuyerClientID(UInt32 iId)
         {
-            m_BuyerClientID = iId;
+            m_BuyerClientID = std::move(iId);
         }
 
         inline UInt32 Deal::GetSellerClientID() const
@@ -118,7 +120,7 @@ namespace exchange
 
         inline void   Deal::SetSellerClientID(UInt32 iId)
         {
-            m_SellerClientID = iId;
+            m_SellerClientID = std::move(iId);
         }
 
         inline UInt32 Deal::GetBuyerOrderID() const
@@ -128,7 +130,7 @@ namespace exchange
 
         inline void Deal::SetBuyerOrderID(UInt32 iId)
         {
-            m_BuyerOrderID = iId;
+            m_BuyerOrderID = std::move(iId);
         }
 
         inline UInt32 Deal::GetSellerOrderID() const
@@ -138,7 +140,7 @@ namespace exchange
 
         inline void Deal::SetSellerOrderID(UInt32 iId)
         {
-            m_SellerOrderID = iId;
+            m_SellerOrderID = std::move(iId);
         }
 
         inline const std::string & Deal::GetReference() const
@@ -146,9 +148,9 @@ namespace exchange
             return m_Reference;
         }
 
-        inline void Deal::SetReference(const std::string & iRef)
+        inline void Deal::SetReference(std::string iRef)
         {
-            m_Reference = iRef;
+            m_Reference = std::move(iRef);
         }
 
         inline Deal::TimestampType Deal::GetTimeStamp() const

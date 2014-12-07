@@ -366,17 +366,8 @@ namespace exchange
             BidContainer.reserve( GetBidIndex().size() );
             AskContainer.reserve( GetAskIndex().size() );
 
-            auto AskIterator = GetAskIndex().begin();
-            for(; AskIterator!=GetAskIndex().end(); AskIterator++)
-            {
-                AskContainer.push_back(*AskIterator);
-            }
-
-            auto BidIterator = GetBidIndex().begin();
-            for(; BidIterator!=GetBidIndex().end(); BidIterator++)
-            {
-                BidContainer.push_back(*BidIterator);
-            }
+            std::copy(GetAskIndex().begin(), GetAskIndex().end(), std::back_inserter(AskContainer));
+            std::copy(GetBidIndex().begin(), GetBidIndex().end(), std::back_inserter(BidContainer));
         }
 
         template <typename TOrder, typename TDealHandler>
@@ -394,7 +385,7 @@ namespace exchange
                     {
                         ContainerIndex++;
                         CurrentPrice = Price;
-                        Container.push_back(std::make_tuple(0, 0, Price));
+                        Container.emplace_back(0, 0, Price);
                     }
 
                     LimitType & Limit = Container[ContainerIndex - 1];
