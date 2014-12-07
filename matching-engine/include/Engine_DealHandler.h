@@ -59,14 +59,14 @@ namespace exchange
                 /**/
                 void OnDeal(typename DealContainerType::value_type ipDeal);
 
-        protected:
-            DealContainerType m_DealContainer;
-            UInt32            m_InstrumentID;
-
-        public:
+            public:
 
                 inline UInt32 GetInstrumentID() const;
                 inline decltype(std::declval<DealContainerType>().size()) GetDealCounter() const;
+
+            protected:
+                DealContainerType m_DealContainer;
+                UInt32            m_InstrumentID;
         };
 
 
