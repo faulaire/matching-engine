@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <logger/Logger.h>
+
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/identity.hpp>
@@ -86,13 +88,15 @@ namespace exchange
 
             public:
 
-                typedef typename TOrder::price_type                                        price_type;
-                typedef typename TOrder::qty_type                                          qty_type;
+                using price_type          = typename TOrder::price_type;
+                using qty_type            = typename TOrder::qty_type;
 
                 /* Types used to store the aggregated view of orders */
                 /* NbOrder Qty Price*/
-                typedef std::tuple<UInt32, qty_type, price_type>                           LimitType;
-                typedef std::vector<LimitType>                                             LimitContainer;
+                using LimitType           = std::tuple<UInt32, qty_type, price_type>;
+                using LimitContainer      = std::vector<LimitType>;
+
+                using OpenInformationType = std::tuple<UInt32, UInt64>;
 
             protected:
 
@@ -147,7 +151,7 @@ namespace exchange
 
                 /**
                 */
-                std::tuple<UInt32, UInt64> GetTheoriticalOpenInformations() const;
+                OpenInformationType GetTheoriticalAuctionInformations() const;
             
             public:
 
@@ -163,6 +167,8 @@ namespace exchange
 
                 template <typename Msg>
                 UInt64 GetExecutableQuantity(const Msg & iOrder, OrderWay iWay) const;
+
+                bool IsValidOpenPrice(const OpenInformationType & Information) const;
 
                 template <typename Container, typename Msg>
                 void ProcessDeals(Container & Orders, Msg & iMsg, UInt64 iMatchQty);
