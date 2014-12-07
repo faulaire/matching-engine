@@ -293,7 +293,7 @@ namespace exchange
         the opening price cannot be higher than the best ask or lower than the best bid immediately after the auction phase.
         */
         template <typename TOrder, typename TDealHandler>
-        std::tuple<UInt32, UInt64> OrderContainer<TOrder, TDealHandler>::GetTheoriticalOpenInformations() const
+        std::tuple<UInt32, UInt64> OrderContainer<TOrder, TDealHandler>::GetTheoriticalAuctionInformations() const
         {
             UInt64 MaxQty = 0;
             UInt32 OpenPrice = 0;
@@ -321,7 +321,7 @@ namespace exchange
         template <typename TOrder, typename TDealHandler>
         void  OrderContainer<TOrder, TDealHandler>::MatchOrders()
         {
-            auto OpeningInformation = GetTheoriticalOpenInformations();
+            auto OpeningInformation = GetTheoriticalAuctionInformations();
 
             UInt32 MatchingPrice = std::get<0>(OpeningInformation);
             UInt64 MatchingQty = std::get<1>(OpeningInformation);

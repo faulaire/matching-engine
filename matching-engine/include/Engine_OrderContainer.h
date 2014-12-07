@@ -168,8 +168,6 @@ namespace exchange
                 template <typename Msg>
                 UInt64 GetExecutableQuantity(const Msg & iOrder, OrderWay iWay) const;
 
-                bool IsValidOpenPrice(const OpenInformationType & Information) const;
-
                 template <typename Container, typename Msg>
                 void ProcessDeals(Container & Orders, Msg & iMsg, UInt64 iMatchQty);
 
