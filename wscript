@@ -36,7 +36,7 @@ def configure(cfg):
 
     cfg.env.with_unittest = cfg.options.with_unittest
 
-    cfg.env.append_value('CXXFLAGS', ['-std=c++11','-W','-Wall','-Wno-unused-local-typedefs'])
+    cfg.env.append_value('CXXFLAGS', ['-std=c++1y','-W','-Wall','-Wno-unused-local-typedefs'])
     
     if cfg.env["CXX"] == ['clang']:
         # We need to link again libstdc++ and libm with clang

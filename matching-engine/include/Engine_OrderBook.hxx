@@ -140,11 +140,11 @@ namespace exchange
         template <typename TOrder, typename TMatchingEngine>
         std::ostream& operator<< (std::ostream& oss, const OrderBook<TOrder,TMatchingEngine> & iOrders)
         {
-            oss << "TradingPhase[" << TradingPhaseToString(iOrders.m_Phase) << "] ; "
-                << "SecurityName[" << iOrders.m_SecurityName << "] ; "
-                << "TurnOver" << iOrders.m_Turnover << "] ; "
-                << "DailyVolume[" << iOrders.m_DailyVolume << "] ; "
-                << "OpenPrice[" << iOrders.m_OpenPrice << "] ; "
+            oss << "TradingPhase["   << TradingPhaseToString(iOrders.m_Phase) << "] ; "
+                << "SecurityName["   << iOrders.m_SecurityName << "] ; "
+                << "TurnOver"        << iOrders.m_Turnover << "] ; "
+                << "DailyVolume["    << iOrders.m_DailyVolume << "] ; "
+                << "OpenPrice["      << iOrders.m_OpenPrice << "] ; "
                 << "LastClosePrice[" << iOrders.m_LastClosePrice << "]" << std::endl;
 
             oss << iOrders.m_Orders;

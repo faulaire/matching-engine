@@ -203,10 +203,6 @@ namespace exchange
         template <typename TOrder, typename TDealHandler>
         bool OrderContainer<TOrder, TDealHandler>::Delete(const UInt32 iOrderId, const UInt32 iClientId, OrderWay iWay)
         {    
-            /*
-            Erase return the number of element erased, so if no element
-            is erased in Bid container, try on Ask.
-            */
             switch (iWay)
             {
                 case OrderWay::BUY:
@@ -245,46 +241,35 @@ namespace exchange
 
             auto OrderID = OrderIDGenerator<TOrder>()(iOrderReplace.GetClientID(), iOrderReplace.GetExistingOrderID());
 
+            auto ApplyModify = [&](auto & Container)
+            {
+                auto Order = Container.find(OrderID);
+                if (Order != Container.end())
+                {
+                    if (ProcessModify(Order, Match))
+                    {
+                        // Order is not fully filled, modify the existing one
+                        OrderUpdater aUpdater(iOrderReplace);
+                        return Container.modify(Order, aUpdater);
+                    }
+                    else
+                    {
+                        // No quantity left on the order, erase it from the container
+                        return (0 != Container.erase(iOrderReplace.GetExistingOrderID()));
+                    }
+                }
+                return false;
+            };
+
             switch (iOrderReplace.GetWay())
             {
                 case OrderWay::BUY:
-                    {
-                        auto BidOrder = m_BidOrders.find(OrderID);
-                        if (BidOrder != m_BidOrders.end())
-                        {
-                            if (ProcessModify(BidOrder, Match))
-                            {
-                                OrderUpdater aUpdater(iOrderReplace);
-                                return m_BidOrders.modify(BidOrder, aUpdater);
-                            }
-                            else
-                            {
-                                return (0 != m_BidOrders.erase(iOrderReplace.GetExistingOrderID()));
-                            }
-                        }
-                    }
-                    break;
+                    return ApplyModify(m_BidOrders);
                 case OrderWay::SELL:
-                    {
-                        auto AskOrder = m_AskOrders.find(OrderID);
-                        if (AskOrder != m_AskOrders.end())
-                        {
-                            if (ProcessModify(AskOrder, Match))
-                            {
-                                OrderUpdater aUpdater(iOrderReplace);
-                                return m_AskOrders.modify(AskOrder, aUpdater);
-                            }
-                            else
-                            {
-                                return (0 != m_AskOrders.erase(iOrderReplace.GetExistingOrderID()));
-                            }
-                        }
-                    }
-                    break;
+                    return ApplyModify(m_AskOrders);
                 default:
                     return false;
             }
-            return false;
         }
 
         /*
