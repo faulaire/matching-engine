@@ -6,7 +6,7 @@ namespace exchange
         {
 
             template <typename Array>
-            void to_base64(UInt64 iToEncode, Array & oEncoded, size_t FirstPos)
+            void to_base64(std::uint64_t iToEncode, Array & oEncoded, size_t FirstPos)
             {
                 static constexpr const char digits_array[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                                                              "abcdefghijklmnopqrstuvwxyz"

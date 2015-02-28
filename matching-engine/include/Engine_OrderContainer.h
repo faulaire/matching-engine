@@ -14,7 +14,6 @@
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 
-#include <Types.h>
 
 namespace exchange
 {
@@ -29,16 +28,16 @@ namespace exchange
         template <typename TOrder>
         struct OrderIDGenerator
         {
-            typedef UInt64 result_type;
+            using result_type = std::uint64_t;
 
-            result_type get_key(UInt32 iClientID, UInt32 iOrderID) const
+            result_type get_key(std::uint32_t iClientID, std::uint32_t iOrderID) const
             {
-                UInt64 Hash = (result_type)iClientID << 32;
+                result_type Hash = (result_type)iClientID << 32;
                 Hash += iOrderID;
                 return Hash;
             }
 
-            result_type operator()(UInt32 iClientID, UInt32 iOrderID) const
+            result_type operator()(std::uint32_t iClientID, std::uint32_t iOrderID) const
             {
                 return get_key(iClientID, iOrderID);
             }
@@ -60,7 +59,7 @@ namespace exchange
                     bmi::tag<order_id_tag>, OrderIDGenerator<TOrder> >,
 
                     bmi::hashed_non_unique<
-                    bmi::tag<client_id_tag>, bmi::const_mem_fun<TOrder, UInt32, &TOrder::GetClientID> >,
+                    bmi::tag<client_id_tag>, bmi::const_mem_fun<TOrder, std::uint32_t, &TOrder::GetClientID> >,
 
                     bmi::ordered_non_unique<
                     bmi::tag<price_tag>, bmi::const_mem_fun<TOrder, typename TOrder::price_type, &TOrder::GetPrice>, SortingPredicate>
@@ -93,10 +92,10 @@ namespace exchange
 
                 /* Types used to store the aggregated view of orders */
                 /* NbOrder Qty Price*/
-                using LimitType           = std::tuple<UInt32, qty_type, price_type>;
+                using LimitType           = std::tuple<std::uint32_t, qty_type, price_type>;
                 using LimitContainer      = std::vector<LimitType>;
 
-                using OpenInformationType = std::tuple<UInt32, UInt64>;
+                using OpenInformationType = std::tuple<std::uint32_t, std::uint64_t>;
 
             protected:
 
@@ -131,7 +130,7 @@ namespace exchange
 
                 /**
                 */
-                bool Delete(const UInt32 iOrderId, const UInt32 ClientId, OrderWay iWay);
+                bool Delete(const std::uint32_t iOrderId, const std::uint32_t ClientId, OrderWay iWay);
 
                 /**
                 */
@@ -163,16 +162,16 @@ namespace exchange
                 bool AuctionInsert(const TOrder & iOrder);
 
                 template <typename Container>
-                UInt64 GetExecutableQuantity(const Container & Orders, price_type iPrice) const;
+                std::uint64_t GetExecutableQuantity(const Container & Orders, price_type iPrice) const;
 
                 template <typename Msg>
-                UInt64 GetExecutableQuantity(const Msg & iOrder, OrderWay iWay) const;
+                std::uint64_t GetExecutableQuantity(const Msg & iOrder, OrderWay iWay) const;
 
                 template <typename Container, typename Msg>
-                void ProcessDeals(Container & Orders, Msg & iMsg, UInt64 iMatchQty);
+                void ProcessDeals(Container & Orders, Msg & iMsg, std::uint64_t iMatchQty);
 
                 template <typename Msg>
-                void ProcessDeals(Msg & iMsg, OrderWay iWay, UInt64 iMatchQty);
+                void ProcessDeals(Msg & iMsg, OrderWay iWay, std::uint64_t iMatchQty);
 
                 const bid_index_type & GetBidIndex() const { return bmi::get<price_tag>(m_BidOrders); }
                 const ask_index_type & GetAskIndex() const { return bmi::get<price_tag>(m_AskOrders); }

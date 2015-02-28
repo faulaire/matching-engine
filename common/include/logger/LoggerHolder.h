@@ -13,7 +13,6 @@
 #include <ILogger.h>
 
 #include <CSingleton.h>
-#include <Types.h>
 
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/fusion/include/for_each.hpp>
@@ -127,7 +126,7 @@ namespace exchange
 
                 inline Verbosity GetVerbosity() const { return m_Verbosity; }
 
-                void SetVerbosity(UInt8 iVerbosity)
+                void SetVerbosity(std::uint8_t iVerbosity)
                 {
                     if (iVerbosity <= INSANE)
                     {
@@ -260,7 +259,7 @@ namespace exchange
                             auto Node = aConfig.get_child_optional(Path);
                             if (Node)
                             {
-                                It->SetVerbosity(Node->get_value<UInt8>());
+                                It->SetVerbosity(Node->get_value<std::uint8_t>());
                             }
                             else
                             {
@@ -276,7 +275,7 @@ namespace exchange
                     }
                 }
 
-                void AddCategory(UInt16 Id, const std::string & iName, Verbosity DefaultVerbosity = INSANE)
+                void AddCategory(std::uint16_t Id, const std::string & iName, Verbosity DefaultVerbosity = INSANE)
                 {
                     if (Id >= m_Categories.size())
                     {
@@ -285,7 +284,7 @@ namespace exchange
                     m_Categories[Id] = LogCategory(iName, DefaultVerbosity);
                 }
 
-                bool IsReporting(UInt16 Id, Verbosity iVerb)
+                bool IsReporting(std::uint16_t Id, Verbosity iVerb)
                 {
                     if (Id < m_Categories.size())
                     {

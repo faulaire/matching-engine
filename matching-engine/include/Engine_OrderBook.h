@@ -60,7 +60,7 @@ namespace exchange
             public:
 
                 /**/
-                OrderBook(const std::string & iSecurityName, UInt32 iInstrumentID, price_type iLastClosePrice, TMatchingEngine&);
+                OrderBook(const std::string & iSecurityName, std::uint32_t iInstrumentID, price_type iLastClosePrice, TMatchingEngine&);
 
                 /**/
                 virtual ~OrderBook();
@@ -75,7 +75,7 @@ namespace exchange
                 bool Modify(TOrderReplace & iOrderReplace);
 
                 /**/
-                bool Delete(UInt32 iOrderID, UInt32 iClientID, OrderWay iWay);
+                bool Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay);
 
                 /**/
                 void ProcessDeal(const Deal * ipDeal);
@@ -88,16 +88,16 @@ namespace exchange
                 /*!
                     Getter/Setter
                 */
-                inline UInt64 GetTurnover() const { return m_Turnover;                 }
-                inline UInt64 GetDailyVolume() const { return m_DailyVolume;           }
-                inline price_type GetOpenPrice() const { return m_OpenPrice;           }
-                inline price_type GetLastClosePrice() const { return m_LastClosePrice; }
-                inline price_type GetLastPrice() const { return m_LastPrice;           }
-                inline TradingPhase GetTradingPhase() const { return m_Phase;          }
+                inline std::uint64_t GetTurnover() const { return m_Turnover;                 }
+                inline std::uint64_t GetDailyVolume() const { return m_DailyVolume;           }
+                inline price_type    GetOpenPrice() const { return m_OpenPrice;           }
+                inline price_type    GetLastClosePrice() const { return m_LastClosePrice; }
+                inline price_type    GetLastPrice() const { return m_LastPrice;           }
+                inline TradingPhase  GetTradingPhase() const { return m_Phase;          }
 
                 inline void SetLastPrice(price_type iPrice) { m_LastPrice = iPrice;             }
-                inline void SetTurnover(UInt64 iTurnOver) { m_Turnover = iTurnOver;             }
-                inline void SetDailyVolume(UInt64 iDailyVolume) { m_DailyVolume = iDailyVolume; }
+                inline void SetTurnover(std::uint64_t iTurnOver) { m_Turnover = iTurnOver;             }
+                inline void SetDailyVolume(std::uint64_t iDailyVolume) { m_DailyVolume = iDailyVolume; }
                 inline void SetOpenPrice(price_type iOpenPrice) { m_OpenPrice = iOpenPrice;     }
 
                 /*
@@ -130,8 +130,8 @@ namespace exchange
 
                 price_type             m_LastPrice;
 
-                UInt64                 m_Turnover;
-                UInt64                 m_DailyVolume;
+                std::uint64_t                 m_Turnover;
+                std::uint64_t                 m_DailyVolume;
                 price_type             m_OpenPrice;
                 price_type             m_LastClosePrice;
         };

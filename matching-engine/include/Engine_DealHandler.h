@@ -39,16 +39,16 @@ namespace exchange
                                                 bmi::tag<deal_id_tag>, bmi::const_mem_fun<Deal, const std::string &, &Deal::GetReference> >,
 
                                                 bmi::hashed_non_unique<
-                                                bmi::tag<buyer_id_tag>, bmi::const_mem_fun<Deal, UInt32, &Deal::GetBuyerClientID> >,
+                                                bmi::tag<buyer_id_tag>, bmi::const_mem_fun<Deal, std::uint32_t, &Deal::GetBuyerClientID> >,
 
                                                 bmi::hashed_non_unique<
-                                                bmi::tag<seller_id_tag>, bmi::const_mem_fun<Deal, UInt32, &Deal::GetSellerClientID> >
+                                                bmi::tag<seller_id_tag>, bmi::const_mem_fun<Deal, std::uint32_t, &Deal::GetSellerClientID> >
                                             >
                                     >;
 
             public:
 
-                DealHandler(UInt32 iInstrumentID);
+                DealHandler(std::uint32_t iInstrumentID);
                 virtual ~DealHandler();
 
             public:
@@ -58,17 +58,17 @@ namespace exchange
 
             public:
 
-                inline UInt32 GetInstrumentID() const;
-                inline UInt64 GetDealCounter() const;
+                inline std::uint32_t GetInstrumentID() const;
+                inline std::uint64_t GetDealCounter() const;
             
             protected:
-                DealContainerType m_DealContainer;
-                UInt32            m_InstrumentID;
+                DealContainerType   m_DealContainer;
+                std::uint32_t       m_InstrumentID;
         };
 
 
         template <typename TDealProcessor>
-        DealHandler<TDealProcessor>::DealHandler(UInt32 iInstrumentID):
+        DealHandler<TDealProcessor>::DealHandler(std::uint32_t iInstrumentID):
             m_InstrumentID(iInstrumentID)
         {}
 
@@ -77,13 +77,13 @@ namespace exchange
         {}
 
         template <typename TDealProcessor>
-        inline UInt32 DealHandler<TDealProcessor>::GetInstrumentID() const
+        inline std::uint32_t DealHandler<TDealProcessor>::GetInstrumentID() const
         {
             return m_InstrumentID;
         }
 
         template <typename TDealProcessor>
-        inline UInt64 DealHandler<TDealProcessor>::GetDealCounter() const
+        inline std::uint64_t DealHandler<TDealProcessor>::GetDealCounter() const
         {
             return m_DealContainer.size();
         }

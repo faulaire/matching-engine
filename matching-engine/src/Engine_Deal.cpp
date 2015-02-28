@@ -11,7 +11,7 @@ namespace exchange
     namespace engine
     {
 
-        Deal::Deal(price_type iPrice, qty_type iQty, UInt32 iBuyerClientID, UInt32 iBuyerOrderID, UInt32 iSellerClientID, UInt32 iSellerOrderID)
+        Deal::Deal(price_type iPrice, qty_type iQty, std::uint32_t iBuyerClientID, std::uint32_t iBuyerOrderID, std::uint32_t iSellerClientID, std::uint32_t iSellerOrderID)
             : m_Reference{0}, m_Price(iPrice), m_Qty(iQty), m_BuyerClientID(iBuyerClientID),
             m_BuyerOrderID(iBuyerOrderID), m_SellerClientID(iSellerClientID), m_SellerOrderID(iSellerOrderID)
         {

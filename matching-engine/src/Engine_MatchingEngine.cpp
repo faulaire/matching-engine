@@ -48,7 +48,7 @@ namespace exchange
                 /* Create all instrument */
                 for (auto && Instrument : Instruments)
                 {
-                    UInt32 aSecurityCode = boost::lexical_cast<UInt32>(Instrument[to_underlying(InstrumentField::SECURITY_CODE)]);
+                    std::uint32_t aSecurityCode = boost::lexical_cast<std::uint32_t>(Instrument[to_underlying(InstrumentField::SECURITY_CODE)]);
                     std::string InstrumentName = Instrument[to_underlying(InstrumentField::NAME)];
 
                     Order::price_type ClosePrice = boost::lexical_cast<Order::price_type>(Instrument[to_underlying(InstrumentField::CLOSE_PRICE)]);
@@ -89,7 +89,7 @@ namespace exchange
                 bRes &= CfgMgr.GetField("engine", "opening_auction_duration", m_OpeningAuctionDuration);
                 bRes &= CfgMgr.GetField("engine", "closing_auction_duration", m_ClosingAuctionDuration);
 
-                UInt32 MaxPriceDeviation;
+                std::uint32_t MaxPriceDeviation;
                 bRes &= CfgMgr.GetField("engine", "max_price_deviation",MaxPriceDeviation);
 
                 m_PriceDeviationFactor = std::make_tuple(1-(double)MaxPriceDeviation*0.01,
@@ -105,7 +105,7 @@ namespace exchange
             return true;
         }
 
-        bool MatchingEngine::Insert(Order & iOrder, UInt32 iProductID)
+        bool MatchingEngine::Insert(Order & iOrder, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())
@@ -118,7 +118,7 @@ namespace exchange
             }
         }
 
-        bool MatchingEngine::Modify(OrderReplace & iOrderReplace, UInt32 iProductID)
+        bool MatchingEngine::Modify(OrderReplace & iOrderReplace, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())
@@ -131,7 +131,7 @@ namespace exchange
             }
         }
 
-        bool MatchingEngine::Delete(UInt32 iOrderID, UInt32 iClientID, OrderWay iWay, UInt32 iProductID)
+        bool MatchingEngine::Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())

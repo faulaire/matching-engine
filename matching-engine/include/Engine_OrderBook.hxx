@@ -7,7 +7,7 @@ namespace exchange
     {
 
         template <typename TOrder, typename TMatchingEngine>
-        OrderBook<TOrder,TMatchingEngine>::OrderBook(const std::string & iSecurityName, UInt32 iInstrumentID, price_type iLastClosePrice, TMatchingEngine& rMatchingEngine)
+        OrderBook<TOrder,TMatchingEngine>::OrderBook(const std::string & iSecurityName, std::uint32_t iInstrumentID, price_type iLastClosePrice, TMatchingEngine& rMatchingEngine)
             : DealHandlerType(iInstrumentID), m_rMatchingEngine(rMatchingEngine), m_SecurityName(iSecurityName), m_Orders(*this),
               m_Phase(TradingPhase::CLOSE), m_AuctionStart(), m_LastPrice(iLastClosePrice), m_Turnover(0), m_DailyVolume(0), m_OpenPrice(0), m_LastClosePrice(iLastClosePrice)
         {
@@ -96,7 +96,7 @@ namespace exchange
         }
 
         template <typename TOrder, typename TMatchingEngine>
-        bool OrderBook<TOrder,TMatchingEngine>::Delete(UInt32 iOrderID, UInt32 iClientID, OrderWay iWay)
+        bool OrderBook<TOrder,TMatchingEngine>::Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay)
         {
             if (m_Phase != TradingPhase::CLOSE)
             {

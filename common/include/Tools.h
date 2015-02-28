@@ -6,7 +6,6 @@
 #pragma once
 
 #include <string>
-#include <Types.h>
 
 namespace exchange
 {
@@ -18,7 +17,7 @@ namespace exchange
             std::string sha256(std::string line);
 
             template <typename Array>
-            void to_base64(UInt64 iToEncode, Array & oEncoded, size_t FirstPos);
+            void to_base64(std::uint64_t iToEncode, Array & oEncoded, size_t FirstPos);
 
             template <typename E>
             typename std::underlying_type<E>::type to_underlying(E e)

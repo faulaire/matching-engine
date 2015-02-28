@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <Types.h>
 #include <Tools.h>
 
 #include <database/MariaDB_Connector.h>
@@ -27,7 +26,7 @@ namespace exchange
                 using TimeType            = boost::posix_time::ptime;
                 using OrderBookType       = OrderBook<Order,MatchingEngine>;
 
-                using OrderBookMap        = std::unordered_map<UInt32, std::unique_ptr<OrderBookType> >;
+                using OrderBookMap        = std::unordered_map<std::uint32_t, std::unique_ptr<OrderBookType> >;
                 using OrderBookValueType  = OrderBookMap::value_type;
                 using OrderBookIterator   = OrderBookMap::iterator;
 
@@ -46,13 +45,13 @@ namespace exchange
                 bool Configure(common::DataBaseConnector & iConnector);
 
                 /**/
-                bool Insert(Order & iOrder, UInt32 iProductID);
+                bool Insert(Order & iOrder, std::uint32_t iProductID);
 
                 /**/
-                bool Modify(OrderReplace & iOrderReplace, UInt32 iProductID);
+                bool Modify(OrderReplace & iOrderReplace, std::uint32_t iProductID);
 
                 /**/
-                bool Delete(UInt32 iOrderID, UInt32 iClientID, OrderWay iWay, UInt32 iProductID);
+                bool Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay, std::uint32_t iProductID);
 
                 /**/
                 void EngineListen();
@@ -65,13 +64,13 @@ namespace exchange
                 inline TradingPhase GetGlobalPhase() const { return m_GlobalPhase; }
 
                 /**/
-                UInt16 GetIntradayAuctionDuration() const { return m_IntradayAuctionDuration; }
+                std::uint16_t GetIntradayAuctionDuration() const { return m_IntradayAuctionDuration; }
 
                 /**/
                 const PriceDevFactors& GetPriceDevFactors() const { return m_PriceDeviationFactor; }
             
                 /**/
-                inline const OrderBookType* GetOrderBook(UInt32 iProductID) const;
+                inline const OrderBookType* GetOrderBook(std::uint32_t iProductID) const;
 
             protected:
 
@@ -107,18 +106,18 @@ namespace exchange
                 /* Start time of any auction phase but intraday */
                 TimeType        m_AuctionStart;
                 /* Duration of the intraday auction state */
-                UInt16          m_IntradayAuctionDuration;
+                std::uint16_t          m_IntradayAuctionDuration;
                 /* Duration of the open auction state */
-                UInt16          m_OpeningAuctionDuration;
+                std::uint16_t          m_OpeningAuctionDuration;
                 /* Duration of the close auction state */
-                UInt16          m_ClosingAuctionDuration;
+                std::uint16_t          m_ClosingAuctionDuration;
                 /* Price deviation factors to compute minimum and maximum price */
                 PriceDevFactors m_PriceDeviationFactor;
                 /* Trading phase of all products ( but Intraday Auction ) */
                 TradingPhase    m_GlobalPhase;
         };
 
-        inline const MatchingEngine::OrderBookType* MatchingEngine::GetOrderBook(UInt32 iProductID) const
+        inline const MatchingEngine::OrderBookType* MatchingEngine::GetOrderBook(std::uint32_t iProductID) const
         {
             auto It = m_OrderBookContainer.find(iProductID);
             if( It != m_OrderBookContainer.end())

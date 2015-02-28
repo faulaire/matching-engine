@@ -149,17 +149,17 @@ namespace exchange
                 return false;
             }
             
-            UInt64 num_fields  = mysql_num_fields(result);
-            UInt64 num_rows    = mysql_num_rows(result);
+            std::uint64_t num_fields  = mysql_num_fields(result);
+            std::uint64_t num_rows    = mysql_num_rows(result);
             
             oResults = ResultArray(num_rows, std::vector<std::string>(num_fields));
             
             MYSQL_ROW row;
             
-            UInt32 RowIndex = 0;
+            std::uint32_t RowIndex = 0;
             while ((row = mysql_fetch_row(result))) 
             { 
-                for (UInt32 Field = 0; Field < num_fields; ++Field)
+                for (std::uint32_t Field = 0; Field < num_fields; ++Field)
                 { 
                     if ( row[Field] )
                     {

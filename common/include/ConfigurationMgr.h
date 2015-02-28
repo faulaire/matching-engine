@@ -8,7 +8,6 @@
 #include <MariaDB_Connector.h>
 #include <CSingleton.h>
 #include <Logger.h>
-#include <Types.h>
 
 #include <boost/lexical_cast.hpp>
 

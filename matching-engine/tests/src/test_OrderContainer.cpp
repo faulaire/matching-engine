@@ -17,7 +17,7 @@ class DealHandler
 {
     public:
 
-        typedef std::map<UInt32, std::unique_ptr<Deal> > DealContainerType;
+        typedef std::map<std::uint32_t, std::unique_ptr<Deal> > DealContainerType;
 
     public:
         DealHandler():m_DealCounter(0)
@@ -40,7 +40,7 @@ class DealHandler
 
     private:
 
-        UInt32                  m_DealCounter;
+        std::uint32_t                  m_DealCounter;
         DealContainerType       m_Deals;
 };
 
@@ -213,7 +213,7 @@ TEST_F(OrderContainerTest, AuctionModify)
 
     DisplayOrders();
 
-    /* OrderWay iWay, qty_type iQty, price_type iPrice, UInt32 iExistingOrderID, UInt32 iReplacedID, UInt32 iClientID */
+    /* OrderWay iWay, qty_type iQty, price_type iPrice, std::uint32_t iExistingOrderID, std::uint32_t iReplacedID, std::uint32_t iClientID */
     OrderReplace ReplaceBuy(OrderWay::BUY, 1337, 2185, 1, 2, 8);
     ASSERT_TRUE(m_Container.Modify(ReplaceBuy));
 
