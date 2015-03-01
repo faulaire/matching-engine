@@ -225,8 +225,5 @@ TEST_F(MatchingEngineTest, InsertContinousTrading)
 int main(int argc, char ** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
-    auto ret = RUN_ALL_TESTS();
-    LoggerHolder & Logger = LoggerHolder::GetInstance();
-    Logger.Kill();
-    return ret;
+    return RUN_ALL_TESTS();
 }
