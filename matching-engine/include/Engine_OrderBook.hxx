@@ -108,6 +108,11 @@ namespace exchange
         template <typename TOrder, typename TMatchingEngine>
         void OrderBook<TOrder,TMatchingEngine>::ProcessDeal(const Deal * ipDeal)
         {
+            /*
+             * TODO : Must be enhanced : What should we do at the end of the INTRADAY_AUCTION phase ?
+             * Register a new price as close price ? not possible.
+             * So a ref price must be introduce ( how to compute ? ) in order to perfom the comparison
+             */
             SetTurnover( GetTurnover() + ipDeal->GetQuantity()*ipDeal->GetPrice() );
             SetDailyVolume( GetDailyVolume() + ipDeal->GetQuantity() );
             SetLastPrice( ipDeal->GetPrice() );

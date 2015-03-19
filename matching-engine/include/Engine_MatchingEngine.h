@@ -96,15 +96,15 @@ namespace exchange
             private:
 
                 /* Contain all registered products */
-                OrderBookMap    m_OrderBookContainer;
+                OrderBookMap           m_OrderBookContainer;
                 /* OrderBook that must be monitored because of their state ( IntradayAuction ) */
-                OrderBookList   m_MonitoredOrderBook;
+                OrderBookList          m_MonitoredOrderBook;
                 /* Time of the Close -> Opening Auction transition */
-                TimeType        m_StartTime;
+                TimeType               m_StartTime;
                 /* Time of the Continuout Trading -> Closing Auction transition */
-                TimeType        m_StopTime;
+                TimeType               m_StopTime;
                 /* Start time of any auction phase but intraday */
-                TimeType        m_AuctionStart;
+                TimeType               m_AuctionStart;
                 /* Duration of the intraday auction state */
                 std::uint16_t          m_IntradayAuctionDuration;
                 /* Duration of the open auction state */
@@ -112,9 +112,9 @@ namespace exchange
                 /* Duration of the close auction state */
                 std::uint16_t          m_ClosingAuctionDuration;
                 /* Price deviation factors to compute minimum and maximum price */
-                PriceDevFactors m_PriceDeviationFactor;
+                PriceDevFactors        m_PriceDeviationFactor;
                 /* Trading phase of all products ( but Intraday Auction ) */
-                TradingPhase    m_GlobalPhase;
+                TradingPhase           m_GlobalPhase;
         };
 
         inline const MatchingEngine::OrderBookType* MatchingEngine::GetOrderBook(std::uint32_t iProductID) const

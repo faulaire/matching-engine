@@ -90,15 +90,15 @@ namespace exchange
                 */
                 inline std::uint64_t GetTurnover() const { return m_Turnover;                 }
                 inline std::uint64_t GetDailyVolume() const { return m_DailyVolume;           }
-                inline price_type    GetOpenPrice() const { return m_OpenPrice;           }
-                inline price_type    GetLastClosePrice() const { return m_LastClosePrice; }
-                inline price_type    GetLastPrice() const { return m_LastPrice;           }
-                inline TradingPhase  GetTradingPhase() const { return m_Phase;          }
+                inline price_type    GetOpenPrice() const { return m_OpenPrice;               }
+                inline price_type    GetLastClosePrice() const { return m_LastClosePrice;     }
+                inline price_type    GetLastPrice() const { return m_LastPrice;               }
+                inline TradingPhase  GetTradingPhase() const { return m_Phase;                }
 
-                inline void SetLastPrice(price_type iPrice) { m_LastPrice = iPrice;             }
+                inline void SetLastPrice(price_type iPrice) { m_LastPrice = iPrice;                    }
                 inline void SetTurnover(std::uint64_t iTurnOver) { m_Turnover = iTurnOver;             }
                 inline void SetDailyVolume(std::uint64_t iDailyVolume) { m_DailyVolume = iDailyVolume; }
-                inline void SetOpenPrice(price_type iOpenPrice) { m_OpenPrice = iOpenPrice;     }
+                inline void SetOpenPrice(price_type iOpenPrice) { m_OpenPrice = iOpenPrice;            }
 
                 /*
                 */
@@ -130,8 +130,8 @@ namespace exchange
 
                 price_type             m_LastPrice;
 
-                std::uint64_t                 m_Turnover;
-                std::uint64_t                 m_DailyVolume;
+                std::uint64_t          m_Turnover;
+                std::uint64_t          m_DailyVolume;
                 price_type             m_OpenPrice;
                 price_type             m_LastClosePrice;
         };

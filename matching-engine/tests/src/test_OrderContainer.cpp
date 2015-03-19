@@ -20,7 +20,7 @@ class DealHandler
         typedef std::map<std::uint32_t, std::unique_ptr<Deal> > DealContainerType;
 
     public:
-        DealHandler():m_DealCounter(0)
+        DealHandler()
         {}
 
         void OnDeal(std::unique_ptr<Deal> ipDeal)
@@ -39,8 +39,6 @@ class DealHandler
         const DealContainerType & GetDealContainer() const { return m_Deals; }
 
     private:
-
-        std::uint32_t                  m_DealCounter;
         DealContainerType       m_Deals;
 };
 

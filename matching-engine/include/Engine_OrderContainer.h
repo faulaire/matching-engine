@@ -173,11 +173,11 @@ namespace exchange
                 template <typename Msg>
                 void ProcessDeals(Msg & iMsg, OrderWay iWay, std::uint64_t iMatchQty);
 
-                const bid_index_type & GetBidIndex() const { return bmi::get<price_tag>(m_BidOrders); }
-                const ask_index_type & GetAskIndex() const { return bmi::get<price_tag>(m_AskOrders); }
-
                 bid_index_type & GetBidIndex() { return bmi::get<price_tag>(m_BidOrders); }
                 ask_index_type & GetAskIndex() { return bmi::get<price_tag>(m_AskOrders); }
+
+                const bid_index_type & GetBidIndex() const { return bmi::get<price_tag>(m_BidOrders); }
+                const ask_index_type & GetAskIndex() const { return bmi::get<price_tag>(m_AskOrders); }
 
             private:
 

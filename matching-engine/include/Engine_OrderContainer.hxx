@@ -219,6 +219,12 @@ namespace exchange
         template <typename TOrderReplace>
         bool OrderContainer<TOrder, TDealHandler>::Modify(TOrderReplace & iOrderReplace, bool Match)
         {
+            /*
+             *  TODO : In case of modification, the priority of the order is reset
+             *  ( For a given price, the modified order order got the lowest priority )
+             *  Check that this behavior is respected
+             */
+
             auto ProcessModify = [&](hashed_index_iterator iOrder, bool bMatch)
             {
                 if (bMatch)
@@ -273,9 +279,11 @@ namespace exchange
         }
 
         /*
-        TODO : Check if the following rule is applied
-        Where there are two maximum executable volumes (for two different prices), the following rules are applied:
-        the opening price cannot be higher than the best ask or lower than the best bid immediately after the auction phase.
+            TODO : Check if the following rule is applied
+            Where there are two maximum executable volumes (for two different prices), the following rules are applied:
+            the opening price cannot be higher than the best ask or lower than the best bid immediately after the auction phase.
+            This rules is clearly not applied, but because the matching engine does not support market order
+            for now, this rules is not necessary
         */
         template <typename TOrder, typename TDealHandler>
         std::tuple<std::uint32_t, std::uint64_t> OrderContainer<TOrder, TDealHandler>::GetTheoriticalAuctionInformations() const
