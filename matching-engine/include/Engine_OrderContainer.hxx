@@ -147,6 +147,7 @@ namespace exchange
                     ProcessDeals(m_BidOrders, iMsg, iMatchQty);
                     break;
                 default:
+                    assert(false);
                     return;
             }
         }
@@ -193,6 +194,7 @@ namespace exchange
                 case OrderWay::SELL:
                     return m_AskOrders.insert(iOrder).second;
                 default:
+                    assert(false);
                     return false;
             };
         }
@@ -274,6 +276,7 @@ namespace exchange
                 case OrderWay::SELL:
                     return ApplyModify(m_AskOrders);
                 default:
+                    assert(false);
                     return false;
             }
         }

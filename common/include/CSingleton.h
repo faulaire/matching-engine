@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2014, Fabien Aulaire
+* Copyright (C) 2015, Fabien Aulaire
 * All rights reserved.
 */
 
