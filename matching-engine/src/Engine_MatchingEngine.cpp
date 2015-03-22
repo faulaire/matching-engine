@@ -13,7 +13,7 @@ namespace exchange
 
         MatchingEngine::MatchingEngine() :
             m_StartTime(), m_StopTime(), m_AuctionStart(),
-            m_IntradayAuctionDuration(), m_OpeningAuctionDuration(), m_ClosingAuctionDuration(),
+            m_IntradayAuctionDuration(0), m_OpeningAuctionDuration(0), m_ClosingAuctionDuration(0),
             m_PriceDeviationFactor(), m_GlobalPhase(TradingPhase::CLOSE)
         {}
 
@@ -85,9 +85,17 @@ namespace exchange
                 TmpDuration = boost::posix_time::duration_from_string(sTmpRes);
                 m_StopTime = today_midnight + TmpDuration;
 
-                bRes &= CfgMgr.GetField("engine", "intraday_auction_duration", m_IntradayAuctionDuration);
-                bRes &= CfgMgr.GetField("engine", "opening_auction_duration", m_OpeningAuctionDuration);
-                bRes &= CfgMgr.GetField("engine", "closing_auction_duration", m_ClosingAuctionDuration);
+                auto Duration = 0;
+
+                bRes &= CfgMgr.GetField("engine", "intraday_auction_duration", Duration);
+                m_IntradayAuctionDuration = DurationType(Duration);
+
+                bRes &= CfgMgr.GetField("engine", "opening_auction_duration", Duration);
+                m_OpeningAuctionDuration = DurationType(Duration);;
+
+                bRes &= CfgMgr.GetField("engine", "closing_auction_duration", Duration);
+                m_ClosingAuctionDuration = DurationType(Duration);;
+
 
                 std::uint32_t MaxPriceDeviation;
                 bRes &= CfgMgr.GetField("engine", "max_price_deviation",MaxPriceDeviation);
@@ -187,7 +195,7 @@ namespace exchange
             while (iterator != m_MonitoredOrderBook.end())
             {
                 auto && pBook = *iterator;
-                auto AuctionEnd = pBook->GetAuctionStart() + boost::posix_time::seconds(GetIntradayAuctionDuration());
+                auto AuctionEnd = pBook->GetAuctionStart() + GetIntradayAuctionDuration();
                 if (Now > AuctionEnd)
                 {
                     pBook->SetTradingPhase(m_GlobalPhase);
@@ -222,7 +230,7 @@ namespace exchange
                     break;
                 case TradingPhase::OPENING_AUCTION:
                     {
-                        auto AuctionEnd = m_AuctionStart + boost::posix_time::seconds(m_OpeningAuctionDuration);
+                        auto AuctionEnd = m_AuctionStart + m_OpeningAuctionDuration;
                         if (now > AuctionEnd)
                         {
                             UpdateInstrumentsPhase(TradingPhase::CONTINUOUS_TRADING);
@@ -240,7 +248,7 @@ namespace exchange
                     break;
                 case TradingPhase::CLOSING_AUCTION:
                     {
-                        auto AuctionEnd = m_AuctionStart + boost::posix_time::seconds(m_ClosingAuctionDuration);
+                        auto AuctionEnd = m_AuctionStart + m_ClosingAuctionDuration;
                         if (now > AuctionEnd)
                         {
                             UpdateInstrumentsPhase(TradingPhase::CLOSE);

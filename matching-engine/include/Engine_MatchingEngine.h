@@ -24,6 +24,7 @@ namespace exchange
             public:
 
                 using TimeType            = boost::posix_time::ptime;
+                using DurationType        = boost::posix_time::seconds;
                 using OrderBookType       = OrderBook<Order,MatchingEngine>;
 
                 using OrderBookMap        = std::unordered_map<std::uint32_t, std::unique_ptr<OrderBookType> >;
@@ -64,7 +65,7 @@ namespace exchange
                 inline TradingPhase GetGlobalPhase() const { return m_GlobalPhase; }
 
                 /**/
-                std::uint16_t GetIntradayAuctionDuration() const { return m_IntradayAuctionDuration; }
+                DurationType GetIntradayAuctionDuration() const { return m_IntradayAuctionDuration; }
 
                 /**/
                 const PriceDevFactors& GetPriceDevFactors() const { return m_PriceDeviationFactor; }
@@ -106,11 +107,11 @@ namespace exchange
                 /* Start time of any auction phase but intraday */
                 TimeType               m_AuctionStart;
                 /* Duration of the intraday auction state */
-                std::uint16_t          m_IntradayAuctionDuration;
+                DurationType           m_IntradayAuctionDuration;
                 /* Duration of the open auction state */
-                std::uint16_t          m_OpeningAuctionDuration;
+                DurationType           m_OpeningAuctionDuration;
                 /* Duration of the close auction state */
-                std::uint16_t          m_ClosingAuctionDuration;
+                DurationType           m_ClosingAuctionDuration;
                 /* Price deviation factors to compute minimum and maximum price */
                 PriceDevFactors        m_PriceDeviationFactor;
                 /* Trading phase of all products ( but Intraday Auction ) */
@@ -120,14 +121,7 @@ namespace exchange
         inline const MatchingEngine::OrderBookType* MatchingEngine::GetOrderBook(std::uint32_t iProductID) const
         {
             auto It = m_OrderBookContainer.find(iProductID);
-            if( It != m_OrderBookContainer.end())
-            {
-                return It->second.get();
-            }
-            else
-            {
-                return nullptr;
-            }
+            return ( It != m_OrderBookContainer.end() ) ? It->second.get() : nullptr;
         }
 
         inline void MatchingEngine::MonitorOrderBook(OrderBookType * pOrderBook)
