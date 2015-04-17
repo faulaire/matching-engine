@@ -30,7 +30,6 @@ def configure(cfg):
     cfg.check(features='cxx cxxprogram', lib=['z'], uselib_store='Z')
     cfg.check(features='cxx cxxprogram', lib=['m'], uselib_store='M')
     cfg.check(features='cxx cxxprogram', lib=['dl'], uselib_store='DL')
-    cfg.check(header_name='gtest/gtest.h', features='cxx cxxprogram')
     
     cfg.find_program("mysql_config", var="mysql_config")
 
@@ -42,6 +41,9 @@ def configure(cfg):
         # We need to link again libstdc++ and libm with clang
         cfg.env.append_value('LINKFLAGS', ['-lstdc++','-lm'])
 
+    if cfg.options.with_unittest:
+        cfg.check(header_name='gtest/gtest.h', features='cxx cxxprogram')
+        
     if cfg.options.release:
         cfg.env.append_value('CXXFLAGS', ['-O3','-march=amdfam10'])
     else:
