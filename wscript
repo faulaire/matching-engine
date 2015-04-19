@@ -17,7 +17,7 @@ def run_test(ctx):
     ctx.recurse('common matching-engine')
 
 def options(opt):
-    opt.load('gxx')
+    opt.load('compiler_cxx')
     opt.add_option('--release', action='store_true', default=False, help='Compile in release mode')
     opt.add_option('--coverage', action='store_true', default=False, help='Activate coverage')
     opt.add_option('--with_unittest', action='store_true', default=False, help='Activate unittest building')
@@ -25,7 +25,7 @@ def options(opt):
 
 def configure(cfg):
     cfg.check_waf_version(mini='1.7.5')
-    cfg.load('gxx')
+    cfg.load('compiler_cxx')
     cfg.check(features='cxx cxxprogram', lib=['pthread'], uselib_store='PTHREAD')
     cfg.check(features='cxx cxxprogram', lib=['z'], uselib_store='Z')
     cfg.check(features='cxx cxxprogram', lib=['m'], uselib_store='M')
