@@ -13,6 +13,12 @@ class RunTestCtx(BuildContext):
         cmd = 'run_test'
         fun = 'run_test'
 
+def IsClangCompiler(cfg):
+   for compiler in cfg.env["CXX"]:
+      if compiler.find("clang") != -1:
+         return True
+   return False
+   
 def run_test(ctx):
     ctx.recurse('common matching-engine')
 
@@ -37,7 +43,7 @@ def configure(cfg):
 
     cfg.env.append_value('CXXFLAGS', ['-std=c++1y','-W','-Wall','-Wno-unused-local-typedefs'])
     
-    if cfg.env["CXX"] == ['clang']:
+    if IsClangCompiler(cfg):
         # We need to link again libstdc++ and libm with clang
         cfg.env.append_value('LINKFLAGS', ['-lstdc++','-lm'])
 
