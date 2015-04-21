@@ -77,6 +77,9 @@
     <ClCompile Include="..\..\tests\src\test_MatchingEngine.cpp">
       <Filter>Tests\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\tests\src\test_OrderBook.cpp">
+      <Filter>Tests\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\wscript" />

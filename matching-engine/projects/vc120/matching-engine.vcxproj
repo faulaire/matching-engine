@@ -83,6 +83,7 @@
     <ClCompile Include="..\..\src\Engine_MatchingEngine.cpp" />
     <ClCompile Include="..\..\src\Engine_Order.cpp" />
     <ClCompile Include="..\..\tests\src\test_MatchingEngine.cpp" />
+    <ClCompile Include="..\..\tests\src\test_OrderBook.cpp" />
     <ClCompile Include="..\..\tests\src\test_OrderContainer.cpp" />
   </ItemGroup>
   <ItemGroup>
