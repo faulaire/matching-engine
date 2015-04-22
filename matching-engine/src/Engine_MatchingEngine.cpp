@@ -22,8 +22,6 @@ namespace exchange
 
         bool MatchingEngine::Configure(common::DataBaseConnector & iConnector)
         {
-            // TODO : Add robustness for database reading
-
             using namespace boost::posix_time;
             using namespace boost::gregorian;
 

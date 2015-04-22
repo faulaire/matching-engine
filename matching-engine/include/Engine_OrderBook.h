@@ -91,14 +91,17 @@ namespace exchange
                 inline std::uint64_t GetTurnover() const { return m_Turnover;                 }
                 inline std::uint64_t GetDailyVolume() const { return m_DailyVolume;           }
                 inline price_type    GetOpenPrice() const { return m_OpenPrice;               }
-                inline price_type    GetLastClosePrice() const { return m_LastClosePrice;     }
+                inline price_type    GetClosePrice() const { return m_ClosePrice;             }
                 inline price_type    GetLastPrice() const { return m_LastPrice;               }
                 inline TradingPhase  GetTradingPhase() const { return m_Phase;                }
+                inline price_type    GetPostAuctionPrice() const { return m_PostAuctionPrice; }
 
-                inline void SetLastPrice(price_type iPrice) { m_LastPrice = iPrice;                    }
-                inline void SetTurnover(std::uint64_t iTurnOver) { m_Turnover = iTurnOver;             }
-                inline void SetDailyVolume(std::uint64_t iDailyVolume) { m_DailyVolume = iDailyVolume; }
-                inline void SetOpenPrice(price_type iOpenPrice) { m_OpenPrice = iOpenPrice;            }
+                inline void SetClosePrice(price_type iPrice) { m_ClosePrice = iPrice;                                   }
+                inline void SetLastPrice(price_type iPrice) { m_LastPrice = iPrice;                                     }
+                inline void SetTurnover(std::uint64_t iTurnOver) { m_Turnover = iTurnOver;                              }
+                inline void SetDailyVolume(std::uint64_t iDailyVolume) { m_DailyVolume = iDailyVolume;                  }
+                inline void SetOpenPrice(price_type iOpenPrice) { m_OpenPrice = iOpenPrice;                             }
+                inline void SetPostAuctionPrice(price_type iPostAuctionPrice) { m_PostAuctionPrice = iPostAuctionPrice; }
 
                 /*
                 */
@@ -133,7 +136,8 @@ namespace exchange
                 std::uint64_t          m_Turnover;
                 std::uint64_t          m_DailyVolume;
                 price_type             m_OpenPrice;
-                price_type             m_LastClosePrice;
+                price_type             m_ClosePrice;
+                price_type             m_PostAuctionPrice;
         };
 
     }

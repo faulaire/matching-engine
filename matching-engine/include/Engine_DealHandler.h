@@ -58,8 +58,9 @@ namespace exchange
 
             public:
 
-                inline std::uint32_t GetInstrumentID() const;
-                inline std::uint64_t GetDealCounter() const;
+                inline std::uint32_t      GetInstrumentID() const;
+                inline std::uint64_t      GetDealCounter() const;
+
             
             protected:
                 DealContainerType   m_DealContainer;
@@ -100,7 +101,8 @@ namespace exchange
 
             if (insertion.second)
             {
-                static_cast<TDealProcessor*>(this)->ProcessDeal((*insertion.first).get());
+                Deal* pDeal = insertion.first->get();
+                static_cast<TDealProcessor*>(this)->ProcessDeal(pDeal);
             }
             else
             {

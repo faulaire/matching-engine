@@ -9,7 +9,7 @@ namespace exchange
         template <typename TOrder, typename TMatchingEngine>
         OrderBook<TOrder,TMatchingEngine>::OrderBook(const std::string & iSecurityName, std::uint32_t iInstrumentID, price_type iLastClosePrice, TMatchingEngine& rMatchingEngine)
             : DealHandlerType(iInstrumentID), m_rMatchingEngine(rMatchingEngine), m_SecurityName(iSecurityName), m_Orders(*this),
-              m_Phase(TradingPhase::CLOSE), m_AuctionStart(), m_LastPrice(iLastClosePrice), m_Turnover(0), m_DailyVolume(0), m_OpenPrice(0), m_LastClosePrice(iLastClosePrice)
+              m_Phase(TradingPhase::CLOSE), m_AuctionStart(), m_LastPrice(iLastClosePrice), m_Turnover(0), m_DailyVolume(0), m_OpenPrice(0), m_ClosePrice(iLastClosePrice), m_PostAuctionPrice(iLastClosePrice)
         {
         }
 
@@ -55,10 +55,21 @@ namespace exchange
                 if( IsAuctionPhase(m_Phase) && !IsAuctionPhase(iNewPhase) )
                 {
                     m_Orders.MatchOrders();
+                    SetPostAuctionPrice(GetLastPrice());
                 }
+
+                if (m_Phase == TradingPhase::OPENING_AUCTION && iNewPhase == TradingPhase::CONTINUOUS_TRADING)
+                {
+                    SetOpenPrice(GetLastPrice());
+                }
+
+                if (m_Phase == TradingPhase::CLOSING_AUCTION && iNewPhase == TradingPhase::CLOSE)
+                {
+                    SetClosePrice(GetLastPrice());
+                }
+
                 m_Phase = iNewPhase;
-                // TODO : Register the close price if we switch to CLOSE
-                // TODO : Register the OPEN PRICE for opening_auction -> continuous trading switch
+                
                 return true;
             }
             else
@@ -108,19 +119,14 @@ namespace exchange
         template <typename TOrder, typename TMatchingEngine>
         void OrderBook<TOrder,TMatchingEngine>::ProcessDeal(const Deal * ipDeal)
         {
-            /*
-             * TODO : Must be enhanced : What should we do at the end of the INTRADAY_AUCTION phase ?
-             * Register a new price as close price ? not possible.
-             * So a ref price must be introduce ( how to compute ? ) in order to perfom the comparison
-             */
             SetTurnover( GetTurnover() + ipDeal->GetQuantity()*ipDeal->GetPrice() );
             SetDailyVolume( GetDailyVolume() + ipDeal->GetQuantity() );
             SetLastPrice( ipDeal->GetPrice() );
 
             auto && PriceDevFactors = m_rMatchingEngine.GetPriceDevFactors();
 
-            price_type min_price = GetLastClosePrice() * std::get<0>(PriceDevFactors);
-            price_type max_price = GetLastClosePrice() * std::get<1>(PriceDevFactors);
+            price_type min_price = GetPostAuctionPrice() * std::get<0>(PriceDevFactors);
+            price_type max_price = GetPostAuctionPrice() * std::get<1>(PriceDevFactors);
 
             if( ipDeal->GetPrice() > max_price || ipDeal->GetPrice() < min_price)
             {
@@ -150,7 +156,7 @@ namespace exchange
                 << "TurnOver"        << iOrders.m_Turnover << "] ; "
                 << "DailyVolume["    << iOrders.m_DailyVolume << "] ; "
                 << "OpenPrice["      << iOrders.m_OpenPrice << "] ; "
-                << "LastClosePrice[" << iOrders.m_LastClosePrice << "]" << std::endl;
+                << "LastClosePrice[" << iOrders.m_ClosePrice << "]" << std::endl;
 
             oss << iOrders.m_Orders;
             return oss;

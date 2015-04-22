@@ -25,7 +25,6 @@ class DealHandler
 
         void OnDeal(std::unique_ptr<Deal> ipDeal)
         {
-            std::cout << "DealHandler : " << *ipDeal << std::endl;
             m_Deals.emplace(m_Deals.size(), std::move(ipDeal));
 
             ASSERT_EQ(*ipDeal, *ipDeal);
@@ -121,8 +120,6 @@ TEST_F(OrderContainerTest, AuctionInsert)
 {
     InsertOrders();
 
-    DisplayOrders();
-
     OrderContainerType::LimitContainer BidContainer;
     OrderContainerType::LimitContainer AskContainer;
 
@@ -150,8 +147,6 @@ TEST_F(OrderContainerTest, AuctionDelete)
 {
     InsertOrders();
     
-    DisplayOrders();
-
     ASSERT_TRUE(m_Container.Delete(1, 5, OrderWay::BUY));
     ASSERT_FALSE(m_Container.Delete(1, 5, OrderWay::BUY));
 
@@ -161,8 +156,6 @@ TEST_F(OrderContainerTest, AuctionDelete)
     ASSERT_FALSE(m_Container.Delete(2, 3, OrderWay::SELL));
 
     ASSERT_TRUE(m_Container.Delete(2, 4, OrderWay::SELL));
-
-    DisplayOrders();
 
     OrderContainerType::LimitContainer BidContainer;
     OrderContainerType::LimitContainer AskContainer;
@@ -209,16 +202,12 @@ TEST_F(OrderContainerTest, AuctionModify)
 {
     InsertOrders();
 
-    DisplayOrders();
-
     /* OrderWay iWay, qty_type iQty, price_type iPrice, std::uint32_t iExistingOrderID, std::uint32_t iReplacedID, std::uint32_t iClientID */
     OrderReplace ReplaceBuy(OrderWay::BUY, 1337, 2185, 1, 2, 8);
     ASSERT_TRUE(m_Container.Modify(ReplaceBuy));
 
     OrderReplace ReplaceSell(OrderWay::SELL, 3000, 4526, 2, 12, 4);
     ASSERT_TRUE(m_Container.Modify(ReplaceSell));
-
-    DisplayOrders();
 
     /*
         Transition from
@@ -282,8 +271,6 @@ TEST_F(OrderContainerTest, AuctionFixing)
 
     ASSERT_EQ(std::get<0>(OpenPrice), 90);
     ASSERT_EQ(std::get<1>(OpenPrice), 900);
-    
-    DisplayOrders();
 
     m_Container.Reset();
 
@@ -301,8 +288,6 @@ TEST_F(OrderContainerTest, AuctionFixing)
                   };
 
     InsertOrders();
-
-    DisplayOrders();
 
     OpenPrice = m_Container.GetTheoriticalAuctionInformations();
 
@@ -327,8 +312,6 @@ TEST_F(OrderContainerTest, AuctionMatching)
 
     InsertOrders();
     
-    DisplayOrders();
-
     m_Container.MatchOrders();
 
     auto & DealContainer = m_DealHandler.GetDealContainer();
@@ -336,8 +319,6 @@ TEST_F(OrderContainerTest, AuctionMatching)
     ASSERT_EQ(DealContainer.size(), 1);
 
     ASSERT_EQ( *DealContainer.at(0) , Deal(90, 900, 5, 1, 1, 2) );
-
-    DisplayOrders();
 
     /*
         
@@ -358,7 +339,6 @@ TEST_F(OrderContainerTest, AuctionMatching)
                   };
 
     InsertOrders();
-    DisplayOrders();
 
     m_Container.MatchOrders();
 
@@ -370,8 +350,6 @@ TEST_F(OrderContainerTest, AuctionMatching)
     ASSERT_EQ(*DealContainer.at(3), Deal(39, 50, 6, 1, 3, 2));
     ASSERT_EQ(*DealContainer.at(4), Deal(39, 150, 6, 1, 4, 2));
     ASSERT_EQ(*DealContainer.at(5), Deal(39, 50, 7, 1, 4, 2));
-
-    DisplayOrders();
 
     m_DealHandler.Reset();
     m_Container.Reset();
@@ -395,15 +373,11 @@ TEST_F(OrderContainerTest, InsertMatching)
 
     InsertOrders();
 
-    DisplayOrders();
-
     Order BuyOrder(OrderWay::BUY, 123, 88, 5, 1);
     Order SellOrder(OrderWay::SELL, 123, 91, 5, 1);
 
     ASSERT_TRUE(m_Container.Insert(BuyOrder, true));
     ASSERT_TRUE(m_Container.Insert(SellOrder, true));
-
-    DisplayOrders();
 
     ASSERT_EQ(DealContainer.size(), 0);
 
@@ -414,20 +388,13 @@ TEST_F(OrderContainerTest, InsertMatching)
     ASSERT_TRUE(m_Container.Insert(SellOrder, true));
 
     ASSERT_EQ(DealContainer.size(), 2);
-    
-    DisplayOrders();
 
     BuyOrder = Order(OrderWay::BUY, 2500, 93, 10, 1);
     SellOrder = Order(OrderWay::SELL, 1500, 87, 10, 1);
 
     ASSERT_TRUE(m_Container.Insert(BuyOrder, true));
 
-    DisplayOrders();
-
     ASSERT_TRUE(m_Container.Insert(SellOrder, true));
-
-    DisplayOrders();
-
 
     m_BidContainerReference = {};
 
@@ -462,25 +429,17 @@ TEST_F(OrderContainerTest, ModifyMatching)
 
     InsertOrders();
 
-    DisplayOrders();
-
     OrderReplace BuyReplace(OrderWay::BUY, 500, 88, 1, 2, 6);
     OrderReplace SellReplace(OrderWay::SELL, 1200, 91, 2, 4, 1);
 
 
     ASSERT_TRUE(m_Container.Modify(BuyReplace, true));
 
-    DisplayOrders();
-
     ASSERT_TRUE(m_Container.Modify(SellReplace, true));
-
-    DisplayOrders();
     
     BuyReplace = OrderReplace(OrderWay::BUY, 2000, 91, 1, 5, 8);
 
     ASSERT_TRUE(m_Container.Modify(BuyReplace, true));
-
-    DisplayOrders();
 
     ASSERT_EQ( DealContainer.size(), 2 );
     ASSERT_EQ( *DealContainer.at(0), Deal(91, 1200, 8, 5, 1, 4) );
@@ -489,8 +448,6 @@ TEST_F(OrderContainerTest, ModifyMatching)
     SellReplace = OrderReplace(OrderWay::SELL, 500, 91, 2, 8, 4);
 
     ASSERT_TRUE(m_Container.Modify(SellReplace, true));
-
-    DisplayOrders();
 
     m_BidContainerReference = { LimiteType(2, 650, 88) };
 
@@ -510,6 +467,44 @@ TEST_F(OrderContainerTest, ModifyMatching)
     m_DealHandler.Reset();
 }
 
+TEST_F(OrderContainerTest, ModifyPriority)
+{
+    m_Container.Reset();
+
+    m_BidOrders = {
+                        { OrderWay::BUY, 100, 10, 1, 6 }, { OrderWay::BUY, 200, 11, 1, 7 },
+                        { OrderWay::BUY, 300, 12, 1, 8 }, { OrderWay::BUY, 300, 13, 1, 9 }
+                  };
+
+
+    m_AskOrders = {
+                        { OrderWay::SELL, 100, 10, 1, 6 }, { OrderWay::SELL, 200, 11, 1, 7 },
+                        { OrderWay::SELL, 300, 12, 1, 8 }, { OrderWay::SELL, 400, 13, 1, 9 }
+                  };
+
+    InsertOrders();
+
+    OrderReplace BuyReplace(OrderWay::BUY, 300, 11, 1, 2, 8);
+    OrderReplace SellReplace(OrderWay::SELL, 400, 12, 1, 2, 9);
+
+    ASSERT_TRUE(m_Container.Modify(BuyReplace, false));
+    ASSERT_TRUE(m_Container.Modify(SellReplace, false));
+
+    std::vector<Order> ByOrderBidContainer;
+    std::vector<Order> ByOrderAskContainer;
+
+    m_Container.ByOrderView(ByOrderBidContainer, ByOrderAskContainer);
+    
+    ASSERT_EQ(ByOrderBidContainer[0], Order(OrderWay::BUY, 300, 13, 1, 9));
+    ASSERT_EQ(ByOrderBidContainer[1], Order(OrderWay::BUY, 300, 11, 1, 7));
+    ASSERT_EQ(ByOrderBidContainer[2], Order(OrderWay::BUY, 200, 11, 2, 8));
+    ASSERT_EQ(ByOrderBidContainer[3], Order(OrderWay::BUY, 100, 10, 1, 6));
+    
+    ASSERT_EQ(ByOrderAskContainer[0], Order(OrderWay::SELL, 100, 10, 1, 6));
+    ASSERT_EQ(ByOrderAskContainer[1], Order(OrderWay::SELL, 200, 11, 1, 7));
+    ASSERT_EQ(ByOrderAskContainer[2], Order(OrderWay::SELL, 300, 12, 1, 8));
+    ASSERT_EQ(ByOrderAskContainer[3], Order(OrderWay::SELL, 400, 12, 2, 8));
+}
 
 int main(int argc, char ** argv)
 {
