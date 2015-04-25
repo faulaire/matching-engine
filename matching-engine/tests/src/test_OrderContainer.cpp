@@ -434,7 +434,6 @@ TEST_F(OrderContainerTest, ModifyMatching)
 
 
     ASSERT_TRUE(m_Container.Modify(BuyReplace, true));
-
     ASSERT_TRUE(m_Container.Modify(SellReplace, true));
     
     BuyReplace = OrderReplace(OrderWay::BUY, 2000, 91, 1, 5, 8);
@@ -442,9 +441,10 @@ TEST_F(OrderContainerTest, ModifyMatching)
     ASSERT_TRUE(m_Container.Modify(BuyReplace, true));
 
     ASSERT_EQ( DealContainer.size(), 2 );
-    ASSERT_EQ( *DealContainer.at(0), Deal(91, 1200, 8, 5, 1, 4) );
-    ASSERT_EQ( *DealContainer.at(1), Deal(91, 650, 8, 5, 2, 2)  );
 
+    ASSERT_EQ(*DealContainer.at(0), Deal(91, 650, 8, 5, 2, 2));
+    ASSERT_EQ( *DealContainer.at(1), Deal(91, 1200, 8, 5, 1, 4) );
+    
     SellReplace = OrderReplace(OrderWay::SELL, 500, 91, 2, 8, 4);
 
     ASSERT_TRUE(m_Container.Modify(SellReplace, true));
@@ -487,6 +487,7 @@ TEST_F(OrderContainerTest, ModifyPriority)
     OrderReplace BuyReplace(OrderWay::BUY, 300, 11, 1, 2, 8);
     OrderReplace SellReplace(OrderWay::SELL, 400, 12, 1, 2, 9);
 
+    // TODO : Check why Modify return false when matching is true
     ASSERT_TRUE(m_Container.Modify(BuyReplace, false));
     ASSERT_TRUE(m_Container.Modify(SellReplace, false));
 
@@ -496,14 +497,14 @@ TEST_F(OrderContainerTest, ModifyPriority)
     m_Container.ByOrderView(ByOrderBidContainer, ByOrderAskContainer);
     
     ASSERT_EQ(ByOrderBidContainer[0], Order(OrderWay::BUY, 300, 13, 1, 9));
-    ASSERT_EQ(ByOrderBidContainer[1], Order(OrderWay::BUY, 300, 11, 1, 7));
-    ASSERT_EQ(ByOrderBidContainer[2], Order(OrderWay::BUY, 200, 11, 2, 8));
+    ASSERT_EQ(ByOrderBidContainer[1], Order(OrderWay::BUY, 200, 11, 1, 7));
+    ASSERT_EQ(ByOrderBidContainer[2], Order(OrderWay::BUY, 300, 11, 2, 8));
     ASSERT_EQ(ByOrderBidContainer[3], Order(OrderWay::BUY, 100, 10, 1, 6));
     
     ASSERT_EQ(ByOrderAskContainer[0], Order(OrderWay::SELL, 100, 10, 1, 6));
     ASSERT_EQ(ByOrderAskContainer[1], Order(OrderWay::SELL, 200, 11, 1, 7));
     ASSERT_EQ(ByOrderAskContainer[2], Order(OrderWay::SELL, 300, 12, 1, 8));
-    ASSERT_EQ(ByOrderAskContainer[3], Order(OrderWay::SELL, 400, 12, 2, 8));
+    ASSERT_EQ(ByOrderAskContainer[3], Order(OrderWay::SELL, 400, 12, 2, 9));
 }
 
 int main(int argc, char ** argv)

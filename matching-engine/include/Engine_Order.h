@@ -307,30 +307,5 @@ namespace exchange
                 std::uint32_t m_new_value;
         };
 
-        /*!
-        *  \brief Functor to update an order
-        *
-        *  To update more than one field of an order this object must be construct with an OrderReplace message and this instance
-        *  will be the second argument of Index::modify method.
-        */
-        class OrderUpdater
-        {
-            public:
-
-                OrderUpdater(const OrderReplace & iOrderReplace) :
-                    m_OrderReplace(iOrderReplace)
-                {}
-
-                void operator()(Order& iOrder) const
-                {
-                    iOrder.SetOrderID(m_OrderReplace.GetReplacedOrderID());
-                    iOrder.SetQuantity(m_OrderReplace.GetQuantity());
-                    iOrder.SetPrice(m_OrderReplace.GetPrice());
-                }
-
-            private:
-                const OrderReplace & m_OrderReplace;
-        };
-
     }
 }

@@ -221,15 +221,9 @@ namespace exchange
         template <typename TOrderReplace>
         bool OrderContainer<TOrder, TDealHandler>::Modify(TOrderReplace & iOrderReplace, bool Match)
         {
-            /*
-             *  TODO : In case of modification, the priority of the order is reset
-             *  ( For a given price, the modified order order got the lowest priority )
-             *  Check that this behavior is respected
-             */
-
-            auto ProcessModify = [&](hashed_index_iterator iOrder, bool bMatch)
+            auto ProcessModify = [&](hashed_index_iterator iOrder)
             {
-                if (bMatch)
+                if (Match)
                 {
                     std::uint64_t MaxExecQty = GetExecutableQuantity(iOrderReplace, iOrder->GetWay());
                     std::uint64_t MatchQty = (std::min)(MaxExecQty, static_cast<std::uint64_t>(iOrderReplace.GetQuantity()));
@@ -254,11 +248,16 @@ namespace exchange
                 auto Order = Container.find(OrderID);
                 if (Order != Container.end())
                 {
-                    if (ProcessModify(Order, Match))
+                    if (ProcessModify(Order))
                     {
-                        // Order is not fully filled, modify the existing one
-                        OrderUpdater aUpdater(iOrderReplace);
-                        return Container.modify(Order, aUpdater);
+                        // Order is not fully filled, re-queued the rest of the quantity
+                        
+                        TOrder ReplacedOrder = { iOrderReplace.GetWay(), iOrderReplace.GetQuantity(), iOrderReplace.GetPrice(),
+                                         iOrderReplace.GetReplacedOrderID(), iOrderReplace.GetClientID() };
+
+                        Container.erase(Order);
+
+                        return Container.insert(ReplacedOrder).second;
                     }
                     else
                     {
