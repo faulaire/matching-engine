@@ -467,7 +467,36 @@ TEST_F(OrderContainerTest, ModifyMatching)
     m_DealHandler.Reset();
 }
 
-TEST_F(OrderContainerTest, ModifyPriority)
+TEST_F(OrderContainerTest, Fully_filled_modified_orders_should_be_removed_from_order_book)
+{
+    InsertOrders();
+
+
+	OrderReplace BuyReplace(OrderWay::BUY, 4000, 4321, 1, 2, 8);
+
+	ASSERT_TRUE(m_Container.Modify(BuyReplace, true));
+
+    m_BidContainerReference = {
+                                 LimiteType(2, 11000, 2185), LimiteType(1, 3000, 1321),
+                                 LimiteType(2, 3000, 1234)
+                              };
+
+
+    m_AskContainerReference = {
+                                 LimiteType(2, 11000, 4321), LimiteType(1, 6000, 4526),
+                                 LimiteType(1, 5000, 4580), LimiteType(2, 7000, 8526)
+                              };
+
+    OrderContainerType::LimitContainer BidContainer;
+    OrderContainerType::LimitContainer AskContainer;
+
+    m_Container.AggregatedView(BidContainer, AskContainer);
+
+    ASSERT_EQ(m_BidContainerReference, BidContainer);
+    ASSERT_EQ(m_AskContainerReference, AskContainer);
+}
+
+TEST_F(OrderContainerTest, Modified_orders_should_loses_their_prority)
 {
     m_Container.Reset();
 
@@ -487,7 +516,6 @@ TEST_F(OrderContainerTest, ModifyPriority)
     OrderReplace BuyReplace(OrderWay::BUY, 300, 11, 1, 2, 8);
     OrderReplace SellReplace(OrderWay::SELL, 400, 12, 1, 2, 9);
 
-    // TODO : Check why Modify return false when matching is true
     ASSERT_TRUE(m_Container.Modify(BuyReplace, false));
     ASSERT_TRUE(m_Container.Modify(SellReplace, false));
 

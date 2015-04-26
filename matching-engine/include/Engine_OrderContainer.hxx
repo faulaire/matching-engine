@@ -221,16 +221,16 @@ namespace exchange
         template <typename TOrderReplace>
         bool OrderContainer<TOrder, TDealHandler>::Modify(TOrderReplace & iOrderReplace, bool Match)
         {
-            auto ProcessModify = [&](hashed_index_iterator iOrder)
+            auto ProcessModify = [&]()
             {
                 if (Match)
                 {
-                    std::uint64_t MaxExecQty = GetExecutableQuantity(iOrderReplace, iOrder->GetWay());
+                    std::uint64_t MaxExecQty = GetExecutableQuantity(iOrderReplace, iOrderReplace.GetWay());
                     std::uint64_t MatchQty = (std::min)(MaxExecQty, static_cast<std::uint64_t>(iOrderReplace.GetQuantity()));
 
                     if (MatchQty)
                     {
-                        ProcessDeals(iOrderReplace, iOrder->GetWay(), MatchQty);
+                        ProcessDeals(iOrderReplace, iOrderReplace.GetWay(), MatchQty);
 
                         if (0 == iOrderReplace.GetQuantity())
                         {
@@ -248,7 +248,7 @@ namespace exchange
                 auto Order = Container.find(OrderID);
                 if (Order != Container.end())
                 {
-                    if (ProcessModify(Order))
+                    if (ProcessModify())
                     {
                         // Order is not fully filled, re-queued the rest of the quantity
                         
@@ -262,7 +262,8 @@ namespace exchange
                     else
                     {
                         // No quantity left on the order, erase it from the container
-                        return (0 != Container.erase(iOrderReplace.GetExistingOrderID()));
+                    	Container.erase(Order);
+                    	return true;
                     }
                 }
                 return false;
