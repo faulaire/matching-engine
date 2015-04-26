@@ -7,7 +7,6 @@
 
 #include <Tools.h>
 
-#include <database/MariaDB_Connector.h>
 #include <logger/Logger.h>
 
 #include <Engine_Order.h>
@@ -43,7 +42,7 @@ namespace exchange
                 ~MatchingEngine();
 
                 /**/
-                bool Configure(common::DataBaseConnector & iConnector);
+                bool Configure(boost::property_tree::ptree & iConfig);
 
                 /**/
                 bool Insert(Order & iOrder, std::uint32_t iProductID);
@@ -81,18 +80,12 @@ namespace exchange
                 /**/
                 void CheckOrderBooks(const TimeType iTime);
 
-            private:
+                /**/
+                bool LoadConfiguration(boost::property_tree::ptree & iConfig);
 
-                enum class InstrumentField
-                {
-                    ID = 0,
-                    NAME,
-                    ISIN,
-                    SECURITY_CODE,
-                    TYPE,
-                    CURRENCY,
-                    CLOSE_PRICE
-                };
+                /**/
+                bool LoadInstruments(boost::property_tree::ptree & iConfig);
+
 
             private:
 

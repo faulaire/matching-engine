@@ -13,34 +13,6 @@ def run_command(Cmd, Arg):
     out, err = p.communicate()
     return out.rstrip('\r\n')
 
-def configure_mysql_client(cfg):
-    if 'mysql_config' in os.environ:
-        mysql_config = os.environ['mysql_config']
-    else:
-        mysql_config = 'mysql_config'
-
-    print mysql_config 
-    cfg.env.CFLAGS_MARIADB = []
-    cfg.env.LIB_MARIADB  = []
-    cfg.env.LIBPATH_MARIADB = []
-    cfg.env.INCLUDES_MARIADB  = []
-
-    cflags = run_command(mysql_config, "--cflags")
-    tokens = string.split(cflags, " ")
-    for token in tokens:
-        if token.find("-I") != -1:
-            cfg.env.INCLUDES_MARIADB.append(token[2:])
-        else:
-            cfg.env.CFLAGS_MARIADB.append(token[1:])
-
-    libs   = run_command(mysql_config, "--libs")
-    tokens = string.split(libs, " ")
-    for token in tokens:
-        if token.find("-L") != -1:
-            cfg.env.LIBPATH_MARIADB.append(token[2:])
-        else:
-            cfg.env.LIB_MARIADB.append(token[2:])
-
 def run_test(ctx):
     sys.path.append(ctx.top_dir)
     import waf_tools
@@ -48,19 +20,18 @@ def run_test(ctx):
     waf_tools.run_tests(ctx)
 
 def configure(cfg):
-    #system lib
-    cfg.env.append_value('LIB',['ssl','crypto','dl','z'])
 
     if cfg.env.with_unittest:
         cfg.env.append_value('LIB',['gtest'])
 
+    #system lib
+    cfg.env.append_value('LIB',['ssl','crypto','dl','z', 'pthread'])
+
     #boost lib
     cfg.env.DEFINES_BOOST     = ['BOOST']
-    cfg.env.LIB_BOOST         = ['boost_system', 'boost_thread', 'boost_filesystem', 'boost_date_time']
+    cfg.env.LIB_BOOST         = ['boost_system', 'boost_thread', 'boost_filesystem', 'boost_date_time', 'boost_serialization']
     cfg.env.LIBPATH_BOOST     = ['/export/boost/105600/lib/']
     cfg.env.INCLUDES_BOOST    = ['/export/boost/105600/include/']
-
-    configure_mysql_client(cfg)
 
 def build(bld):
     
@@ -73,10 +44,10 @@ def build(bld):
     #Build the static library
     # find all .cpp files ( exclude unit tests )
     sources_files =  bld.path.ant_glob('**/*.cpp',excl=['**/test_*.cpp'])
-    bld.stlib( source = sources_files, target="common", use="MARIADB BOOST", includes=IncludePaths )
+    bld.stlib( source = sources_files, target="common", use="BOOST", includes=IncludePaths )
 
     #Unit test related stuff
     
     if bld.env.with_unittest:
-        waf_tools.build_tests(bld, "common MARIADB", IncludePaths)
+        waf_tools.build_tests(bld, "common", IncludePaths)
 

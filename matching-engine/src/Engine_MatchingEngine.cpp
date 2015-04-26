@@ -4,7 +4,7 @@
 */
 
 #include <Engine_MatchingEngine.h>
-#include <ConfigurationMgr.h>
+#include <Engine_Instrument.h>
 
 namespace exchange
 {
@@ -20,95 +20,96 @@ namespace exchange
         MatchingEngine::~MatchingEngine()
         {}
 
-        bool MatchingEngine::Configure(common::DataBaseConnector & iConnector)
+        bool MatchingEngine::Configure(boost::property_tree::ptree & iConfig)
+        {
+            if (!LoadInstruments(iConfig))
+            {
+                EXERR("Failed to load instruments");
+                return false;
+            }
+
+            if (!LoadConfiguration(iConfig))
+            {
+                EXERR("Failed to load the configuration");
+                return false;
+            }
+ 
+            return true;
+        }
+
+        bool MatchingEngine::LoadConfiguration(boost::property_tree::ptree & iConfig)
         {
             using namespace boost::posix_time;
             using namespace boost::gregorian;
 
-            if (iConnector.Connect())
+            try
             {
-                auto && CfgMgr = common::ConfigurationMgr::GetInstance();
-
-                if (!CfgMgr.IsConfigured())
-                {
-                    if (!CfgMgr.Init(iConnector))
-                    {
-                        return false;
-                    }
-                }
-
-                common::DataBaseConnector::ResultArray Instruments;
-
-                iConnector.Query("SELECT * from instruments", Instruments);
-
-                using namespace exchange::common::tools;
-
-                /* Create all instrument */
-                for (auto && Instrument : Instruments)
-                {
-                    std::uint32_t aSecurityCode = boost::lexical_cast<std::uint32_t>(Instrument[to_underlying(InstrumentField::SECURITY_CODE)]);
-                    std::string InstrumentName = Instrument[to_underlying(InstrumentField::NAME)];
-
-                    Order::price_type ClosePrice = boost::lexical_cast<Order::price_type>(Instrument[to_underlying(InstrumentField::CLOSE_PRICE)]);
-
-                    std::unique_ptr<OrderBookType> pBook = std::make_unique<OrderBookType>(InstrumentName, aSecurityCode, ClosePrice, *this);
-
-                    EXINFO("MatchingEngine::Configure : Adding Instrument : " << InstrumentName);
-
-                    auto pIterator = m_OrderBookContainer.emplace(aSecurityCode, std::move(pBook));
-                    if( !pIterator.second )
-                    {
-                        EXERR("MatchingEngine::Configure : Corrupted database, failed to insert instrument : " << InstrumentName);
-                        return false;
-                    }
-                }
-
-                /*
-                    Read the configuration (Start/Stop time and auction duration
-                */
-
-                std::string sTmpRes;
-                bool    bRes = true;
-
                 // Get the current localtime
                 boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
                 //Get the date part out of the time
                 boost::posix_time::ptime today_midnight(now.date());
 
-                bRes &= CfgMgr.GetField("engine", "start_time", sTmpRes);
-                boost::posix_time::time_duration TmpDuration = boost::posix_time::duration_from_string(sTmpRes);
-                m_StartTime = today_midnight + TmpDuration;
+                auto StartTime = iConfig.get<std::string>("Engine.start_time");
+                auto StopTime = iConfig.get<std::string>("Engine.stop_time");
 
-                bRes &= CfgMgr.GetField("engine", "stop_time", sTmpRes);
-                TmpDuration = boost::posix_time::duration_from_string(sTmpRes);
-                m_StopTime = today_midnight + TmpDuration;
+                m_StartTime = today_midnight + boost::posix_time::duration_from_string(StartTime);
+                m_StopTime = today_midnight + boost::posix_time::duration_from_string(StopTime);
 
-                auto Duration = 0;
+                m_IntradayAuctionDuration = DurationType(iConfig.get<int>("Engine.intraday_auction_duration"));
 
-                bRes &= CfgMgr.GetField("engine", "intraday_auction_duration", Duration);
-                m_IntradayAuctionDuration = DurationType(Duration);
+                m_OpeningAuctionDuration = DurationType(iConfig.get<int>("Engine.opening_auction_duration"));
 
-                bRes &= CfgMgr.GetField("engine", "opening_auction_duration", Duration);
-                m_OpeningAuctionDuration = DurationType(Duration);;
-
-                bRes &= CfgMgr.GetField("engine", "closing_auction_duration", Duration);
-                m_ClosingAuctionDuration = DurationType(Duration);;
+                m_ClosingAuctionDuration = DurationType(iConfig.get<int>("Engine.closing_auction_duration"));
 
 
-                std::uint32_t MaxPriceDeviation;
-                bRes &= CfgMgr.GetField("engine", "max_price_deviation",MaxPriceDeviation);
+                auto MaxPriceDeviation = iConfig.get<std::uint32_t>("Engine.max_price_deviation");
 
-                m_PriceDeviationFactor = std::make_tuple(1-(double)MaxPriceDeviation*0.01,
-                                                         1+(double)MaxPriceDeviation*0.01);
-
-                return bRes;
+                m_PriceDeviationFactor = std::make_tuple(
+                                                            1 - (double)MaxPriceDeviation*0.01,
+                                                            1 + (double)MaxPriceDeviation*0.0
+                                                        );
+                return true;
             }
-            else
+            catch (const boost::property_tree::ptree_error & Error)
             {
-                EXERR("MatchingEngine::Configure : Could not connect to DataBase");
+                EXERR("MatchingEngine::LoadConfiguration : " << Error.what());
                 return false;
             }
-            return true;
+        }
+
+        bool MatchingEngine::LoadInstruments(boost::property_tree::ptree & iConfig)
+        {
+            try
+            {
+                auto InstrumentHandler = [this](const Instrument<Order> & Instrument)
+                {
+                    // TODO : Order book should have an Instrument for argument
+                    std::unique_ptr<OrderBookType> pBook = std::make_unique<OrderBookType>(
+                                                                                            Instrument.GetName(),
+                                                                                            Instrument.GetProductId(),
+                                                                                            Instrument.GetClosePrice(),
+                                                                                            *this);
+
+                    EXINFO("MatchingEngine::LoadInstruments : Adding Instrument : " << Instrument.GetName());
+
+                    auto pIterator = m_OrderBookContainer.emplace(Instrument.GetProductId(), std::move(pBook));
+                    if (!pIterator.second)
+                    {
+                        EXERR("MatchingEngine::LoadInstruments : Corrupted database, failed to insert instrument : " << Instrument.GetName());
+                    }
+                };
+
+                auto InstrumentDBPath = iConfig.get<std::string>("Engine.instrument_db_path");
+
+                InstrumentManager<Order> Loader(InstrumentDBPath);
+
+                return Loader.Load(InstrumentHandler);
+            }
+            catch (const boost::property_tree::ptree_error & Error)
+            {
+                EXERR("MatchingEngine::LoadInstruments : " << Error.what());
+                return false;
+            }
         }
 
         bool MatchingEngine::Insert(Order & iOrder, std::uint32_t iProductID)

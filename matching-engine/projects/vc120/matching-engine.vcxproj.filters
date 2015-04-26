@@ -54,6 +54,9 @@
     <ClInclude Include="..\..\include\Engine_DealHandler.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Engine_Instrument.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Engine_Order.cpp">
@@ -84,6 +87,12 @@
   <ItemGroup>
     <None Include="..\..\wscript" />
     <None Include="..\..\tests\config\config.ini">
+      <Filter>Tests\Configuration</Filter>
+    </None>
+    <None Include="..\..\config\config.ini">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="..\..\tests\config\config_always_closed.ini">
       <Filter>Tests\Configuration</Filter>
     </None>
   </ItemGroup>

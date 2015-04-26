@@ -19,12 +19,6 @@
     <Filter Include="Source Files\logger">
       <UniqueIdentifier>{d5d1c297-c4e1-45ae-9ed9-d82a7a900022}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\database">
-      <UniqueIdentifier>{9d74b65f-ba93-4756-b2f3-ae239e8bd298}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\database">
-      <UniqueIdentifier>{5d1f8cc7-38f8-4ba7-bdd3-0386ba8de8e3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Tests">
       <UniqueIdentifier>{62e97a4a-6bbd-4afc-a074-3473dc43ec22}</UniqueIdentifier>
     </Filter>
@@ -54,17 +48,8 @@
     <ClInclude Include="..\..\include\CSingleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Tools.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\ConfigurationMgr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\database\MariaDB_Connector.h">
-      <Filter>Header Files\database</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Tools.hxx">
       <Filter>Header Files</Filter>
@@ -74,22 +59,10 @@
     <ClCompile Include="..\..\src\Tools.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ConfigurationMgr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\database\MariaDB_Connector.cpp">
-      <Filter>Source Files\database</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\logger\LoggerFile.cpp">
       <Filter>Source Files\logger</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\tests\src\test_mariadb.cpp">
-      <Filter>Tests\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\tests\src\test_logger.cpp">
-      <Filter>Tests\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\tests\src\test_ConfigurationMgr.cpp">
       <Filter>Tests\Source Files</Filter>
     </ClCompile>
   </ItemGroup>

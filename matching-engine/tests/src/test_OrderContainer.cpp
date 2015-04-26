@@ -5,6 +5,7 @@
 
 #include <Engine_Order.h>
 #include <Engine_OrderContainer.h>
+#include <Logger.h>
 
 #include <functional>
 
@@ -78,8 +79,19 @@ class OrderContainerTest : public testing::Test
             }
         }
 
+
         virtual void SetUp()
         {
+            auto & Logger = LoggerHolder::GetInstance();
+
+            boost::property_tree::ptree         aConfig;
+
+            if (boost::filesystem::exists("config.ini"))
+            {
+                boost::property_tree::ini_parser::read_ini("config.ini", aConfig);
+                Logger.Init(aConfig);
+            }
+
 
             m_BidContainerReference = {
                                          LimiteType(2, 11000, 2185), LimiteType(1, 4000, 1325),

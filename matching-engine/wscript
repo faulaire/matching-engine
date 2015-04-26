@@ -10,7 +10,8 @@ def run_test(ctx):
 
 
 def configure(cfg):
-    pass
+    #system lib
+    cfg.env.append_value('LIB',['leveldb'])
 
 def build(bld):
 

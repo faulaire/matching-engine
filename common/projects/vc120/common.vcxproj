@@ -65,9 +65,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\ConfigurationMgr.h" />
     <ClInclude Include="..\..\include\CSingleton.h" />
-    <ClInclude Include="..\..\include\database\MariaDB_Connector.h" />
     <ClInclude Include="..\..\include\logger\ILogger.h" />
     <ClInclude Include="..\..\include\logger\Logger.h" />
     <ClInclude Include="..\..\include\logger\LoggerConsole.h" />
@@ -75,16 +73,11 @@
     <ClInclude Include="..\..\include\logger\LoggerHolder.h" />
     <ClInclude Include="..\..\include\Tools.h" />
     <ClInclude Include="..\..\include\Tools.hxx" />
-    <ClInclude Include="..\..\include\Types.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\ConfigurationMgr.cpp" />
-    <ClCompile Include="..\..\src\database\MariaDB_Connector.cpp" />
     <ClCompile Include="..\..\src\logger\LoggerFile.cpp" />
     <ClCompile Include="..\..\src\Tools.cpp" />
-    <ClCompile Include="..\..\tests\src\test_ConfigurationMgr.cpp" />
     <ClCompile Include="..\..\tests\src\test_logger.cpp" />
-    <ClCompile Include="..\..\tests\src\test_mariadb.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\tests\config\config.ini" />

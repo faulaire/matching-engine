@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include <Engine_MatchingEngine.h>
+#include <Logger.h>
 
 using namespace exchange::engine;
 
@@ -14,8 +15,21 @@ public:
     using OrderBookType = OrderBook<Order, MatchingEngine>;
 
     OrderBookTest()
-        : m_OrderBook("YOUPORN", 1, 10, m_Engine)
+        : m_OrderBook("MingYiCorporation", 1, 10, m_Engine)
     {}
+
+    virtual void SetUp()
+    {
+        auto & Logger = LoggerHolder::GetInstance();
+
+        boost::property_tree::ptree         aConfig;
+
+        if (boost::filesystem::exists("config.ini"))
+        {
+            boost::property_tree::ini_parser::read_ini("config.ini", aConfig);
+            Logger.Init(aConfig);
+        }
+    }
 
 protected:
 

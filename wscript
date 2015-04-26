@@ -37,7 +37,13 @@ def configure(cfg):
     cfg.check(features='cxx cxxprogram', lib=['m'], uselib_store='M')
     cfg.check(features='cxx cxxprogram', lib=['dl'], uselib_store='DL')
     
-    cfg.find_program("mysql_config", var="mysql_config")
+    cfg.check(features='cxx cxxprogram', lib=['leveldb'], uselib_store='LEVELDB')
+    cfg.check(header_name='leveldb/db.h', features='cxx cxxprogram')
+    
+    #TODO : Add a check for boost / ssl 
+
+    
+
 
     cfg.env.with_unittest = cfg.options.with_unittest
 
