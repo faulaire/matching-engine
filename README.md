@@ -14,10 +14,11 @@ Version 0.1.x:
 ## Installation
 
 Prerequisites:
-* [BOOST 1.55+](http://www.boost.org/)
-* [LEVELDB 1.18+](http://leveldb.org/)
-* [CLANG 3.6+](http://clang.llvm.org/) or [GCC 4.9+](https://gcc.gnu.org/)
-* [OPENSSL 1.0.1f](https://www.openssl.org/)
+* [Boost 1.55+](http://www.boost.org/)
+* [LevelDB 1.18+](http://leveldb.org/)
+* [Google Test 1.7.*](https://code.google.com/p/googletest/)
+* [Clang 3.6+](http://clang.llvm.org/) or [Gcc 4.9+](https://gcc.gnu.org/)
+* [Openssl 1.0.1f](https://www.openssl.org/)
 
 ## Notes
 
