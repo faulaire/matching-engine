@@ -162,22 +162,15 @@ namespace exchange
                 if (MatchQty)
                 {
                     ProcessDeals(iOrder, iOrder.GetWay(), MatchQty);
-
-                    if (iOrder.GetQuantity())
-                    {
-                        return AuctionInsert(iOrder);
-                    }
-                    return true;
-                }
-                else
-                {
-                    return AuctionInsert(iOrder);
                 }
             }
-            else
+
+            if (iOrder.GetQuantity())
             {
                 return AuctionInsert(iOrder);
             }
+
+            return true;
         }
 
         template <typename TOrder, typename TDealHandler>
