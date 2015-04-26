@@ -187,7 +187,7 @@ TEST_F(MatchingEngineTest, InsertContinousTrading)
 
     m_Engine.SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING);
 
-
+    // TODO : These tests should be moved to OrderBook
     auto pOrderBook = m_Engine.GetOrderBook(1);
     ASSERT_NE(pOrderBook, nullptr);
     ASSERT_EQ(pOrderBook->GetInstrumentID(), 1);
