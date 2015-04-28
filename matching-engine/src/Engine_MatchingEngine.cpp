@@ -198,7 +198,7 @@ namespace exchange
                 if (Now > AuctionEnd)
                 {
                     pBook->SetTradingPhase(m_GlobalPhase);
-                    m_MonitoredOrderBook.erase(iterator++);
+                    iterator = m_MonitoredOrderBook.erase(iterator);
                 }
                 else
                 {
