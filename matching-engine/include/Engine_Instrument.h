@@ -5,7 +5,9 @@
 
 #pragma once
 
-#include "leveldb/db.h"
+#include <leveldb/db.h>
+
+#include <ScopedExit.h>
 
 #include <sstream>
 
@@ -27,6 +29,7 @@ namespace exchange
         template <typename TOrder>
         class Instrument
         {
+            // TODO : It could be better to have an abstraction of the underlying database model in order to switch to any kind of nosql storage
             friend std::ostream& operator<< <> (std::ostream& o, const Instrument<TOrder> & x);
             
             using price_type = typename TOrder::price_type;
@@ -43,7 +46,7 @@ namespace exchange
             const std::string & GetCurrency() const { return m_currency; }
             const std::string & GetIsin() const { return m_isin; }
             price_type          GetClosePrice() const { return m_closeprice; }
-            int                 GetProductId() const { return m_productid; }
+            std::uint32_t       GetProductId() const { return m_productid; }
 
         private:
 
@@ -146,7 +149,10 @@ namespace exchange
                     leveldb::ReadOptions options;
                     options.snapshot = m_db->GetSnapshot();
                     
+                    auto release_at_exit = common::make_scope_exit([this,&options]() { m_db->ReleaseSnapshot(options.snapshot); });
+                    
                     leveldb::Iterator* it = m_db->NewIterator(leveldb::ReadOptions());
+
                     for (it->SeekToFirst(); it->Valid(); it->Next())
                     {
                         leveldb::Slice value = it->value();
@@ -159,8 +165,6 @@ namespace exchange
 
                         callback(instrument);
                     }
-
-                    m_db->ReleaseSnapshot(options.snapshot);
 
                     delete it;
                     return true;

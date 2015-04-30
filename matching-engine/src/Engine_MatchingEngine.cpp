@@ -12,7 +12,7 @@ namespace exchange
     {
 
         MatchingEngine::MatchingEngine() :
-            m_StartTime(), m_StopTime(), m_AuctionStart(),
+            m_StartTime(), m_StopTime(), m_AuctionEnd(),
             m_IntradayAuctionDuration(0), m_OpeningAuctionDuration(0), m_ClosingAuctionDuration(0),
             m_PriceDeviationFactor(), m_GlobalPhase(TradingPhase::CLOSE)
         {}
@@ -62,11 +62,11 @@ namespace exchange
                 m_ClosingAuctionDuration = DurationType(iConfig.get<int>("Engine.closing_auction_duration"));
 
 
-                auto MaxPriceDeviation = iConfig.get<std::uint32_t>("Engine.max_price_deviation");
+                auto MaxPriceDeviationPercentage = iConfig.get<double>("Engine.max_price_deviation")*0.01;
 
                 m_PriceDeviationFactor = std::make_tuple(
-                                                            1 - (double)MaxPriceDeviation*0.01,
-                                                            1 + (double)MaxPriceDeviation*0.0
+                                                            1 - MaxPriceDeviationPercentage,
+                                                            1 + MaxPriceDeviationPercentage
                                                         );
                 return true;
             }
@@ -83,12 +83,7 @@ namespace exchange
             {
                 auto InstrumentHandler = [this](const Instrument<Order> & Instrument)
                 {
-                    // TODO : Order book should have an Instrument for argument
-                    std::unique_ptr<OrderBookType> pBook = std::make_unique<OrderBookType>(
-                                                                                            Instrument.GetName(),
-                                                                                            Instrument.GetProductId(),
-                                                                                            Instrument.GetClosePrice(),
-                                                                                            *this);
+                    std::unique_ptr<OrderBookType> pBook = std::make_unique<OrderBookType>(Instrument, *this);
 
                     EXINFO("MatchingEngine::LoadInstruments : Adding Instrument : " << Instrument.GetName());
 
@@ -163,9 +158,18 @@ namespace exchange
                 return false;
             }
 
-            if (iNewPhase == TradingPhase::OPENING_AUCTION || iNewPhase == TradingPhase::CLOSING_AUCTION)
+            auto now = boost::posix_time::second_clock::local_time();
+
+            // TODO : This part of code was buggy and is not tested
+
+            if (iNewPhase == TradingPhase::OPENING_AUCTION)
             {
-                m_AuctionStart = boost::posix_time::second_clock::local_time();
+                m_AuctionEnd = now + m_OpeningAuctionDuration;
+            }
+
+            if (iNewPhase == TradingPhase::CLOSING_AUCTION)
+            {
+                m_AuctionEnd = now + m_ClosingAuctionDuration;
             }
 
             UpdateInstrumentsPhase(iNewPhase);
@@ -174,6 +178,10 @@ namespace exchange
 
         void MatchingEngine::UpdateInstrumentsPhase(TradingPhase iNewPhase)
         {
+            /*
+                TODO : Check what's append when a instrument is in intraday auction phase ?
+                TODO : Write a test to test this behavior
+            */
             if( iNewPhase != m_GlobalPhase)
             {
                 EXINFO("MatchingEngine::UpdateInstrumentsPhase : Switching from phase[" << TradingPhaseToString(m_GlobalPhase)
@@ -194,8 +202,7 @@ namespace exchange
             while (iterator != m_MonitoredOrderBook.end())
             {
                 auto && pBook = *iterator;
-                auto AuctionEnd = pBook->GetAuctionStart() + GetIntradayAuctionDuration();
-                if (Now > AuctionEnd)
+                if (Now > pBook->GetAuctionEnd())
                 {
                     pBook->SetTradingPhase(m_GlobalPhase);
                     iterator = m_MonitoredOrderBook.erase(iterator);
@@ -212,6 +219,9 @@ namespace exchange
             const TimeType now = boost::posix_time::second_clock::local_time();
 
             /* Verify if some orderbook are in intraday auction state */
+            /* TODO : Rework this part */
+            /* TODO : Randomize end of auction */
+
             CheckOrderBooks(now);
 
             const bool bInOpenPeriod = (now < m_StopTime) && (now > m_StartTime);
@@ -222,15 +232,14 @@ namespace exchange
                     {
                         if (bInOpenPeriod)
                         {
-                            m_AuctionStart = now;
+                            m_AuctionEnd = now + m_OpeningAuctionDuration;
                             UpdateInstrumentsPhase(TradingPhase::OPENING_AUCTION);
                         }
                     }
                     break;
                 case TradingPhase::OPENING_AUCTION:
                     {
-                        auto AuctionEnd = m_AuctionStart + m_OpeningAuctionDuration;
-                        if (now > AuctionEnd)
+                        if (now > m_AuctionEnd)
                         {
                             UpdateInstrumentsPhase(TradingPhase::CONTINUOUS_TRADING);
                         }
@@ -240,22 +249,31 @@ namespace exchange
                     {
                         if (!bInOpenPeriod)
                         {
-                            m_AuctionStart = now;
+                            m_AuctionEnd = now + m_ClosingAuctionDuration;
                             UpdateInstrumentsPhase(TradingPhase::CLOSING_AUCTION);
                         }
                     }
                     break;
                 case TradingPhase::CLOSING_AUCTION:
                     {
-                        auto AuctionEnd = m_AuctionStart + m_ClosingAuctionDuration;
-                        if (now > AuctionEnd)
+                        if (now > m_AuctionEnd)
                         {
                             UpdateInstrumentsPhase(TradingPhase::CLOSE);
+                            CancelAllOrders();
                         }
                     }
                     break;
                 default:
                     break;
+            }
+        }
+
+        void MatchingEngine::CancelAllOrders()
+        {
+            // TODO : Check if it's possible to have orderbook in m_MonitoredOrderBook
+            for (auto && OrderBook : m_OrderBookContainer)
+            {
+                OrderBook.second->CancelAllOrders();
             }
         }
 

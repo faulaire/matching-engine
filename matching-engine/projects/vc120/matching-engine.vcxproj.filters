@@ -95,6 +95,7 @@
     <None Include="..\..\tests\config\config_always_closed.ini">
       <Filter>Tests\Configuration</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\tests\config\pom.xml">

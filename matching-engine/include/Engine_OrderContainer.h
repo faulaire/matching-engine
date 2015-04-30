@@ -138,7 +138,7 @@ namespace exchange
 
                 /**
                 */
-                void Reset();
+                void CancelAllOrders();
 
                 /**
                 */

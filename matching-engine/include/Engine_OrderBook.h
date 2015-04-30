@@ -10,6 +10,7 @@
 #include <Engine_Order.h>
 #include <Engine_DealHandler.h>
 #include <Engine_OrderContainer.h>
+#include <Engine_Instrument.h>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -60,7 +61,7 @@ namespace exchange
             public:
 
                 /**/
-                OrderBook(const std::string & iSecurityName, std::uint32_t iInstrumentID, price_type iLastClosePrice, TMatchingEngine&);
+                OrderBook(const Instrument<TOrder> & iInstrument, TMatchingEngine&);
 
                 /**/
                 virtual ~OrderBook();
@@ -81,7 +82,10 @@ namespace exchange
                 void ProcessDeal(const Deal * ipDeal);
 
                 /**/
-                TimeType GetAuctionStart() const { return m_AuctionStart; }
+                TimeType GetAuctionEnd() const { return m_AuctionEnd; }
+
+                /***/
+                void CancelAllOrders();
                 
             public:
 
@@ -121,6 +125,8 @@ namespace exchange
 
                 inline bool IsAuctionPhase(const TradingPhase iPhase) const;
 
+                void HandleIntradayAuctionPhaseSwitching(const TradingPhase iNewPhase);
+
             private:
 
                 TMatchingEngine&       m_rMatchingEngine;
@@ -129,7 +135,7 @@ namespace exchange
                 OrderContainerType     m_Orders;
                 TradingPhase           m_Phase;
 
-                TimeType               m_AuctionStart;
+                TimeType               m_AuctionEnd;
 
                 price_type             m_LastPrice;
 

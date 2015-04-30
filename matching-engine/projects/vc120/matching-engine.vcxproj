@@ -92,6 +92,7 @@
     <None Include="..\..\tests\config\config.ini" />
     <None Include="..\..\tests\config\config_always_closed.ini" />
     <None Include="..\..\wscript" />
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\tests\config\pom.xml" />

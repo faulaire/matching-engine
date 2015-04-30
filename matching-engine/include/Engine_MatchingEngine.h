@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <Tools.h>
+//#include <Tools.h>
 
 #include <logger/Logger.h>
 
@@ -13,6 +13,7 @@
 #include <Engine_OrderBook.h>
 
 #include <unordered_map>
+#include <unordered_set>
 
 namespace exchange
 {
@@ -30,7 +31,7 @@ namespace exchange
                 using OrderBookValueType  = OrderBookMap::value_type;
                 using OrderBookIterator   = OrderBookMap::iterator;
 
-                using OrderBookList       = std::list<OrderBookType*>;
+                using OrderBookList       = std::unordered_set<OrderBookType*>;
                 using PriceDevFactors     = std::tuple<double, double>;
 
             public:
@@ -57,20 +58,26 @@ namespace exchange
                 void EngineListen();
 
                 /**/
+                void CancelAllOrders();
+
+                /**/
                 inline void MonitorOrderBook(OrderBookType * pOrderBook);
+                
+                /**/
+                inline void UnMonitorOrderBook(OrderBookType * pOrderBook);
 
                 /**/
                 bool SetGlobalPhase(TradingPhase iNewPhase);
                 inline TradingPhase GetGlobalPhase() const { return m_GlobalPhase; }
 
                 /**/
-                DurationType GetIntradayAuctionDuration() const { return m_IntradayAuctionDuration; }
-
-                /**/
                 const PriceDevFactors& GetPriceDevFactors() const { return m_PriceDeviationFactor; }
             
                 /**/
                 inline const OrderBookType* GetOrderBook(std::uint32_t iProductID) const;
+
+                /**/
+                DurationType GetIntradayAuctionDuration() const { return m_IntradayAuctionDuration; }
 
             protected:
 
@@ -97,8 +104,8 @@ namespace exchange
                 TimeType               m_StartTime;
                 /* Time of the Continuout Trading -> Closing Auction transition */
                 TimeType               m_StopTime;
-                /* Start time of any auction phase but intraday */
-                TimeType               m_AuctionStart;
+                /* End time of any auction phase but intraday */
+                TimeType               m_AuctionEnd;
                 /* Duration of the intraday auction state */
                 DurationType           m_IntradayAuctionDuration;
                 /* Duration of the open auction state */
@@ -119,7 +126,12 @@ namespace exchange
 
         inline void MatchingEngine::MonitorOrderBook(OrderBookType * pOrderBook)
         {
-            m_MonitoredOrderBook.push_back(pOrderBook);
+            m_MonitoredOrderBook.insert(pOrderBook);
+        }
+
+        inline void MatchingEngine::UnMonitorOrderBook(OrderBookType * pOrderBook)
+        {
+            m_MonitoredOrderBook.erase(pOrderBook);
         }
     }
 }

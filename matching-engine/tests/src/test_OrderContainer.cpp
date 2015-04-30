@@ -82,14 +82,11 @@ class OrderContainerTest : public testing::Test
 
         virtual void SetUp()
         {
-            auto & Logger = LoggerHolder::GetInstance();
-
             boost::property_tree::ptree         aConfig;
 
             if (boost::filesystem::exists("config.ini"))
             {
                 boost::property_tree::ini_parser::read_ini("config.ini", aConfig);
-                Logger.Init(aConfig);
             }
 
 
@@ -264,7 +261,7 @@ TEST_F(OrderContainerTest, AuctionModify)
 
 TEST_F(OrderContainerTest, AuctionFixing)
 {
-    m_Container.Reset();
+    m_Container.CancelAllOrders();
 
     m_BidOrders = {
                      { OrderWay::BUY, 1200, 90, 1, 5 }, { OrderWay::BUY, 350, 89, 1, 6 },
@@ -284,7 +281,7 @@ TEST_F(OrderContainerTest, AuctionFixing)
     ASSERT_EQ(std::get<0>(OpenPrice), 90);
     ASSERT_EQ(std::get<1>(OpenPrice), 900);
 
-    m_Container.Reset();
+    m_Container.CancelAllOrders();
 
 
     m_BidOrders = {
@@ -309,7 +306,7 @@ TEST_F(OrderContainerTest, AuctionFixing)
 
 TEST_F(OrderContainerTest, AuctionMatching)
 {
-    m_Container.Reset();
+    m_Container.CancelAllOrders();
 
     m_BidOrders = {
                       { OrderWay::BUY, 1200, 90, 1, 5 }, { OrderWay::BUY, 350, 89, 1, 6 },
@@ -336,7 +333,7 @@ TEST_F(OrderContainerTest, AuctionMatching)
         
     */
     m_DealHandler.Reset();
-    m_Container.Reset();
+    m_Container.CancelAllOrders();
 
     m_BidOrders = {
                      { OrderWay::BUY, 200, 41, 1, 5 }, { OrderWay::BUY, 300, 40, 1, 6 },
@@ -364,14 +361,14 @@ TEST_F(OrderContainerTest, AuctionMatching)
     ASSERT_EQ(*DealContainer.at(5), Deal(39, 50, 7, 1, 4, 2));
 
     m_DealHandler.Reset();
-    m_Container.Reset();
+    m_Container.CancelAllOrders();
 }
 
 TEST_F(OrderContainerTest, InsertMatching)
 {
     auto & DealContainer = m_DealHandler.GetDealContainer();
 
-    m_Container.Reset();
+    m_Container.CancelAllOrders();
 
     m_BidOrders = {
                      { OrderWay::BUY, 350, 89, 1, 6 }, { OrderWay::BUY, 150, 88, 1, 7 },
@@ -427,7 +424,7 @@ TEST_F(OrderContainerTest, ModifyMatching)
 {
     auto & DealContainer = m_DealHandler.GetDealContainer();
 
-    m_Container.Reset();
+    m_Container.CancelAllOrders();
 
     m_BidOrders = {
                      { OrderWay::BUY, 350, 89, 1, 6 }, { OrderWay::BUY, 150, 88, 1, 7 },
@@ -510,7 +507,7 @@ TEST_F(OrderContainerTest, Fully_filled_modified_orders_should_be_removed_from_o
 
 TEST_F(OrderContainerTest, Modified_orders_should_loses_their_prority)
 {
-    m_Container.Reset();
+    m_Container.CancelAllOrders();
 
     m_BidOrders = {
                         { OrderWay::BUY, 100, 10, 1, 6 }, { OrderWay::BUY, 200, 11, 1, 7 },
@@ -549,6 +546,16 @@ TEST_F(OrderContainerTest, Modified_orders_should_loses_their_prority)
 
 int main(int argc, char ** argv)
 {
+    auto & Logger = LoggerHolder::GetInstance();
+
+    if (boost::filesystem::exists("config.ini"))
+    {
+        boost::property_tree::ptree aConfig;
+
+        boost::property_tree::ini_parser::read_ini("config.ini", aConfig);
+        Logger.Init(aConfig);
+    }
+
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

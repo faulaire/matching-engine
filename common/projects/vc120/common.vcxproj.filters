@@ -48,17 +48,11 @@
     <ClInclude Include="..\..\include\CSingleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Tools.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Tools.hxx">
+    <ClInclude Include="..\..\include\ScopedExit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Tools.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\logger\LoggerFile.cpp">
       <Filter>Source Files\logger</Filter>
     </ClCompile>

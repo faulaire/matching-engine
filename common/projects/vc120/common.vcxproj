@@ -71,12 +71,10 @@
     <ClInclude Include="..\..\include\logger\LoggerConsole.h" />
     <ClInclude Include="..\..\include\logger\LoggerFile.h" />
     <ClInclude Include="..\..\include\logger\LoggerHolder.h" />
-    <ClInclude Include="..\..\include\Tools.h" />
-    <ClInclude Include="..\..\include\Tools.hxx" />
+    <ClInclude Include="..\..\include\ScopedExit.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\logger\LoggerFile.cpp" />
-    <ClCompile Include="..\..\src\Tools.cpp" />
     <ClCompile Include="..\..\tests\src\test_logger.cpp" />
   </ItemGroup>
   <ItemGroup>

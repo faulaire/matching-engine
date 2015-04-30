@@ -7,7 +7,6 @@
 
 using namespace exchange::engine;
 
-// To use a test fixture, derive a class from testing::Test.
 class OrderBookTest : public testing::Test
 {
 public:
@@ -15,19 +14,16 @@ public:
     using OrderBookType = OrderBook<Order, MatchingEngine>;
 
     OrderBookTest()
-        : m_OrderBook("MingYiCorporation", 1, 10, m_Engine)
+        : m_OrderBook(Instrument<Order>{"MingYiCorporation", "ISIN", "EUR", 1, 10}, m_Engine)
     {}
 
     virtual void SetUp()
     {
-        auto & Logger = LoggerHolder::GetInstance();
-
         boost::property_tree::ptree         aConfig;
 
         if (boost::filesystem::exists("config.ini"))
         {
             boost::property_tree::ini_parser::read_ini("config.ini", aConfig);
-            Logger.Init(aConfig);
         }
     }
 
@@ -36,6 +32,9 @@ protected:
     MatchingEngine m_Engine;
     OrderBookType  m_OrderBook;
 };
+
+// TODO: Add a price deviation test
+// TODO: Add a test to handle everything related to turnover / dailyvolume ...
 
 TEST_F(OrderBookTest, InvalidOrders)
 {
@@ -74,6 +73,16 @@ TEST_F(OrderBookTest, Phases)
 
 int main(int argc, char ** argv)
 {
+    auto & Logger = LoggerHolder::GetInstance();
+
+    if (boost::filesystem::exists("config.ini"))
+    {
+        boost::property_tree::ptree aConfig;
+
+        boost::property_tree::ini_parser::read_ini("config.ini", aConfig);
+        Logger.Init(aConfig);
+    }
+
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

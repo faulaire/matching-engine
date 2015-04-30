@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2013, Fabien Aulaire
+* Copyright (C) 2015, Fabien Aulaire
 * All rights reserved.
 */
 
@@ -15,8 +15,11 @@ namespace exchange
     {
 
         template <typename TOrder, typename TDealHandler>
-        void OrderContainer<TOrder, TDealHandler>::Reset()
+        void OrderContainer<TOrder, TDealHandler>::CancelAllOrders()
         {
+            /*
+                TODO : Fine now but all clients need to be notified that their orders have been cancelled
+            */
             m_AskOrders.clear();
             m_BidOrders.clear();
         }

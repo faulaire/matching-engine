@@ -7,9 +7,10 @@ namespace exchange
     {
 
         template <typename TOrder, typename TMatchingEngine>
-        OrderBook<TOrder,TMatchingEngine>::OrderBook(const std::string & iSecurityName, std::uint32_t iInstrumentID, price_type iLastClosePrice, TMatchingEngine& rMatchingEngine)
-            : DealHandlerType(iInstrumentID), m_rMatchingEngine(rMatchingEngine), m_SecurityName(iSecurityName), m_Orders(*this),
-              m_Phase(TradingPhase::CLOSE), m_AuctionStart(), m_LastPrice(iLastClosePrice), m_Turnover(0), m_DailyVolume(0), m_OpenPrice(0), m_ClosePrice(iLastClosePrice), m_PostAuctionPrice(iLastClosePrice)
+        OrderBook<TOrder, TMatchingEngine>::OrderBook(const Instrument<TOrder> & iInstrument, TMatchingEngine& rMatchingEngine)
+            : DealHandlerType(iInstrument.GetProductId()), m_rMatchingEngine(rMatchingEngine), m_SecurityName(iInstrument.GetName()), m_Orders(*this),
+            m_Phase(TradingPhase::CLOSE), m_AuctionEnd(), m_LastPrice(iInstrument.GetClosePrice()), m_Turnover(0), m_DailyVolume(0),
+            m_OpenPrice(0), m_ClosePrice(iInstrument.GetClosePrice()), m_PostAuctionPrice(iInstrument.GetClosePrice())
         {
         }
 
@@ -57,6 +58,8 @@ namespace exchange
                     m_Orders.MatchOrders();
                     SetPostAuctionPrice(GetLastPrice());
                 }
+
+                HandleIntradayAuctionPhaseSwitching(iNewPhase);
 
                 if (m_Phase == TradingPhase::OPENING_AUCTION && iNewPhase == TradingPhase::CONTINUOUS_TRADING)
                 {
@@ -133,7 +136,7 @@ namespace exchange
                 if( GetTradingPhase() != TradingPhase::INTRADAY_AUCTION)
                 {
                     SetTradingPhase(TradingPhase::INTRADAY_AUCTION);
-                    m_AuctionStart = boost::posix_time::second_clock::local_time();
+                    m_AuctionEnd = boost::posix_time::second_clock::local_time() + m_rMatchingEngine.GetIntradayAuctionDuration();
 
                     m_rMatchingEngine.MonitorOrderBook(this);
                 }
@@ -146,6 +149,30 @@ namespace exchange
             return ( iPhase == TradingPhase::OPENING_AUCTION) ||
                    ( iPhase == TradingPhase::CLOSING_AUCTION) ||
                    ( iPhase == TradingPhase::INTRADAY_AUCTION);
+        }
+
+        template <typename TOrder, typename TMatchingEngine>
+        void OrderBook<TOrder, TMatchingEngine>::CancelAllOrders()
+        {
+            m_Orders.CancelAllOrders();
+        }
+
+        template <typename TOrder, typename TMatchingEngine>
+        void OrderBook<TOrder, TMatchingEngine>::HandleIntradayAuctionPhaseSwitching(const TradingPhase iNewPhase)
+        {
+            if (m_Phase == TradingPhase::INTRADAY_AUCTION &&)
+            {
+                if (iNewPhase == TradingPhase::CLOSING_AUCTION)
+                {
+                    m_rMatchingEngine.UnMonitorOrderBook(this);
+                }
+                else
+                {
+                    EXERR("OrderBook::SetTradingPhase " << m_SecurityName << " : invalid transition from phase " << TradingPhaseToString(m_Phase) <<
+                        " to phase " << TradingPhaseToString(iNewPhase) << "]");
+                    assert(false);
+                }
+            }
         }
 
         template <typename TOrder, typename TMatchingEngine>

@@ -42,9 +42,6 @@ def configure(cfg):
     
     #TODO : Add a check for boost / ssl 
 
-    
-
-
     cfg.env.with_unittest = cfg.options.with_unittest
 
     cfg.env.append_value('CXXFLAGS', ['-std=c++1y','-W','-Wall','-Wno-unused-local-typedefs'])
