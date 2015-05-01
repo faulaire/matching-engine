@@ -42,6 +42,8 @@ namespace exchange
                 :m_name(name), m_isin(isin), m_currency(currency), m_closeprice(closeprice), m_productid(id)
             {}
 
+            inline bool operator==(const Instrument & rhs) const;
+
             const std::string & GetName() const { return m_name; }
             const std::string & GetCurrency() const { return m_currency; }
             const std::string & GetIsin() const { return m_isin; }
@@ -71,6 +73,20 @@ namespace exchange
             std::uint32_t      m_productid;
                    
         };
+
+        template <typename TOrder>
+        inline bool Instrument<TOrder>::operator==(const Instrument & rhs) const
+        {
+            if (&rhs != this)
+            {
+                return rhs.m_name == m_name       &&
+                    rhs.m_isin == m_isin       &&
+                    rhs.m_currency == m_currency   &&
+                    rhs.m_closeprice == m_closeprice &&
+                    rhs.m_productid == m_productid;
+            }
+            return true;
+        }
 
         template <typename TOrder>
         std::ostream & operator<<(std::ostream &os, const Instrument<TOrder> &gp)

@@ -124,6 +124,7 @@ namespace exchange
                 bool CheckOrder(const Msg & iMsg) const;
 
                 inline bool IsAuctionPhase(const TradingPhase iPhase) const;
+                inline bool IsValidPhase(const TradingPhase iPhase) const;
 
                 void HandleIntradayAuctionPhaseSwitching(const TradingPhase iNewPhase);
 

@@ -31,7 +31,6 @@ class MatchingEngineTest : public testing::Test
 
         void WriteInstruments()
         {
-            // TODO : Add a specific test for the Instrument Manager
             std::string  InstrumentDBPath = m_Config.get<std::string>("Engine.instrument_db_path");
             InstrumentManager<Order> InstrMgr(InstrumentDBPath);
 

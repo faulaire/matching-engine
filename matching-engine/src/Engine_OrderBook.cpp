@@ -25,7 +25,7 @@ namespace exchange
                 case TradingPhase::INTRADAY_AUCTION:
                     return "INTRADAY_AUCTION";
                 default:
-                    return "UNKNOW_TRADING_PHASE";
+                    return "UNKNOWN_TRADING_PHASE";
             }
         }
     }

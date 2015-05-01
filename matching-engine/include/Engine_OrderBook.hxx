@@ -48,7 +48,7 @@ namespace exchange
                 return true;
             }
 
-            if (iNewPhase < TradingPhase::PHASES_SIZE && iNewPhase >= TradingPhase::OPENING_AUCTION)
+            if (IsValidPhase(iNewPhase))
             {
                 EXINFO("OrderBook::SetTradingPhase " << m_SecurityName << " : switching from phase " << TradingPhaseToString(m_Phase) <<
                     " to phase " << TradingPhaseToString(iNewPhase) << "]");
@@ -152,6 +152,12 @@ namespace exchange
         }
 
         template <typename TOrder, typename TMatchingEngine>
+        inline bool OrderBook<TOrder, TMatchingEngine>::IsValidPhase(const TradingPhase iPhase) const
+        {
+            return iPhase < TradingPhase::PHASES_SIZE && iPhase >= TradingPhase::OPENING_AUCTION;
+        }
+
+        template <typename TOrder, typename TMatchingEngine>
         void OrderBook<TOrder, TMatchingEngine>::CancelAllOrders()
         {
             m_Orders.CancelAllOrders();
@@ -160,7 +166,7 @@ namespace exchange
         template <typename TOrder, typename TMatchingEngine>
         void OrderBook<TOrder, TMatchingEngine>::HandleIntradayAuctionPhaseSwitching(const TradingPhase iNewPhase)
         {
-            if (m_Phase == TradingPhase::INTRADAY_AUCTION &&)
+            if (m_Phase == TradingPhase::INTRADAY_AUCTION)
             {
                 if (iNewPhase == TradingPhase::CLOSING_AUCTION)
                 {
