@@ -160,8 +160,6 @@ namespace exchange
 
             auto now = boost::posix_time::second_clock::local_time();
 
-            // TODO : This part of code was buggy and is not tested
-
             if (iNewPhase == TradingPhase::OPENING_AUCTION)
             {
                 m_AuctionEnd = now + m_OpeningAuctionDuration;

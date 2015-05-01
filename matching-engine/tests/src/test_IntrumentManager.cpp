@@ -22,7 +22,7 @@ public:
 		boost::filesystem::remove_all(m_DBFilePath);
 	}
 
-	void InstrumentHandler(const Instrument<Order> & Instrument)
+	void InstrumentHandler(const Instrument<Order> & /*Instrument*/)
 	{
 		m_InstrumentCounter++;
 	}

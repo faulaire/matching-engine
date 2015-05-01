@@ -55,6 +55,39 @@ TEST_F(MatchingEngineTest, Should_configuration_success_when_valid_configuration
     ASSERT_TRUE(m_pEngine->Configure(m_Config));
 }
 
+TEST_F(MatchingEngineTest, Should_configuration_fail_when_invalid_configuration_file)
+{
+    boost::property_tree::ptree aConfig;
+    const std::string invalid_config_path = "invalid_config.ini";
+
+    ASSERT_TRUE(boost::filesystem::exists(invalid_config_path));
+
+    boost::property_tree::ini_parser::read_ini(invalid_config_path, aConfig);
+
+    ASSERT_FALSE(m_pEngine->Configure(aConfig));
+}
+
+TEST_F(MatchingEngineTest, Should_configuration_fail_when_database_is_inconsistent)
+{
+    boost::property_tree::ptree aConfig;
+    const std::string invalid_config_path = "corrupted_db_config.ini";
+
+    ASSERT_TRUE(boost::filesystem::exists(invalid_config_path));
+
+    boost::property_tree::ini_parser::read_ini(invalid_config_path, aConfig);
+
+    std::string  InstrumentDBPath = aConfig.get<std::string>("Engine.instrument_db_path");
+    InstrumentManager<Order> InstrMgr(InstrumentDBPath);
+
+    Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
+    Instrument<Order> MichelinBis{ "MichelinBis", "ISINMICH", "EUR", 1, 1254 };
+
+    InstrMgr.Write(Michelin, true);
+    InstrMgr.Write(MichelinBis, true);
+    
+    ASSERT_FALSE(m_pEngine->Configure(aConfig));
+}
+
 TEST_F(MatchingEngineTest, Should_engine_state_be_closed_at_startup)
 {
     ASSERT_TRUE(m_pEngine->Configure(m_Config));
@@ -394,7 +427,14 @@ TEST_F(MatchingEngineTest, Should_non_persistent_orders_being_cancelled_after_cl
 
 /*
     TODO  Test that we cannot reinsert a full executed order
+
+        -> Configuration fail for matching_engine
+        -> Corrupted database
+
+    ->CheckOrderBooks never iterates over monitored order books
 */
+
+
 
 int main(int argc, char ** argv)
 {
