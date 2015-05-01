@@ -278,7 +278,7 @@ namespace exchange
         }
 
         /*
-            TODO : Check if the following rule is applied
+            ENH_TODO : Check if the following rule is applied
             Where there are two maximum executable volumes (for two different prices), the following rules are applied:
             the opening price cannot be higher than the best ask or lower than the best bid immediately after the auction phase.
             This rules is clearly not applied, but because the matching engine does not support market order

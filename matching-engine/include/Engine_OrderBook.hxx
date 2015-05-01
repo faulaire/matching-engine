@@ -133,7 +133,7 @@ namespace exchange
 
             if( ipDeal->GetPrice() > max_price || ipDeal->GetPrice() < min_price)
             {
-                if( GetTradingPhase() != TradingPhase::INTRADAY_AUCTION)
+                if( !IsAuctionPhase(GetTradingPhase()) )
                 {
                     SetTradingPhase(TradingPhase::INTRADAY_AUCTION);
                     m_AuctionEnd = boost::posix_time::second_clock::local_time() + m_rMatchingEngine.GetIntradayAuctionDuration();
@@ -172,7 +172,7 @@ namespace exchange
                 {
                     m_rMatchingEngine.UnMonitorOrderBook(this);
                 }
-                else
+                else if ( iNewPhase != TradingPhase::CONTINUOUS_TRADING )
                 {
                     EXERR("OrderBook::SetTradingPhase " << m_SecurityName << " : invalid transition from phase " << TradingPhaseToString(m_Phase) <<
                         " to phase " << TradingPhaseToString(iNewPhase) << "]");

@@ -29,7 +29,7 @@ namespace exchange
         template <typename TOrder>
         class Instrument
         {
-            // TODO : It could be better to have an abstraction of the underlying database model in order to switch to any kind of nosql storage
+            // ENH_TODO : It could be better to have an abstraction of the underlying database model in order to switch to any kind of nosql storage
             friend std::ostream& operator<< <> (std::ostream& o, const Instrument<TOrder> & x);
             
             using price_type = typename TOrder::price_type;

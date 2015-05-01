@@ -179,8 +179,8 @@ namespace exchange
         void MatchingEngine::UpdateInstrumentsPhase(TradingPhase iNewPhase)
         {
             /*
-                TODO : Check what's append when a instrument is in intraday auction phase ?
-                TODO : Write a test to test this behavior
+                TODO : Check what's append when a instrument is in intraday auction phase
+                        -> Handled now, write a test for it
             */
             if( iNewPhase != m_GlobalPhase)
             {
@@ -271,6 +271,7 @@ namespace exchange
         void MatchingEngine::CancelAllOrders()
         {
             // TODO : Check if it's possible to have orderbook in m_MonitoredOrderBook
+            assert(m_MonitoredOrderBook.size() != 0);
             for (auto && OrderBook : m_OrderBookContainer)
             {
                 OrderBook.second->CancelAllOrders();
