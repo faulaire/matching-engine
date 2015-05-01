@@ -67,14 +67,14 @@ namespace exchange
             > order_set;
         };
 
-        template<typename TOrder, typename TDealHandler> class OrderContainer;
-        template<typename TOrder, typename TDealHandler> std::ostream& operator<< (std::ostream& o, const OrderContainer<TOrder, TDealHandler> & x);
+        template<typename TOrder, typename TEventHandler> class OrderContainer;
+        template<typename TOrder, typename TEventHandler> std::ostream& operator<< (std::ostream& o, const OrderContainer<TOrder, TEventHandler> & x);
 
-        template <typename TOrder, typename TDealHandler>
+        template <typename TOrder, typename TEventHandler>
         class OrderContainer
         {
 
-            friend std::ostream& operator<< <> (std::ostream& o, const OrderContainer<TOrder, TDealHandler> & x);
+            friend std::ostream& operator<< <> (std::ostream& o, const OrderContainer<TOrder, TEventHandler> & x);
 
             public:
 
@@ -115,8 +115,8 @@ namespace exchange
 
                 /**
                 */
-                OrderContainer(TDealHandler & iDealHandler):
-                    m_DealHandler(iDealHandler), m_ViewMode(ViewMode::VM_BY_ORDER)
+                OrderContainer(TEventHandler & iEventHandler):
+                    m_EventHandler(iEventHandler), m_ViewMode(ViewMode::VM_BY_ORDER)
                 {}
 
                 /**
@@ -200,7 +200,7 @@ namespace exchange
                 /* */
                 AskStorage      m_AskOrders;
                 /* */
-                TDealHandler&   m_DealHandler;
+                TEventHandler&  m_EventHandler;
                 /* */
                 ViewMode        m_ViewMode;
         };

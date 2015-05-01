@@ -8,7 +8,7 @@
 #include <logger/Logger.h>
 
 #include <Engine_Order.h>
-#include <Engine_DealHandler.h>
+#include <Engine_EventHandler.h>
 #include <Engine_OrderContainer.h>
 #include <Engine_Instrument.h>
 
@@ -45,7 +45,7 @@ namespace exchange
 
 
         template <typename TOrder, typename TMatchingEngine>
-        class OrderBook : public DealHandler<OrderBook<TOrder,TMatchingEngine> >
+        class OrderBook : public EventHandler<OrderBook<TOrder,TMatchingEngine> >
         {
             private:
 
@@ -53,7 +53,7 @@ namespace exchange
                 friend std::ostream& operator<< <> (std::ostream& o, const OrderBook<TOrder,TMatchingEngine> & x);
                 /**/
                 using OrderContainerType = OrderContainer<TOrder, OrderBook>;
-                using DealHandlerType = DealHandler<OrderBook<TOrder,TMatchingEngine> >;
+                using EventHandlerType = EventHandler<OrderBook<TOrder,TMatchingEngine> >;
 
                 using price_type = typename TOrder::price_type;
                 using TimeType   = boost::posix_time::ptime;
@@ -80,6 +80,9 @@ namespace exchange
 
                 /**/
                 void ProcessDeal(const Deal * ipDeal);
+
+                /**/
+                void ProcessUnsolicitedCancelledOrder(const Order & order);
 
                 /**/
                 TimeType GetAuctionEnd() const { return m_AuctionEnd; }

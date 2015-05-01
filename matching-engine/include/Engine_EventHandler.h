@@ -20,8 +20,8 @@ namespace exchange
     {
         namespace bmi = boost::multi_index;
 
-        template <typename TDealProcessor>
-        class DealHandler
+        template <typename TEventProcessor>
+        class EventHandler
         {
             protected:
 
@@ -48,13 +48,16 @@ namespace exchange
 
             public:
 
-                DealHandler(std::uint32_t iInstrumentID);
-                virtual ~DealHandler();
+                EventHandler(std::uint32_t iInstrumentID);
+                virtual ~EventHandler();
 
             public:
 
                 /**/
                 void OnDeal(std::unique_ptr<Deal> ipDeal);
+
+                /**/
+                void OnUnsolicitedCancelledOrder(const Order & order);
 
             public:
 
@@ -68,29 +71,29 @@ namespace exchange
         };
 
 
-        template <typename TDealProcessor>
-        DealHandler<TDealProcessor>::DealHandler(std::uint32_t iInstrumentID):
+        template <typename TEventProcessor>
+        EventHandler<TEventProcessor>::EventHandler(std::uint32_t iInstrumentID):
             m_InstrumentID(iInstrumentID)
         {}
 
-        template <typename TDealProcessor>
-        DealHandler<TDealProcessor>::~DealHandler()
+        template <typename TEventProcessor>
+        EventHandler<TEventProcessor>::~EventHandler()
         {}
 
-        template <typename TDealProcessor>
-        inline std::uint32_t DealHandler<TDealProcessor>::GetInstrumentID() const
+        template <typename TEventProcessor>
+        inline std::uint32_t EventHandler<TEventProcessor>::GetInstrumentID() const
         {
             return m_InstrumentID;
         }
 
-        template <typename TDealProcessor>
-        inline std::uint64_t DealHandler<TDealProcessor>::GetDealCounter() const
+        template <typename TEventProcessor>
+        inline std::uint64_t EventHandler<TEventProcessor>::GetDealCounter() const
         {
             return m_DealContainer.size();
         }
 
-        template <typename TDealProcessor>
-        void DealHandler<TDealProcessor>::OnDeal(std::unique_ptr<Deal> ipDeal)
+        template <typename TEventProcessor>
+        void EventHandler<TEventProcessor>::OnDeal(std::unique_ptr<Deal> ipDeal)
         {
             std::ostringstream  oss("");
             oss << m_InstrumentID << "_" << ipDeal->GetTimeStamp().time_since_epoch().count();
@@ -102,13 +105,19 @@ namespace exchange
             if (insertion.second)
             {
                 Deal* pDeal = insertion.first->get();
-                static_cast<TDealProcessor*>(this)->ProcessDeal(pDeal);
+                static_cast<TEventProcessor*>(this)->ProcessDeal(pDeal);
             }
             else
             {
-                EXERR("DealHandler : Failed to insert and process deal [" << (*insertion.first).get());
+                EXERR("EventHandler : Failed to insert and process deal [" << (*insertion.first).get());
                 assert(false);
             }
+        }
+
+        template <typename TEventProcessor>
+        void EventHandler<TEventProcessor>::OnUnsolicitedCancelledOrder(const Order & order)
+        {
+            static_cast<TEventProcessor*>(this)->ProcessUnsolicitedCancelledOrder(order);
         }
     }
 }

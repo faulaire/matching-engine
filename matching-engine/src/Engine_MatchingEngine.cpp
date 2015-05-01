@@ -178,10 +178,6 @@ namespace exchange
 
         void MatchingEngine::UpdateInstrumentsPhase(TradingPhase iNewPhase)
         {
-            /*
-                TODO : Check what's append when a instrument is in intraday auction phase
-                        -> Handled now, write a test for it
-            */
             if( iNewPhase != m_GlobalPhase)
             {
                 EXINFO("MatchingEngine::UpdateInstrumentsPhase : Switching from phase[" << TradingPhaseToString(m_GlobalPhase)
@@ -219,7 +215,6 @@ namespace exchange
             const TimeType now = boost::posix_time::second_clock::local_time();
 
             /* Verify if some orderbook are in intraday auction state */
-            /* TODO : Rework this part */
             /* TODO : Randomize end of auction */
 
             CheckOrderBooks(now);
@@ -270,12 +265,19 @@ namespace exchange
 
         void MatchingEngine::CancelAllOrders()
         {
-            // TODO : Check if it's possible to have orderbook in m_MonitoredOrderBook
-            assert(m_MonitoredOrderBook.size() != 0);
+            /*
+                ENH_TODO : This is not good check, we may want to cancelorders during intraday auction phases
+            */
+            assert(m_MonitoredOrderBook.size() == 0);
             for (auto && OrderBook : m_OrderBookContainer)
             {
                 OrderBook.second->CancelAllOrders();
             }
+        }
+
+        void MatchingEngine::OnUnsolicitedCancelledOrder(const Order & order)
+        {
+            EXINFO("MatchingEngine::OnUnsolicitedCancelledOrder : " << order);
         }
 
     }

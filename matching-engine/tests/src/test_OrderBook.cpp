@@ -7,6 +7,8 @@
 
 using namespace exchange::engine;
 
+
+
 class OrderBookTest : public testing::Test
 {
 public:
@@ -353,6 +355,49 @@ TEST_F(OrderBookTest, Should_set_trading_phase_FAIL_when_invalid_phases)
 {
     ASSERT_FALSE(m_pOrderBook->SetTradingPhase((TradingPhase)-7572));
     ASSERT_FALSE(m_pOrderBook->SetTradingPhase((TradingPhase)6843));
+}
+
+TEST_F(OrderBookTest, Should_orderbook_be_monitored_when_switching_from_continuous_trading_to_intraday_auction)
+{
+    ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
+
+    auto MaxPriceDev = m_Config.get<unsigned int>("Engine.max_price_deviation");
+    MaxPriceDev++;
+
+    auto ref_price = m_pOrderBook->GetPostAuctionPrice();
+    auto to_low_price = ref_price * (1 - MaxPriceDev*0.01);
+
+    Order OrderBuy(OrderWay::BUY, 100, to_low_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, to_low_price, 1, 5);
+
+    ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
+    ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
+
+    ASSERT_EQ(1, m_pEngine->GetMonitoredOrderBookCounter());
+}
+
+TEST_F(OrderBookTest, Should_orderbook_be_unmonitored_when_switching_from_intraday_auction_to_closing_auction)
+{
+    ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
+
+    auto MaxPriceDev = m_Config.get<unsigned int>("Engine.max_price_deviation");
+    MaxPriceDev++;
+
+    auto ref_price = m_pOrderBook->GetPostAuctionPrice();
+    auto to_low_price = ref_price * (1 - MaxPriceDev*0.01);
+
+    Order OrderBuy(OrderWay::BUY, 100, to_low_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, to_low_price, 1, 5);
+
+    ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
+    ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
+
+    ASSERT_EQ(1, m_pEngine->GetMonitoredOrderBookCounter());
+
+    ASSERT_EQ(TradingPhase::INTRADAY_AUCTION, m_pOrderBook->GetTradingPhase());
+    ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CLOSING_AUCTION));
+
+    ASSERT_EQ(0, m_pEngine->GetMonitoredOrderBookCounter());
 }
 
 int main(int argc, char ** argv)

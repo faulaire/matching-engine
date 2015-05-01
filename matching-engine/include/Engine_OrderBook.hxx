@@ -8,7 +8,7 @@ namespace exchange
 
         template <typename TOrder, typename TMatchingEngine>
         OrderBook<TOrder, TMatchingEngine>::OrderBook(const Instrument<TOrder> & iInstrument, TMatchingEngine& rMatchingEngine)
-            : DealHandlerType(iInstrument.GetProductId()), m_rMatchingEngine(rMatchingEngine), m_SecurityName(iInstrument.GetName()), m_Orders(*this),
+            : EventHandlerType(iInstrument.GetProductId()), m_rMatchingEngine(rMatchingEngine), m_SecurityName(iInstrument.GetName()), m_Orders(*this),
             m_Phase(TradingPhase::CLOSE), m_AuctionEnd(), m_LastPrice(iInstrument.GetClosePrice()), m_Turnover(0), m_DailyVolume(0),
             m_OpenPrice(0), m_ClosePrice(iInstrument.GetClosePrice()), m_PostAuctionPrice(iInstrument.GetClosePrice())
         {
@@ -180,6 +180,13 @@ namespace exchange
                 }
             }
         }
+        
+        template <typename TOrder, typename TMatchingEngine>
+        void OrderBook<TOrder, TMatchingEngine>::ProcessUnsolicitedCancelledOrder(const Order & order)
+        {
+            m_rMatchingEngine.OnUnsolicitedCancelledOrder(order);
+        }
+
 
         template <typename TOrder, typename TMatchingEngine>
         std::ostream& operator<< (std::ostream& oss, const OrderBook<TOrder,TMatchingEngine> & iOrders)

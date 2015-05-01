@@ -14,14 +14,21 @@ namespace exchange
     namespace engine
     {
 
-        template <typename TOrder, typename TDealHandler>
-        void OrderContainer<TOrder, TDealHandler>::CancelAllOrders()
+        template <typename TOrder, typename TEventHandler>
+        void OrderContainer<TOrder, TEventHandler>::CancelAllOrders()
         {
-            /*
-                TODO : Fine now but all clients need to be notified that their orders have been cancelled
-            */
-            m_AskOrders.clear();
-            m_BidOrders.clear();
+            auto DoCancelAllOrders = [this](auto & container)
+            {
+                while (!container.empty())
+                {
+                    auto OrderIt = container.begin();
+                    m_EventHandler.OnUnsolicitedCancelledOrder(*OrderIt);
+                    container.erase(OrderIt);
+                }
+            };
+
+            DoCancelAllOrders(m_AskOrders);
+            DoCancelAllOrders(m_BidOrders);
         }
 
         template <typename TOrder, typename SortingPredicate>
@@ -36,9 +43,9 @@ namespace exchange
             typedef std::less_equal<typename TOrder::price_type>       value;
         };
 
-        template <typename TOrder, typename TDealHandler>
+        template <typename TOrder, typename TEventHandler>
         template <typename Container>
-        std::uint64_t OrderContainer<TOrder, TDealHandler>::GetExecutableQuantity(const Container & Orders, price_type iPrice) const
+        std::uint64_t OrderContainer<TOrder, TEventHandler>::GetExecutableQuantity(const Container & Orders, price_type iPrice) const
         {
             auto & Index = bmi::get<price_tag>(Orders);
             std::uint64_t Qty = 0;
@@ -56,9 +63,9 @@ namespace exchange
             return Qty;
         }
 
-        template <typename TOrder, typename TDealHandler>
+        template <typename TOrder, typename TEventHandler>
         template <typename Msg>
-        std::uint64_t OrderContainer<TOrder, TDealHandler>::GetExecutableQuantity(const Msg & iMsg, OrderWay iWay) const
+        std::uint64_t OrderContainer<TOrder, TEventHandler>::GetExecutableQuantity(const Msg & iMsg, OrderWay iWay) const
         {
             switch (iWay)
             {
@@ -95,9 +102,9 @@ namespace exchange
             return AggressorIDHelper<Msg, is_replaced_order<Msg>::value >::get(t);
         }
 
-        template <typename TOrder, typename TDealHandler>
+        template <typename TOrder, typename TEventHandler>
         template <typename Container, typename Msg>
-        void OrderContainer<TOrder, TDealHandler>::ProcessDeals(Container & Orders, Msg & iMsg, std::uint64_t iMatchQty)
+        void OrderContainer<TOrder, TEventHandler>::ProcessDeals(Container & Orders, Msg & iMsg, std::uint64_t iMatchQty)
         {
             auto & Index = bmi::get<price_tag>(Orders);
 
@@ -128,7 +135,7 @@ namespace exchange
                     pDeal = std::make_unique<Deal>(ExecPrice, ExecQty, iMsg.GetClientID(), GetAggressorID(iMsg), OrderToHit->GetClientID(), OrderToHit->GetOrderID());
                 }
 
-                m_DealHandler.OnDeal(std::move(pDeal));
+                m_EventHandler.OnDeal(std::move(pDeal));
 
                 if (0 == OrderToHit->GetQuantity())
                 {
@@ -137,9 +144,9 @@ namespace exchange
             }
         }
 
-        template <typename TOrder, typename TDealHandler>
+        template <typename TOrder, typename TEventHandler>
         template <typename Msg>
-        void OrderContainer<TOrder, TDealHandler>::ProcessDeals(Msg & iMsg, OrderWay iWay, std::uint64_t iMatchQty)
+        void OrderContainer<TOrder, TEventHandler>::ProcessDeals(Msg & iMsg, OrderWay iWay, std::uint64_t iMatchQty)
         {
             switch (iWay)
             {
@@ -155,8 +162,8 @@ namespace exchange
             }
         }
 
-        template <typename TOrder, typename TDealHandler>
-        bool OrderContainer<TOrder, TDealHandler>::Insert(TOrder & iOrder, bool Match)
+        template <typename TOrder, typename TEventHandler>
+        bool OrderContainer<TOrder, TEventHandler>::Insert(TOrder & iOrder, bool Match)
         {
             if (Match)
             {
@@ -176,8 +183,8 @@ namespace exchange
             return true;
         }
 
-        template <typename TOrder, typename TDealHandler>
-        bool OrderContainer<TOrder, TDealHandler>::AuctionInsert(const TOrder & iOrder)
+        template <typename TOrder, typename TEventHandler>
+        bool OrderContainer<TOrder, TEventHandler>::AuctionInsert(const TOrder & iOrder)
         {
             /*
             *  insert return a pair, the second element indicate
@@ -198,8 +205,8 @@ namespace exchange
         /**
         * Erase an order from order book
         */
-        template <typename TOrder, typename TDealHandler>
-        bool OrderContainer<TOrder, TDealHandler>::Delete(const std::uint32_t iOrderId, const std::uint32_t iClientId, OrderWay iWay)
+        template <typename TOrder, typename TEventHandler>
+        bool OrderContainer<TOrder, TEventHandler>::Delete(const std::uint32_t iOrderId, const std::uint32_t iClientId, OrderWay iWay)
         {    
             switch (iWay)
             {
@@ -213,9 +220,9 @@ namespace exchange
             };
         }
 
-        template <typename TOrder, typename TDealHandler>
+        template <typename TOrder, typename TEventHandler>
         template <typename TOrderReplace>
-        bool OrderContainer<TOrder, TDealHandler>::Modify(TOrderReplace & iOrderReplace, bool Match)
+        bool OrderContainer<TOrder, TEventHandler>::Modify(TOrderReplace & iOrderReplace, bool Match)
         {
             auto ProcessModify = [&]()
             {
@@ -284,8 +291,8 @@ namespace exchange
             This rules is clearly not applied, but because the matching engine does not support market order
             for now, this rules is not necessary
         */
-        template <typename TOrder, typename TDealHandler>
-        std::tuple<std::uint32_t, std::uint64_t> OrderContainer<TOrder, TDealHandler>::GetTheoriticalAuctionInformations() const
+        template <typename TOrder, typename TEventHandler>
+        std::tuple<std::uint32_t, std::uint64_t> OrderContainer<TOrder, TEventHandler>::GetTheoriticalAuctionInformations() const
         {
             std::uint64_t MaxQty = 0;
             std::uint32_t OpenPrice = 0;
@@ -310,8 +317,8 @@ namespace exchange
         /*
         Post auction phase
         */
-        template <typename TOrder, typename TDealHandler>
-        void  OrderContainer<TOrder, TDealHandler>::MatchOrders()
+        template <typename TOrder, typename TEventHandler>
+        void  OrderContainer<TOrder, TEventHandler>::MatchOrders()
         {
             auto OpeningInformation = GetTheoriticalAuctionInformations();
 
@@ -335,7 +342,7 @@ namespace exchange
                     BidIndex.modify(BidOrder, OrderUpdaterSingle<&Order::SetQuantity>(BidOrder->GetQuantity() - ExecutedQty));
 
                     std::unique_ptr<Deal> pDeal = std::make_unique<Deal>(MatchingPrice, ExecutedQty, BidOrder->GetClientID(), BidOrder->GetOrderID(), AskOrder->GetClientID(), AskOrder->GetOrderID());
-                    m_DealHandler.OnDeal(std::move(pDeal));
+                    m_EventHandler.OnDeal(std::move(pDeal));
 
                     MatchingQty -= ExecutedQty;
 
@@ -352,8 +359,8 @@ namespace exchange
             }
         }
 
-        template <typename TOrder, typename TDealHandler>
-        void OrderContainer<TOrder, TDealHandler>::ByOrderView(std::vector<TOrder> & BidContainer, std::vector<TOrder> & AskContainer) const
+        template <typename TOrder, typename TEventHandler>
+        void OrderContainer<TOrder, TEventHandler>::ByOrderView(std::vector<TOrder> & BidContainer, std::vector<TOrder> & AskContainer) const
         {
             BidContainer.reserve( GetBidIndex().size() );
             AskContainer.reserve( GetAskIndex().size() );
@@ -362,8 +369,8 @@ namespace exchange
             std::copy(GetBidIndex().begin(), GetBidIndex().end(), std::back_inserter(BidContainer));
         }
 
-        template <typename TOrder, typename TDealHandler>
-        void OrderContainer<TOrder, TDealHandler>::AggregatedView(LimitContainer & BidContainer, LimitContainer & AskContainer) const
+        template <typename TOrder, typename TEventHandler>
+        void OrderContainer<TOrder, TEventHandler>::AggregatedView(LimitContainer & BidContainer, LimitContainer & AskContainer) const
         {
             auto AggregatedViewHelper = [&](price_index_iterator begin, price_index_iterator end, LimitContainer & Container)
             { 
@@ -390,26 +397,26 @@ namespace exchange
             AggregatedViewHelper(GetAskIndex().begin(), GetAskIndex().end(), AskContainer);
         }
 
-        template <typename TOrder, typename TDealHandler>
-        std::ostream& operator<<(std::ostream& oss, const OrderContainer<TOrder, TDealHandler> & iOrders)
+        template <typename TOrder, typename TEventHandler>
+        std::ostream& operator<<(std::ostream& oss, const OrderContainer<TOrder, TEventHandler> & iOrders)
         {
             switch (iOrders.GetViewMode())
             {
-                case OrderContainer<TOrder, TDealHandler>::ViewMode::VM_BY_ORDER:
+                case OrderContainer<TOrder, TEventHandler>::ViewMode::VM_BY_ORDER:
                     iOrders.StreamByOrder(oss);
                     break;
-                case OrderContainer<TOrder, TDealHandler>::ViewMode::VM_BY_PRICE:
+                case OrderContainer<TOrder, TEventHandler>::ViewMode::VM_BY_PRICE:
                     iOrders.StreamByPrice(oss);
                     break;
-                case OrderContainer<TOrder, TDealHandler>::ViewMode::VM_UNKNOWN:
+                case OrderContainer<TOrder, TEventHandler>::ViewMode::VM_UNKNOWN:
                     assert(false);
                     break;
             };
             return oss;
         }
 
-        template <typename TOrder, typename TDealHandler>
-        void OrderContainer<TOrder, TDealHandler>::StreamByOrder(std::ostream& oss) const
+        template <typename TOrder, typename TEventHandler>
+        void OrderContainer<TOrder, TEventHandler>::StreamByOrder(std::ostream& oss) const
         {
             auto MaxIndex = (std::max)(m_BidOrders.size(), m_AskOrders.size());
 
@@ -447,11 +454,11 @@ namespace exchange
             }
         }
 
-        template <typename TOrder, typename TDealHandler>
-        void OrderContainer<TOrder, TDealHandler>::StreamByPrice(std::ostream& oss) const
+        template <typename TOrder, typename TEventHandler>
+        void OrderContainer<TOrder, TEventHandler>::StreamByPrice(std::ostream& oss) const
         {
-            typedef typename OrderContainer<TOrder, TDealHandler>::LimitContainer LimitContainer;
-            typedef typename OrderContainer<TOrder, TDealHandler>::LimitType      LimitType;
+            typedef typename OrderContainer<TOrder, TEventHandler>::LimitContainer LimitContainer;
+            typedef typename OrderContainer<TOrder, TEventHandler>::LimitType      LimitType;
 
             LimitContainer BidContainer;
             LimitContainer AskContainer;

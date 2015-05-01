@@ -12,16 +12,16 @@
 using namespace exchange::engine;
 
 /**
-    class DealHandler
+    class EventHandler
 */
-class DealHandler
+class EventHandler
 {
     public:
 
         typedef std::map<std::uint32_t, std::unique_ptr<Deal> > DealContainerType;
 
     public:
-        DealHandler()
+        EventHandler()
         {}
 
         void OnDeal(std::unique_ptr<Deal> ipDeal)
@@ -30,6 +30,10 @@ class DealHandler
 
             ASSERT_EQ(*ipDeal, *ipDeal);
         }
+
+        /**/
+        void OnUnsolicitedCancelledOrder(const Order & /* order*/ )
+        {}
 
         void Reset()
         {
@@ -47,12 +51,12 @@ class OrderContainerTest : public testing::Test
 {
     protected:
 
-        typedef OrderContainer<Order, DealHandler>      OrderContainerType;
-        typedef OrderContainerType::LimitContainer      LimitContainerType;
-        typedef LimitContainerType::value_type          LimiteType;
+        typedef OrderContainer<Order, EventHandler>      OrderContainerType;
+        typedef OrderContainerType::LimitContainer       LimitContainerType;
+        typedef LimitContainerType::value_type           LimiteType;
 
     protected:
-        OrderContainerTest():m_Container(m_DealHandler)
+        OrderContainerTest():m_Container(m_EventHandler)
         {}
 
         void DisplayOrders()
@@ -116,7 +120,7 @@ class OrderContainerTest : public testing::Test
 
         
         OrderContainerType  m_Container;
-        DealHandler         m_DealHandler;
+        EventHandler        m_EventHandler;
 
         LimitContainerType  m_BidContainerReference;
         LimitContainerType  m_AskContainerReference;
@@ -323,7 +327,7 @@ TEST_F(OrderContainerTest, AuctionMatching)
     
     m_Container.MatchOrders();
 
-    auto & DealContainer = m_DealHandler.GetDealContainer();
+    auto & DealContainer = m_EventHandler.GetDealContainer();
 
     ASSERT_EQ(DealContainer.size(), 1);
 
@@ -332,7 +336,7 @@ TEST_F(OrderContainerTest, AuctionMatching)
     /*
         
     */
-    m_DealHandler.Reset();
+    m_EventHandler.Reset();
     m_Container.CancelAllOrders();
 
     m_BidOrders = {
@@ -360,13 +364,13 @@ TEST_F(OrderContainerTest, AuctionMatching)
     ASSERT_EQ(*DealContainer.at(4), Deal(39, 150, 6, 1, 4, 2));
     ASSERT_EQ(*DealContainer.at(5), Deal(39, 50, 7, 1, 4, 2));
 
-    m_DealHandler.Reset();
+    m_EventHandler.Reset();
     m_Container.CancelAllOrders();
 }
 
 TEST_F(OrderContainerTest, InsertMatching)
 {
-    auto & DealContainer = m_DealHandler.GetDealContainer();
+    auto & DealContainer = m_EventHandler.GetDealContainer();
 
     m_Container.CancelAllOrders();
 
@@ -417,12 +421,12 @@ TEST_F(OrderContainerTest, InsertMatching)
     ASSERT_TRUE(BidContainer == m_BidContainerReference);
     ASSERT_TRUE(AskContainer == m_AskContainerReference);
 
-    m_DealHandler.Reset();
+    m_EventHandler.Reset();
 }
 
 TEST_F(OrderContainerTest, ModifyMatching)
 {
-    auto & DealContainer = m_DealHandler.GetDealContainer();
+    auto & DealContainer = m_EventHandler.GetDealContainer();
 
     m_Container.CancelAllOrders();
 
@@ -473,7 +477,7 @@ TEST_F(OrderContainerTest, ModifyMatching)
     ASSERT_EQ( DealContainer.size(), 3 );
     ASSERT_EQ( *DealContainer.at(2), Deal(91, 150, 8, 5, 4, 8) );
 
-    m_DealHandler.Reset();
+    m_EventHandler.Reset();
 }
 
 TEST_F(OrderContainerTest, Fully_filled_modified_orders_should_be_removed_from_order_book)

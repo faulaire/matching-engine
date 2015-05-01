@@ -77,7 +77,13 @@ namespace exchange
                 inline const OrderBookType* GetOrderBook(std::uint32_t iProductID) const;
 
                 /**/
+                inline OrderBookList::size_type GetMonitoredOrderBookCounter() const;
+
+                /**/
                 DurationType GetIntradayAuctionDuration() const { return m_IntradayAuctionDuration; }
+
+                /**/
+                void OnUnsolicitedCancelledOrder(const Order & order);
 
             protected:
 
@@ -132,6 +138,11 @@ namespace exchange
         inline void MatchingEngine::UnMonitorOrderBook(OrderBookType * pOrderBook)
         {
             m_MonitoredOrderBook.erase(pOrderBook);
+        }
+
+        inline MatchingEngine::OrderBookList::size_type MatchingEngine::GetMonitoredOrderBookCounter() const
+        {
+            return m_MonitoredOrderBook.size();
         }
     }
 }

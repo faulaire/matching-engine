@@ -393,7 +393,7 @@ TEST_F(MatchingEngineTest, Should_non_persistent_orders_being_cancelled_after_cl
 }
 
 /*
-    TODO  Teset que l'on ne peut pas réinserer un ordre full exec avec les même IDs
+    TODO  Test that we cannot reinsert a full executed order
 */
 
 int main(int argc, char ** argv)
