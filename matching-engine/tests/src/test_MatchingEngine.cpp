@@ -73,6 +73,18 @@ TEST_F(MatchingEngineTest, Should_configuration_fail_when_invalid_configuration_
     ASSERT_FALSE(m_pEngine->Configure(aConfig));
 }
 
+TEST_F(MatchingEngineTest, Should_configuration_fail_when_instrument_db_path_is_missing)
+{
+    boost::property_tree::ptree aConfig;
+    const std::string missing_instrument_db_path = "missing_instrument_db_config.ini";
+
+    ASSERT_TRUE(boost::filesystem::exists(missing_instrument_db_path));
+
+    boost::property_tree::ini_parser::read_ini(missing_instrument_db_path, aConfig);
+
+    ASSERT_FALSE(m_pEngine->Configure(aConfig));
+}
+
 TEST_F(MatchingEngineTest, Should_configuration_fail_when_database_is_inconsistent)
 {
     boost::property_tree::ptree aConfig;
@@ -98,10 +110,19 @@ TEST_F(MatchingEngineTest, Should_configuration_fail_when_database_is_inconsiste
         InstrMgr.Write(Michelin, key_extractor, true);
         InstrMgr.Write(MichelinBis, key_extractor, true);
     }
-
-    // TODO : Add an already held by process tests
     
     ASSERT_FALSE(m_pEngine->Configure(aConfig));
+}
+
+TEST_F(MatchingEngineTest, Should_configuration_fail_when_database_is_already_locked)
+{
+    std::string  InstrumentDBPath = m_Config.get<std::string>("Engine.instrument_db_path");
+
+    InstrumentManager<Order> InstrMgr(InstrumentDBPath);
+    
+    InstrMgr.Load([](const auto & /*instr*/) {});
+
+    ASSERT_FALSE(m_pEngine->Configure(m_Config));
 }
 
 TEST_F(MatchingEngineTest, Should_engine_state_be_closed_at_startup)

@@ -21,6 +21,8 @@ public:
 
     virtual void SetUp()
     {
+        EXINFO("OrderBookTest::SetUp : Working with :" << m_Instrument);
+
         m_pEngine.reset(new exchange::engine::MatchingEngine());
 
         m_pOrderBook.reset(new OrderBookType(m_Instrument, *m_pEngine));
@@ -262,7 +264,10 @@ TEST_F(OrderBookTest, Should_order_be_rejected_when_price_is_null)
 {
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
     Order OrderBuy(OrderWay::BUY, 1000, 0, 1, 5);
-    Order OrderSell(OrderWay::BUY, 1000, 0, 1, 5);
+    Order OrderSell(OrderWay::SELL, 1000, 0, 1, 5);
+
+    EXINFO(OrderBuy);
+    EXINFO(OrderSell);
 
     ASSERT_FALSE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_FALSE(m_pOrderBook->Insert(OrderSell));
@@ -273,6 +278,9 @@ TEST_F(OrderBookTest, Should_order_be_rejected_when_way_is_invalid)
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
     Order OrderBuy(OrderWay::MAX_WAY, 1000, 0, 1, 5);
     Order WeirOrder((OrderWay)27, 1000, 0, 1, 5);
+
+    EXINFO(OrderBuy);
+    EXINFO(WeirOrder);
 
     ASSERT_FALSE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_FALSE(m_pOrderBook->Insert(WeirOrder));

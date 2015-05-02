@@ -104,12 +104,13 @@ namespace exchange
 
             if (insertion.second)
             {
-                Deal* pDeal = insertion.first->get();
+                auto pDeal = insertion.first->get();
+                EXINFO("EventHandler::OnDeal : " << *pDeal);
                 static_cast<TEventProcessor*>(this)->ProcessDeal(pDeal);
             }
             else
             {
-                EXERR("EventHandler : Failed to insert and process deal [" << (*insertion.first).get());
+                EXERR("EventHandler : Failed to insert and process deal [" << *(insertion.first->get()) );
                 assert(false);
             }
         }
