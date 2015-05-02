@@ -437,9 +437,48 @@ TEST_F(MatchingEngineTest, Should_non_persistent_orders_being_cancelled_after_cl
     ASSERT_FALSE(m_pEngine->Delete(1, 5, OrderWay::BUY, product_id));
 }
 
+TEST_F(MatchingEngineTest, Should_orderbook_be_monitored_when_switching_to_intraday_auction)
+{
+    ASSERT_TRUE(m_pEngine->Configure(m_Config));
+
+    ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
+
+    Order ob(OrderWay::BUY, 1000, 2000, 1, 5);
+    Order os(OrderWay::SELL, 1000, 2000, 1, 5);
+
+    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
+    ASSERT_TRUE(m_pEngine->Insert(os, product_id));
+
+    ASSERT_EQ(1, m_pEngine->GetMonitoredOrderBookCounter());
+}
+
+TEST_F(MatchingEngineTest, Should_orderbook_be_unmonitored_at_the_end_of_intraday_auction)
+{
+    ASSERT_TRUE(m_pEngine->Configure(m_Config));
+
+    ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
+
+    Order ob(OrderWay::BUY, 1000, 2000, 1, 5);
+    Order os(OrderWay::SELL, 1000, 2000, 1, 5);
+
+    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
+    ASSERT_TRUE(m_pEngine->Insert(os, product_id));
+
+    ASSERT_EQ(1, m_pEngine->GetMonitoredOrderBookCounter());
+    
+    m_pEngine->EngineListen();
+    
+    ASSERT_EQ(1, m_pEngine->GetMonitoredOrderBookCounter());
+    
+    auto auction_delay = m_Config.get<unsigned int>("Engine.intraday_auction_duration");
+    sleep(auction_delay + 1);
+    
+    m_pEngine->EngineListen();
+    
+    ASSERT_EQ(0, m_pEngine->GetMonitoredOrderBookCounter());
+}
 /*
     TODO  Test that we cannot reinsert a full executed order
-    TODO  CheckOrderBooks never iterates over monitored order books
 */
 
 int main(int argc, char ** argv)

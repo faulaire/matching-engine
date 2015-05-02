@@ -93,12 +93,11 @@ def run_tests(Context):
     Context.exec_command("rats -w 3 --xml %s > %s/rats-report.xml"%(Context.path.relpath(), bin_dir))
     
     # Run vera++: static code checker focusing on code style issues
-    vera_install_path="/opt/vera++/bin"
     
     # All files but remove unit tests
     files_to_analyze = " find %s -regex \".*\.cpp\|.*\.h\"|grep -v 'test_' "%(Context.path.relpath())
-    vera_command     = " %s/vera++ - -showrules -nodup"%vera_install_path
-    vera_parser_cmd  = " %s/vera++Report2checkstyleReport.perl > %s/vera++-report.xml"%(vera_install_path,bin_dir)
+    vera_command     = " vera++ - -showrules -nodup"
+    vera_parser_cmd  = " vera++Report2checkstyleReport.perl > %s/vera++-report.xml"%(bin_dir)
 
     Context.exec_command("bash -c '%s|%s|&%s'"%(files_to_analyze,vera_command,vera_parser_cmd))
 
