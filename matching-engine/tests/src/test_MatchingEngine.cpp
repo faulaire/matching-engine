@@ -69,6 +69,8 @@ TEST_F(MatchingEngineTest, Should_configuration_fail_when_invalid_configuration_
 
 TEST_F(MatchingEngineTest, Should_configuration_fail_when_database_is_inconsistent)
 {
+    // TODO : Understand already held by process
+
     boost::property_tree::ptree aConfig;
     const std::string invalid_config_path = "corrupted_db_config.ini";
 
@@ -427,14 +429,8 @@ TEST_F(MatchingEngineTest, Should_non_persistent_orders_being_cancelled_after_cl
 
 /*
     TODO  Test that we cannot reinsert a full executed order
-
-        -> Configuration fail for matching_engine
-        -> Corrupted database
-
-    ->CheckOrderBooks never iterates over monitored order books
+    TODO  CheckOrderBooks never iterates over monitored order books
 */
-
-
 
 int main(int argc, char ** argv)
 {

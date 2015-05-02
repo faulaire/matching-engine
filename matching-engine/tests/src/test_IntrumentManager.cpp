@@ -90,7 +90,7 @@ TEST_F(InstrumentManagerTest, Should_load_return_n_instruments_when_n_instrument
 	ASSERT_EQ(3, m_InstrumentCounter);
 }
 
-TEST_F(InstrumentManagerTest, Should_load_return_the_same_instrument_as_one_inserted)
+TEST_F(InstrumentManagerTest, Should_load_return_the_same_instrument_as_the_inserted_one)
 {
 	InstrumentManager<Order> InstrMgr(m_DBFilePath);
 

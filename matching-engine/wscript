@@ -2,7 +2,7 @@
 # encoding: utf-8
 import sys
 
-def run_test(ctx):
+def run_tests(ctx):
     sys.path.append(ctx.top_dir)
     import waf_tools
     
@@ -11,7 +11,7 @@ def run_test(ctx):
 
 def configure(cfg):
     #system lib
-    cfg.env.append_value('LIB',['leveldb'])
+    pass
 
 def build(bld):
 

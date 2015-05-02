@@ -9,6 +9,8 @@
 #include <string>
 #include <sstream>
 #include <queue>
+#include <thread>
+#include <condition_variable>
 
 #include <ILogger.h>
 
@@ -19,7 +21,6 @@
 #include <boost/fusion/container/vector.hpp>
 
 #include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
 #include <boost/format.hpp>
 
 namespace exchange
@@ -166,9 +167,9 @@ namespace exchange
                 /* Thread related members */
                 std::queue<std::string>     m_WriteQueue;
                 std::queue<std::string>     m_ReadQueue;
-                boost::thread               m_WriterThread;
-                boost::mutex                m_mutex;
-                boost::condition_variable   m_cond;
+                std::thread                 m_WriterThread;
+                std::mutex                  m_mutex;
+                std::condition_variable     m_cond;
                 bool m_Stopped;
 
             private:
@@ -184,7 +185,7 @@ namespace exchange
                     while (!m_Stopped)
                     {
                         {
-                            boost::unique_lock<boost::mutex> lock(m_mutex);
+                            std::unique_lock<std::mutex> lock(m_mutex);
                             if (m_WriteQueue.empty())
                             {
                                 m_cond.wait(lock);
@@ -206,7 +207,7 @@ namespace exchange
                 ~LoggerHolder(void)
                 {
                     {
-                        boost::unique_lock<boost::mutex> lock(m_mutex);
+                        std::unique_lock<std::mutex> lock(m_mutex);
                         m_Stopped = true;
                         m_cond.notify_one();
                     }
@@ -299,7 +300,7 @@ namespace exchange
                 void Flush()
                 {
                     m_oss << std::endl;
-                    boost::unique_lock<boost::mutex> lock(m_mutex);
+                    std::unique_lock<std::mutex> lock(m_mutex);
                     m_WriteQueue.push(m_oss.str());
                     m_oss.str("");
                     m_cond.notify_one();

@@ -21,6 +21,8 @@ def run_test(ctx):
 
 def configure(cfg):
 
+    cfg.env.append_value('LIB',['leveldb'])
+
     if cfg.env.with_unittest:
         cfg.env.append_value('LIB',['gtest'])
 
@@ -29,7 +31,7 @@ def configure(cfg):
 
     #boost lib
     cfg.env.DEFINES_BOOST     = ['BOOST']
-    cfg.env.LIB_BOOST         = ['boost_system', 'boost_thread', 'boost_filesystem', 'boost_date_time', 'boost_serialization']
+    cfg.env.LIB_BOOST         = ['boost_system', 'boost_filesystem', 'boost_date_time', 'boost_serialization']
     cfg.env.LIBPATH_BOOST     = ['/export/boost/105600/lib/']
     cfg.env.INCLUDES_BOOST    = ['/export/boost/105600/include/']
 

@@ -5,9 +5,8 @@
 
 #pragma once
 
-#include <leveldb/db.h>
-
 #include <ScopedExit.h>
+#include <NoSqlStorage.h>
 
 #include <sstream>
 
@@ -29,7 +28,6 @@ namespace exchange
         template <typename TOrder>
         class Instrument
         {
-            // ENH_TODO : It could be better to have an abstraction of the underlying database model in order to switch to any kind of nosql storage
             friend std::ostream& operator<< <> (std::ostream& o, const Instrument<TOrder> & x);
             
             using price_type = typename TOrder::price_type;
@@ -96,8 +94,9 @@ namespace exchange
         }
         
 
+        
         template <typename TOrder>
-        class InstrumentManager
+        class InstrumentManager : public common::NoSqlStorage< Instrument<TOrder>, common::LevelDBStorage >
         {
             private:
 
@@ -105,133 +104,9 @@ namespace exchange
 
             public:
 
-                InstrumentManager(const std::string & LevelDBFilePath);
-                ~InstrumentManager();
-
-                template <typename TCallback>
-                bool Load(TCallback & callback);
-
-                bool Write(const instrument_type & Instrument, bool bSync = true);
-
-            private:
-
-                bool InitializeDB();
-
-            private:
-                
-                std::string  m_LevelDBFilePath;
-                leveldb::DB* m_db;
+                using common::NoSqlStorage< Instrument<TOrder>, common::LevelDBStorage >::NoSqlStorage;
         };
 
-
-        template <typename TOrder>
-        InstrumentManager<TOrder>::InstrumentManager(const std::string & LevelDBFilePath)
-            :m_LevelDBFilePath(LevelDBFilePath), m_db(nullptr)
-        {}
-
-        template <typename TOrder>
-        InstrumentManager<TOrder>::~InstrumentManager()
-        {
-            delete m_db;
-        }
-
-        template <typename TOrder>
-        bool InstrumentManager<TOrder>::InitializeDB()
-        {
-            if (m_db == nullptr)
-            {
-                leveldb::Options options;
-                options.create_if_missing = true;
-
-                leveldb::Status status = leveldb::DB::Open(options, m_LevelDBFilePath, &m_db);
-
-                if (!status.ok())
-                {
-                    EXERR("InstrumentManager::InitializeDB : Failed to initialize DB. Reason[" << status.ToString() << "]");
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        template <typename TOrder>
-        template <typename TCallback>
-        bool InstrumentManager<TOrder>::Load(TCallback & callback)
-        {
-            if (InitializeDB())
-            {
-                try
-                {
-                    leveldb::ReadOptions options;
-                    options.snapshot = m_db->GetSnapshot();
-                    
-                    auto release_at_exit = common::make_scope_exit([this,&options]() { m_db->ReleaseSnapshot(options.snapshot); });
-                    
-                    leveldb::Iterator* it = m_db->NewIterator(leveldb::ReadOptions());
-
-                    for (it->SeekToFirst(); it->Valid(); it->Next())
-                    {
-                        leveldb::Slice value = it->value();
-
-                        std::stringstream ss(value.ToString());
-                        boost::archive::text_iarchive ia(ss);
-
-                        instrument_type instrument;
-                        ia >> instrument;
-
-                        callback(instrument);
-                    }
-
-                    delete it;
-                    return true;
-                }
-                catch (...)
-                {
-                    EXERR("InstrumentManager::Load Unknown exception raised");
-                    return false;
-                }
-            }
-            return false;
-        }
-
-        template <typename TOrder>
-        bool InstrumentManager<TOrder>::Write(const instrument_type & Instrument, bool bSync)
-        {
-            if (InitializeDB())
-            {
-                std::stringstream stringstream;
-                boost::archive::text_oarchive oa(stringstream);
-
-                oa << Instrument;
-
-                const leveldb::Slice  key = Instrument.GetName();
-                const leveldb::Slice  value = stringstream.str();
-
-                std::string dummy_res;
-
-                if (m_db->Get(leveldb::ReadOptions(), key, &dummy_res).ok())
-                {
-                    EXERR("InstrumentManager::Write : Already Existing Key");
-                    return false;
-                }
-                
-                leveldb::WriteOptions write_options;
-                write_options.sync = bSync;
-
-                auto status = m_db->Put(write_options, key, value);
-                if (!status.ok())
-                {
-                    EXERR("InstrumentManager::Write : Failed to write to DB. Reason[" << status.ToString() << "]");
-                    return false;
-                }
-                else
-                {
-                    EXINFO("InstrumentManager::Write : Product[" << Instrument.GetName() << "] with ProductID[" << Instrument.GetProductId() << "] written in database");
-                    return true;
-                }
-            }
-            return false;
-        }
 
     }
 }
