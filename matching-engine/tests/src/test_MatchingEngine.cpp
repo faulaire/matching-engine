@@ -32,7 +32,13 @@ class MatchingEngineTest : public testing::Test
         void WriteInstruments()
         {
             std::string  InstrumentDBPath = m_Config.get<std::string>("Engine.instrument_db_path");
-            InstrumentManager<Order> InstrMgr(InstrumentDBPath);
+
+            auto key_extractor = [](const Instrument<Order> & Instrument) -> const std::string &
+            {
+                return Instrument.GetName();
+            };
+
+            InstrumentManager<Order> InstrMgr(InstrumentDBPath, key_extractor);
 
             Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
             Instrument<Order> Natixis{ "Natixis", "ISINNATI", "EUR", 2, 1255 };
@@ -69,8 +75,6 @@ TEST_F(MatchingEngineTest, Should_configuration_fail_when_invalid_configuration_
 
 TEST_F(MatchingEngineTest, Should_configuration_fail_when_database_is_inconsistent)
 {
-    // TODO : Understand already held by process
-
     boost::property_tree::ptree aConfig;
     const std::string invalid_config_path = "corrupted_db_config.ini";
 
@@ -79,7 +83,13 @@ TEST_F(MatchingEngineTest, Should_configuration_fail_when_database_is_inconsiste
     boost::property_tree::ini_parser::read_ini(invalid_config_path, aConfig);
 
     std::string  InstrumentDBPath = aConfig.get<std::string>("Engine.instrument_db_path");
-    InstrumentManager<Order> InstrMgr(InstrumentDBPath);
+
+    auto key_extractor = [](const Instrument<Order> & Instrument) -> const std::string &
+    {
+        return Instrument.GetName();
+    };
+
+    InstrumentManager<Order> InstrMgr(InstrumentDBPath, key_extractor);
 
     Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
     Instrument<Order> MichelinBis{ "MichelinBis", "ISINMICH", "EUR", 1, 1254 };

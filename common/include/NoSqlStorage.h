@@ -21,10 +21,12 @@ namespace exchange
 
             using key_type = typename UnderlyingStorage::key_type;
 
+            using key_extractor_type = std::function < const std::string &(const ObjectType &) >;
+
         public:
 
-            NoSqlStorage(const std::string & DBFilePath)
-                :m_UdrStorage(DBFilePath), m_DBFilePath(DBFilePath)
+            NoSqlStorage(const std::string & DBFilePath, const key_extractor_type & key_extractor)
+                :m_KeyExtractor(key_extractor), m_UdrStorage(DBFilePath), m_DBFilePath(DBFilePath)
             {}
 
             ~NoSqlStorage()
@@ -42,9 +44,9 @@ namespace exchange
             bool InitializeDB();
 
         private:
-
-            UnderlyingStorage m_UdrStorage;
-            std::string       m_DBFilePath;
+            key_extractor_type m_KeyExtractor;
+            UnderlyingStorage  m_UdrStorage;
+            std::string        m_DBFilePath;
         };
 
         template <typename ObjectType, typename UnderlyingStorage>
