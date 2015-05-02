@@ -10,8 +10,8 @@ VERSION = '0.1'
 
 from waflib.Build import BuildContext
 class RunTestCtx(BuildContext):
-        cmd = 'run_test'
-        fun = 'run_test'
+        cmd = 'run_tests'
+        fun = 'run_tests'
 
 def IsClangCompiler(cfg):
    for compiler in cfg.env["CXX"]:
