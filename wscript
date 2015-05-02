@@ -19,7 +19,7 @@ def IsClangCompiler(cfg):
          return True
    return False
    
-def run_test(ctx):
+def run_tests(ctx):
     ctx.recurse('common matching-engine')
 
 def options(opt):
@@ -43,7 +43,9 @@ def configure(cfg):
     cfg.check(features='cxx cxxprogram', lib=['boost_filesystem'], uselib_store='BOOST_FILESYSTEM')
     cfg.check(features='cxx cxxprogram', lib=['boost_date_time'], uselib_store='BOOST_DATE_TIME')
     cfg.check(features='cxx cxxprogram', lib=['boost_serialization'], uselib_store='BOOST_SERIALIZATION')
-
+    
+    cfg.check(header_name='leveldb/db.h', features='cxx cxxprogram')
+    
     cfg.env.with_unittest = cfg.options.with_unittest
 
     cfg.env.append_value('CXXFLAGS', ['-std=c++1y','-W','-Wall','-Wno-unused-local-typedefs'])

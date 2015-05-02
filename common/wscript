@@ -13,7 +13,7 @@ def run_command(Cmd, Arg):
     out, err = p.communicate()
     return out.rstrip('\r\n')
 
-def run_test(ctx):
+def run_tests(ctx):
     sys.path.append(ctx.top_dir)
     import waf_tools
 

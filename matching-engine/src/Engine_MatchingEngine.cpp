@@ -96,12 +96,7 @@ namespace exchange
 
                 auto InstrumentDBPath = iConfig.get<std::string>("Engine.instrument_db_path");
 
-                auto key_extractor = [](const Instrument<Order> & Instrument) -> const std::string &
-                {
-                    return Instrument.GetName();
-                };
-
-                InstrumentManager<Order> Loader(InstrumentDBPath, key_extractor);
+                InstrumentManager<Order> Loader(InstrumentDBPath);
 
                 return Loader.Load(InstrumentHandler);
             }

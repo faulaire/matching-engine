@@ -47,7 +47,7 @@ protected:
 
 TEST_F(InstrumentManagerTest, Should_load_success_when_valid_database)
 {
-	InstrumentManager<Order> InstrMgr(m_DBFilePath, key_extractor);
+	InstrumentManager<Order> InstrMgr(m_DBFilePath);
 
 	auto instr_handler = [this](const auto & instr) { this->InstrumentHandler(instr); };
 	ASSERT_EQ(true, InstrMgr.Load(instr_handler));
@@ -55,7 +55,7 @@ TEST_F(InstrumentManagerTest, Should_load_success_when_valid_database)
 
 TEST_F(InstrumentManagerTest, Should_load_return_nothing_when_empty_database)
 {
-	InstrumentManager<Order> InstrMgr(m_DBFilePath, key_extractor);
+	InstrumentManager<Order> InstrMgr(m_DBFilePath);
 
 	auto instr_handler = [this](const auto & instr) { this->InstrumentHandler(instr); };
 	InstrMgr.Load(instr_handler);
@@ -65,34 +65,34 @@ TEST_F(InstrumentManagerTest, Should_load_return_nothing_when_empty_database)
 
 TEST_F(InstrumentManagerTest, Should_instrument_insertion_success_when_new_instrument)
 {
-	InstrumentManager<Order> InstrMgr(m_DBFilePath, key_extractor);
+	InstrumentManager<Order> InstrMgr(m_DBFilePath);
 
 	Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
 
-	ASSERT_EQ(true, InstrMgr.Write(Michelin));
+	ASSERT_EQ(true, InstrMgr.Write(Michelin, key_extractor));
 }
 
 TEST_F(InstrumentManagerTest, Should_instrument_insertion_fail_when_already_inserted_instrument)
 {
-	InstrumentManager<Order> InstrMgr(m_DBFilePath, key_extractor);
+	InstrumentManager<Order> InstrMgr(m_DBFilePath);
 
 	Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
 
-	ASSERT_EQ(true, InstrMgr.Write(Michelin));
-	ASSERT_EQ(false, InstrMgr.Write(Michelin));
+	ASSERT_EQ(true, InstrMgr.Write(Michelin, key_extractor));
+	ASSERT_EQ(false, InstrMgr.Write(Michelin, key_extractor));
 }
 
 TEST_F(InstrumentManagerTest, Should_load_return_n_instruments_when_n_instrument_inserted)
 {
-	InstrumentManager<Order> InstrMgr(m_DBFilePath, key_extractor);
+	InstrumentManager<Order> InstrMgr(m_DBFilePath);
 
 	Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
 	Instrument<Order> Natixis{ "Natixis", "ISINATIX", "JPY", 2, 1255 };
 	Instrument<Order> Ibm{ "IBM", "ISINIBM", "USD", 3, 1256 };
 
-	ASSERT_EQ(true, InstrMgr.Write(Michelin));
-	ASSERT_EQ(true, InstrMgr.Write(Natixis));
-	ASSERT_EQ(true, InstrMgr.Write(Ibm));
+	ASSERT_EQ(true, InstrMgr.Write(Michelin, key_extractor));
+	ASSERT_EQ(true, InstrMgr.Write(Natixis, key_extractor));
+	ASSERT_EQ(true, InstrMgr.Write(Ibm, key_extractor));
 
 	auto instr_handler = [this](const auto & instr) { this->InstrumentHandler(instr); };
 	InstrMgr.Load(instr_handler);
@@ -102,11 +102,11 @@ TEST_F(InstrumentManagerTest, Should_load_return_n_instruments_when_n_instrument
 
 TEST_F(InstrumentManagerTest, Should_load_return_the_same_instrument_as_the_inserted_one)
 {
-	InstrumentManager<Order> InstrMgr(m_DBFilePath, key_extractor);
+	InstrumentManager<Order> InstrMgr(m_DBFilePath);
 
 	Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
 
-	ASSERT_EQ(true, InstrMgr.Write(Michelin));
+	ASSERT_EQ(true, InstrMgr.Write(Michelin, key_extractor));
 
 	auto instr_handler = [Michelin, this](const Instrument<Order> & instr)
 	{ 

@@ -21,12 +21,10 @@ namespace exchange
 
             using key_type = typename UnderlyingStorage::key_type;
 
-            using key_extractor_type = std::function < const std::string &(const ObjectType &) >;
-
         public:
 
-            NoSqlStorage(const std::string & DBFilePath, const key_extractor_type & key_extractor)
-                :m_KeyExtractor(key_extractor), m_UdrStorage(DBFilePath), m_DBFilePath(DBFilePath)
+            NoSqlStorage(const std::string & DBFilePath)
+                : m_UdrStorage(DBFilePath), m_DBFilePath(DBFilePath)
             {}
 
             ~NoSqlStorage()
@@ -35,16 +33,17 @@ namespace exchange
             }
 
             template <typename TCallback>
-            bool Load(TCallback & callback);
+            bool Load(const TCallback & callback);
 
-            bool Write(const ObjectType & object, bool bSync = true);
+            template <typename TKeyExtractor>
+            bool Write(const ObjectType & object, const TKeyExtractor & extractor, bool bSync = true);
 
         protected:
 
             bool InitializeDB();
 
         private:
-            key_extractor_type m_KeyExtractor;
+            
             UnderlyingStorage  m_UdrStorage;
             std::string        m_DBFilePath;
         };
@@ -57,7 +56,7 @@ namespace exchange
 
         template <typename ObjectType, typename UnderlyingStorage>
         template <typename TCallback>
-        bool NoSqlStorage<ObjectType, UnderlyingStorage>::Load(TCallback & callback)
+        bool NoSqlStorage<ObjectType, UnderlyingStorage>::Load(const TCallback & callback)
         {
             if (InitializeDB())
             {
@@ -90,7 +89,8 @@ namespace exchange
         }
 
         template <typename ObjectType, typename UnderlyingStorage>
-        bool NoSqlStorage<ObjectType, UnderlyingStorage>::Write(const ObjectType & object, bool bSync)
+        template <typename TKeyExtractor>
+        bool NoSqlStorage<ObjectType, UnderlyingStorage>::Write(const ObjectType & object, const TKeyExtractor & extractor, bool bSync)
         {
             if (InitializeDB())
             {
@@ -99,7 +99,7 @@ namespace exchange
 
                 oa << object;
 
-                const key_type  key     = m_KeyExtractor(object);
+                const key_type  key     = extractor(object);
                 const auto      svalue  = std::move(stringstream.str());
 
                 const key_type  value   = svalue;
@@ -118,7 +118,7 @@ namespace exchange
                 }
                 else
                 {
-                    EXINFO("NoSqlStorage::Write : Product[" << m_KeyExtractor(object) << "] written in database");
+                    EXINFO("NoSqlStorage::Write : Product[" << extractor(object) << "] written in database");
                     return true;
                 }
             }

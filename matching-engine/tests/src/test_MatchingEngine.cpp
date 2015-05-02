@@ -38,15 +38,15 @@ class MatchingEngineTest : public testing::Test
                 return Instrument.GetName();
             };
 
-            InstrumentManager<Order> InstrMgr(InstrumentDBPath, key_extractor);
+            InstrumentManager<Order> InstrMgr(InstrumentDBPath);
 
             Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
             Instrument<Order> Natixis{ "Natixis", "ISINNATI", "EUR", 2, 1255 };
             Instrument<Order> IBM{ "IBM", "ISINIBM", "USD", 3, 1256 };
 
-            InstrMgr.Write(Michelin, true);
-            InstrMgr.Write(Natixis, true);
-            InstrMgr.Write(IBM, true);
+            InstrMgr.Write(Michelin, key_extractor, true);
+            InstrMgr.Write(Natixis, key_extractor, true);
+            InstrMgr.Write(IBM, key_extractor, true);
         }
 
     protected:
@@ -83,19 +83,23 @@ TEST_F(MatchingEngineTest, Should_configuration_fail_when_database_is_inconsiste
     boost::property_tree::ini_parser::read_ini(invalid_config_path, aConfig);
 
     std::string  InstrumentDBPath = aConfig.get<std::string>("Engine.instrument_db_path");
-
+    
     auto key_extractor = [](const Instrument<Order> & Instrument) -> const std::string &
     {
         return Instrument.GetName();
     };
 
-    InstrumentManager<Order> InstrMgr(InstrumentDBPath, key_extractor);
+    {
+        InstrumentManager<Order> InstrMgr(InstrumentDBPath);
 
-    Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
-    Instrument<Order> MichelinBis{ "MichelinBis", "ISINMICH", "EUR", 1, 1254 };
+        Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
+        Instrument<Order> MichelinBis{ "MichelinBis", "ISINMICH", "EUR", 1, 1254 };
 
-    InstrMgr.Write(Michelin, true);
-    InstrMgr.Write(MichelinBis, true);
+        InstrMgr.Write(Michelin, key_extractor, true);
+        InstrMgr.Write(MichelinBis, key_extractor, true);
+    }
+
+    // TODO : Add an already held by process tests
     
     ASSERT_FALSE(m_pEngine->Configure(aConfig));
 }
