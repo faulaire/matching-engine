@@ -96,12 +96,12 @@ namespace exchange
 
                 auto InstrumentDBPath = iConfig.get<std::string>("Engine.instrument_db_path");
 
-                auto key_exctractor = [](const Instrument<Order> & Instrument) -> const std::string &
+                auto key_extractor = [](const Instrument<Order> & Instrument) -> const std::string &
                 {
                     return Instrument.GetName();
                 };
 
-                InstrumentManager<Order> Loader(InstrumentDBPath, key_exctractor);
+                InstrumentManager<Order> Loader(InstrumentDBPath, key_extractor);
 
                 return Loader.Load(InstrumentHandler);
             }
@@ -268,10 +268,6 @@ namespace exchange
 
         void MatchingEngine::CancelAllOrders()
         {
-            /*
-                ENH_TODO : This is not good check, we may want to cancelorders during intraday auction phases
-            */
-            assert(m_MonitoredOrderBook.size() == 0);
             for (auto && OrderBook : m_OrderBookContainer)
             {
                 OrderBook.second->CancelAllOrders();

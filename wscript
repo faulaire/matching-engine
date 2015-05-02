@@ -38,9 +38,29 @@ def configure(cfg):
     cfg.check(features='cxx cxxprogram', lib=['dl'], uselib_store='DL')
     
     cfg.check(features='cxx cxxprogram', lib=['leveldb'], uselib_store='LEVELDB')
+
+    cfg.check(features='cxx cxxprogram', lib=['boost_system'], uselib_store='BOOST_SYSTEM')
+    cfg.check(features='cxx cxxprogram', lib=['boost_filesystem'], uselib_store='BOOST_FILESYSTEM')
+    cfg.check(features='cxx cxxprogram', lib=['boost_date_time'], uselib_store='BOOST_DATE_TIME')
+    cfg.check(features='cxx cxxprogram', lib=['boost_serialization'], uselib_store='BOOST_SERIALIZATION')
+
     cfg.check(header_name='leveldb/db.h', features='cxx cxxprogram')
+    cfg.check(header_name='boost/multi_index_container.hpp', features='cxx cxxprogram')
+    cfg.check(header_name='boost/date_time.hpp', features='cxx cxxprogram')
+    cfg.check(header_name='boost/noncopyable.hpp', features='cxx cxxprogram')
+    #cfg.check(header_name='boost/filesystem.hpp', features='cxx cxxprogram')
+    cfg.check(header_name='boost/format.hpp', features='cxx cxxprogram')
+    cfg.check(header_name='boost/utility.hpp', features='cxx cxxprogram')
+    cfg.check(header_name='boost/archive/text_oarchive.hpp', features='cxx cxxprogram')
+    cfg.check(header_name='boost/archive/text_iarchive.hpp', features='cxx cxxprogram')
+    cfg.check(header_name='boost/date_time/posix_time/posix_time.hpp', features='cxx cxxprogram')
+    cfg.check(header_name='boost/property_tree/ptree.hpp', features='cxx cxxprogram')
+    cfg.check(header_name='boost/property_tree/ini_parser.hpp', features='cxx cxxprogram')
+    cfg.check(header_name='boost/fusion/algorithm/iteration/for_each.hpp', features='cxx cxxprogram')
+    cfg.check(header_name='boost/fusion/container/vector.hpp', features='cxx cxxprogram')
+    cfg.check(header_name='boost/fusion/include/for_each.hpp', features='cxx cxxprogram')
+
     
-    #TODO : Add a check for boost / ssl 
 
     cfg.env.with_unittest = cfg.options.with_unittest
 

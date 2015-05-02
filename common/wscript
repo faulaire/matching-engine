@@ -29,11 +29,8 @@ def configure(cfg):
     #system lib
     cfg.env.append_value('LIB',['ssl','crypto','dl','z', 'pthread'])
 
-    #boost lib
-    cfg.env.DEFINES_BOOST     = ['BOOST']
-    cfg.env.LIB_BOOST         = ['boost_system', 'boost_filesystem', 'boost_date_time', 'boost_serialization']
-    cfg.env.LIBPATH_BOOST     = ['/export/boost/105600/lib/']
-    cfg.env.INCLUDES_BOOST    = ['/export/boost/105600/include/']
+    # boost lib
+    cfg.env.append_value('LIB',['boost_system','boost_filesystem','boost_date_time','boost_serialization'])
 
 def build(bld):
     

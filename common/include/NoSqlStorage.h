@@ -99,8 +99,7 @@ namespace exchange
 
                 oa << object;
 
-                // TODO : Add a stuff to know how to get the key from the object
-                const key_type  key     = object.GetName();
+                const key_type  key     = m_KeyExtractor(object);
                 const auto      svalue  = std::move(stringstream.str());
 
                 const key_type  value   = svalue;
@@ -119,7 +118,7 @@ namespace exchange
                 }
                 else
                 {
-                    EXINFO("NoSqlStorage::Write : Product[" << object.GetName() << "] written in database");
+                    EXINFO("NoSqlStorage::Write : Product[" << m_KeyExtractor(object) << "] written in database");
                     return true;
                 }
             }
