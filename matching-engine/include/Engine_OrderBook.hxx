@@ -136,7 +136,7 @@ namespace exchange
                 if( !IsAuctionPhase(GetTradingPhase()) )
                 {
                     SetTradingPhase(TradingPhase::INTRADAY_AUCTION);
-                    m_AuctionEnd = boost::posix_time::second_clock::local_time() + m_rMatchingEngine.GetIntradayAuctionDuration();
+                    m_AuctionEnd = TMatchingEngine::ClockType::local_time() + m_rMatchingEngine.GetIntradayAuctionDuration();
 
                     m_rMatchingEngine.MonitorOrderBook(this);
                 }

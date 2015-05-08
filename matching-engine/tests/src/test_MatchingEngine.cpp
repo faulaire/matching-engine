@@ -9,15 +9,46 @@
 
 using namespace exchange::engine;
 
+
+class test_clock : public boost::posix_time::second_clock
+{
+public:
+
+    using time_type          = boost::posix_time::ptime;
+    using time_duration_type = boost::posix_time::ptime::time_duration_type;
+
+public:
+
+    static time_type local_time()
+    {
+        time_type local_time = boost::posix_time::second_clock::local_time();
+        local_time += boost::posix_time::seconds(time_offset);
+        return local_time;
+    }
+
+    static void go_to_future(long seconds)
+    {
+        time_offset += seconds;
+    }
+
+private:
+    static long time_offset;
+};
+
+long test_clock::time_offset = 0;
+
 class MatchingEngineTest : public testing::Test
 {
     public:
+
+        using clock_type  = test_clock;
+        using engine_type = exchange::engine::MatchingEngine<clock_type>;
 
         static const unsigned product_id = 1;
 
         virtual void SetUp()
         {
-            m_pEngine.reset(new exchange::engine::MatchingEngine());
+            m_pEngine.reset(new engine_type());
 
             if (boost::filesystem::exists("config.ini"))
             {
@@ -51,8 +82,8 @@ class MatchingEngineTest : public testing::Test
 
     protected:
 
-        boost::property_tree::ptree                          m_Config;
-        std::unique_ptr<exchange::engine::MatchingEngine>    m_pEngine;
+        boost::property_tree::ptree     m_Config;
+        std::unique_ptr<engine_type>    m_pEngine;
         
 };
 
@@ -148,7 +179,7 @@ TEST_F(MatchingEngineTest, Should_engine_state_be_contiunous_trading_after_openi
 
     auto auction_delay  = m_Config.get<unsigned int>("Engine.opening_auction_duration");
 
-    sleep(auction_delay+1);
+    clock_type::go_to_future(auction_delay + 1);
 
     m_pEngine->EngineListen();
 
@@ -164,7 +195,7 @@ TEST_F(MatchingEngineTest, Should_engine_state_be_close_after_closing_auction)
 
     auto auction_delay = m_Config.get<unsigned int>("Engine.closing_auction_duration");
 
-    sleep(auction_delay + 1);
+    clock_type::go_to_future(auction_delay + 1);
 
     m_pEngine->EngineListen();
 
@@ -453,7 +484,7 @@ TEST_F(MatchingEngineTest, Should_non_persistent_orders_being_cancelled_after_cl
     m_pEngine->SetGlobalPhase(TradingPhase::CLOSING_AUCTION);
 
     auto auction_delay = m_Config.get<unsigned int>("Engine.closing_auction_duration");
-    sleep(auction_delay + 1);
+    clock_type::go_to_future(auction_delay + 1);
 
     m_pEngine->EngineListen();
 
@@ -496,7 +527,7 @@ TEST_F(MatchingEngineTest, Should_orderbook_be_unmonitored_at_the_end_of_intrada
     ASSERT_EQ(1, m_pEngine->GetMonitoredOrderBookCounter());
     
     auto auction_delay = m_Config.get<unsigned int>("Engine.intraday_auction_duration");
-    sleep(auction_delay + 1);
+    clock_type::go_to_future(auction_delay + 1);
     
     m_pEngine->EngineListen();
     
@@ -504,6 +535,7 @@ TEST_F(MatchingEngineTest, Should_orderbook_be_unmonitored_at_the_end_of_intrada
 }
 /*
     TODO  Test that we cannot reinsert a full executed order
+    TODO : The close price must be saved at the end of the day
 */
 
 int main(int argc, char ** argv)

@@ -19,130 +19,114 @@ namespace exchange
 {
     namespace engine
     {
+
+        template <typename Clock = boost::posix_time::second_clock>
         class MatchingEngine
         {
-            public:
+        public:
 
-                using TimeType            = boost::posix_time::ptime;
-                using DurationType        = boost::posix_time::seconds;
-                using OrderBookType       = OrderBook<Order,MatchingEngine>;
+            using ClockType     = Clock;
+            using TimeType      = boost::posix_time::ptime;
+            using DurationType  = boost::posix_time::seconds;
+            using OrderBookType = OrderBook<Order, MatchingEngine>;
 
-                using OrderBookMap        = std::unordered_map<std::uint32_t, std::unique_ptr<OrderBookType> >;
-                using OrderBookValueType  = OrderBookMap::value_type;
-                using OrderBookIterator   = OrderBookMap::iterator;
+            using OrderBookMap = std::unordered_map<std::uint32_t, std::unique_ptr<OrderBookType> >;
 
-                using OrderBookList       = std::unordered_set<OrderBookType*>;
-                using PriceDevFactors     = std::tuple<double, double>;
+            using OrderBookList = std::unordered_set<OrderBookType*>;
+            using PriceDevFactors = std::tuple<double, double>;
 
-            public:
+        public:
 
-                /**/
-                MatchingEngine();
+            /**/
+            MatchingEngine();
 
-                /**/
-                ~MatchingEngine();
+            /**/
+            ~MatchingEngine();
 
-                /**/
-                bool Configure(boost::property_tree::ptree & iConfig);
+            /**/
+            bool Configure(boost::property_tree::ptree & iConfig);
 
-                /**/
-                bool Insert(Order & iOrder, std::uint32_t iProductID);
+            /**/
+            bool Insert(Order & iOrder, std::uint32_t iProductID);
 
-                /**/
-                bool Modify(OrderReplace & iOrderReplace, std::uint32_t iProductID);
+            /**/
+            bool Modify(OrderReplace & iOrderReplace, std::uint32_t iProductID);
 
-                /**/
-                bool Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay, std::uint32_t iProductID);
+            /**/
+            bool Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay, std::uint32_t iProductID);
 
-                /**/
-                void EngineListen();
+            /**/
+            void EngineListen();
 
-                /**/
-                void CancelAllOrders();
+            /**/
+            void CancelAllOrders();
 
-                /**/
-                inline void MonitorOrderBook(OrderBookType * pOrderBook);
-                
-                /**/
-                inline void UnMonitorOrderBook(OrderBookType * pOrderBook);
+            /**/
+            inline void MonitorOrderBook(OrderBookType * pOrderBook);
 
-                /**/
-                bool SetGlobalPhase(TradingPhase iNewPhase);
-                inline TradingPhase GetGlobalPhase() const { return m_GlobalPhase; }
+            /**/
+            inline void UnMonitorOrderBook(OrderBookType * pOrderBook);
 
-                /**/
-                const PriceDevFactors& GetPriceDevFactors() const { return m_PriceDeviationFactor; }
-            
-                /**/
-                inline const OrderBookType* GetOrderBook(std::uint32_t iProductID) const;
+            /**/
+            bool SetGlobalPhase(TradingPhase iNewPhase);
+            inline TradingPhase GetGlobalPhase() const { return m_GlobalPhase; }
 
-                /**/
-                inline OrderBookList::size_type GetMonitoredOrderBookCounter() const;
+            /**/
+            const PriceDevFactors& GetPriceDevFactors() const { return m_PriceDeviationFactor; }
 
-                /**/
-                DurationType GetIntradayAuctionDuration() const { return m_IntradayAuctionDuration; }
+            /**/
+            inline const OrderBookType* GetOrderBook(std::uint32_t iProductID) const;
 
-                /**/
-                void OnUnsolicitedCancelledOrder(const Order & order);
+            /**/
+            inline typename OrderBookList::size_type GetMonitoredOrderBookCounter() const;
 
-            protected:
+            /**/
+            DurationType GetIntradayAuctionDuration() const { return m_IntradayAuctionDuration; }
 
-                /**/
-                void UpdateInstrumentsPhase(TradingPhase iNewPhase);
+            /**/
+            void OnUnsolicitedCancelledOrder(const Order & order);
 
-                /**/
-                void CheckOrderBooks(const TimeType iTime);
+        protected:
 
-                /**/
-                bool LoadConfiguration(boost::property_tree::ptree & iConfig);
+            /**/
+            void UpdateInstrumentsPhase(TradingPhase iNewPhase);
 
-                /**/
-                bool LoadInstruments(boost::property_tree::ptree & iConfig);
+            /**/
+            void CheckOrderBooks(const TimeType iTime);
+
+            /**/
+            bool LoadConfiguration(boost::property_tree::ptree & iConfig);
+
+            /**/
+            bool LoadInstruments(boost::property_tree::ptree & iConfig);
 
 
-            private:
+        private:
 
-                /* Contain all registered products */
-                OrderBookMap           m_OrderBookContainer;
-                /* OrderBook that must be monitored because of their state ( IntradayAuction ) */
-                OrderBookList          m_MonitoredOrderBook;
-                /* Time of the Close -> Opening Auction transition */
-                TimeType               m_StartTime;
-                /* Time of the Continuout Trading -> Closing Auction transition */
-                TimeType               m_StopTime;
-                /* End time of any auction phase but intraday */
-                TimeType               m_AuctionEnd;
-                /* Duration of the intraday auction state */
-                DurationType           m_IntradayAuctionDuration;
-                /* Duration of the open auction state */
-                DurationType           m_OpeningAuctionDuration;
-                /* Duration of the close auction state */
-                DurationType           m_ClosingAuctionDuration;
-                /* Price deviation factors to compute minimum and maximum price */
-                PriceDevFactors        m_PriceDeviationFactor;
-                /* Trading phase of all products ( but Intraday Auction ) */
-                TradingPhase           m_GlobalPhase;
+            /* Contain all registered products */
+            OrderBookMap           m_OrderBookContainer;
+            /* OrderBook that must be monitored because of their state ( IntradayAuction ) */
+            OrderBookList          m_MonitoredOrderBook;
+            /* Time of the Close -> Opening Auction transition */
+            TimeType               m_StartTime;
+            /* Time of the Continuout Trading -> Closing Auction transition */
+            TimeType               m_StopTime;
+            /* End time of any auction phase but intraday */
+            TimeType               m_AuctionEnd;
+            /* Duration of the intraday auction state */
+            DurationType           m_IntradayAuctionDuration;
+            /* Duration of the open auction state */
+            DurationType           m_OpeningAuctionDuration;
+            /* Duration of the close auction state */
+            DurationType           m_ClosingAuctionDuration;
+            /* Price deviation factors to compute minimum and maximum price */
+            PriceDevFactors        m_PriceDeviationFactor;
+            /* Trading phase of all products ( but Intraday Auction ) */
+            TradingPhase           m_GlobalPhase;
         };
 
-        inline const MatchingEngine::OrderBookType* MatchingEngine::GetOrderBook(std::uint32_t iProductID) const
-        {
-            auto It = m_OrderBookContainer.find(iProductID);
-            return ( It != m_OrderBookContainer.end() ) ? It->second.get() : nullptr;
-        }
-
-        inline void MatchingEngine::MonitorOrderBook(OrderBookType * pOrderBook)
-        {
-            m_MonitoredOrderBook.insert(pOrderBook);
-        }
-
-        inline void MatchingEngine::UnMonitorOrderBook(OrderBookType * pOrderBook)
-        {
-            m_MonitoredOrderBook.erase(pOrderBook);
-        }
-
-        inline MatchingEngine::OrderBookList::size_type MatchingEngine::GetMonitoredOrderBookCounter() const
-        {
-            return m_MonitoredOrderBook.size();
-        }
     }
+
 }
+
+#include <Engine_MatchingEngine.hxx>

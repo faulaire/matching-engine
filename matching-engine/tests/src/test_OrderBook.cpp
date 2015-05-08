@@ -13,7 +13,9 @@ class OrderBookTest : public testing::Test
 {
 public:
 
-    using OrderBookType = OrderBook<Order, MatchingEngine>;
+    using engine_type = exchange::engine::MatchingEngine<>;
+
+    using OrderBookType = OrderBook<Order, engine_type>;
 
     OrderBookTest():
         m_Instrument{ "MingYiCorporation", "ISIN", "EUR", 1, 1000 }
@@ -23,7 +25,7 @@ public:
     {
         EXINFO("OrderBookTest::SetUp : Working with :" << m_Instrument);
 
-        m_pEngine.reset(new exchange::engine::MatchingEngine());
+        m_pEngine.reset(new engine_type());
 
         m_pOrderBook.reset(new OrderBookType(m_Instrument, *m_pEngine));
 
@@ -42,7 +44,7 @@ protected:
 
     Instrument<Order>                                    m_Instrument;
     boost::property_tree::ptree                          m_Config;
-    std::unique_ptr<MatchingEngine>                      m_pEngine;
+    std::unique_ptr<engine_type>                         m_pEngine;
     std::unique_ptr<OrderBookType>                       m_pOrderBook;
 };
 

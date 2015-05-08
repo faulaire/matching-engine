@@ -89,8 +89,8 @@ namespace exchange
         template <typename TOrder>
         std::ostream & operator<<(std::ostream &os, const Instrument<TOrder> &gp)
         {
-            return os << "Name[" << gp.m_name << "] Isin[" << gp.m_isin << "] Currency[" << gp.m_currency << "] "
-                << "ClosePrice[" << gp.m_closeprice << "] ProductId[" << gp.m_productid << "]";
+            return os << "Name[" << gp.GetName() << "] Isin[" << gp.GetIsin() << "] Currency[" << gp.GetCurrency() << "] "
+                << "ClosePrice[" << gp.GetClosePrice() << "] ProductId[" << gp.GetProductId() << "]";
         }
         
 

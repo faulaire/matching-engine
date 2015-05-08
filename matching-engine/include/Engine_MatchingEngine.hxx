@@ -10,17 +10,19 @@ namespace exchange
 {
     namespace engine
     {
-
-        MatchingEngine::MatchingEngine() :
+        template <typename Clock>
+        MatchingEngine<Clock>::MatchingEngine() :
             m_StartTime(), m_StopTime(), m_AuctionEnd(),
             m_IntradayAuctionDuration(0), m_OpeningAuctionDuration(0), m_ClosingAuctionDuration(0),
             m_PriceDeviationFactor(), m_GlobalPhase(TradingPhase::CLOSE)
         {}
 
-        MatchingEngine::~MatchingEngine()
+        template <typename Clock>
+        MatchingEngine<Clock>::~MatchingEngine()
         {}
 
-        bool MatchingEngine::Configure(boost::property_tree::ptree & iConfig)
+        template <typename Clock>
+        bool MatchingEngine<Clock>::Configure(boost::property_tree::ptree & iConfig)
         {
             if (!LoadInstruments(iConfig))
             {
@@ -37,7 +39,8 @@ namespace exchange
             return true;
         }
 
-        bool MatchingEngine::LoadConfiguration(boost::property_tree::ptree & iConfig)
+        template <typename Clock>
+        bool MatchingEngine<Clock>::LoadConfiguration(boost::property_tree::ptree & iConfig)
         {
             using namespace boost::posix_time;
             using namespace boost::gregorian;
@@ -45,7 +48,7 @@ namespace exchange
             try
             {
                 // Get the current localtime
-                boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
+                boost::posix_time::ptime now = Clock::local_time();
                 //Get the date part out of the time
                 boost::posix_time::ptime today_midnight(now.date());
 
@@ -77,7 +80,8 @@ namespace exchange
             }
         }
 
-        bool MatchingEngine::LoadInstruments(boost::property_tree::ptree & iConfig)
+        template <typename Clock>
+        bool MatchingEngine<Clock>::LoadInstruments(boost::property_tree::ptree & iConfig)
         {
             try
             {
@@ -107,7 +111,8 @@ namespace exchange
             }
         }
 
-        bool MatchingEngine::Insert(Order & iOrder, std::uint32_t iProductID)
+        template <typename Clock>
+        bool MatchingEngine<Clock>::Insert(Order & iOrder, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())
@@ -120,7 +125,8 @@ namespace exchange
             }
         }
 
-        bool MatchingEngine::Modify(OrderReplace & iOrderReplace, std::uint32_t iProductID)
+        template <typename Clock>
+        bool MatchingEngine<Clock>::Modify(OrderReplace & iOrderReplace, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())
@@ -133,7 +139,8 @@ namespace exchange
             }
         }
 
-        bool MatchingEngine::Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay, std::uint32_t iProductID)
+        template <typename Clock>
+        bool MatchingEngine<Clock>::Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())
@@ -146,7 +153,8 @@ namespace exchange
             }
         }
 
-        bool MatchingEngine::SetGlobalPhase(TradingPhase iNewPhase)
+        template <typename Clock>
+        bool MatchingEngine<Clock>::SetGlobalPhase(TradingPhase iNewPhase)
         {
             /*
              * INTRADAY_AUCTION can't be set because it's managed at OrderBook level
@@ -158,7 +166,7 @@ namespace exchange
                 return false;
             }
 
-            auto now = boost::posix_time::second_clock::local_time();
+            auto now = Clock::local_time();
 
             if (iNewPhase == TradingPhase::OPENING_AUCTION)
             {
@@ -174,7 +182,8 @@ namespace exchange
             return true;
         }
 
-        void MatchingEngine::UpdateInstrumentsPhase(TradingPhase iNewPhase)
+        template <typename Clock>
+        void MatchingEngine<Clock>::UpdateInstrumentsPhase(TradingPhase iNewPhase)
         {
             if( iNewPhase != m_GlobalPhase)
             {
@@ -190,7 +199,8 @@ namespace exchange
             }
         }
 
-        void MatchingEngine::CheckOrderBooks(const TimeType Now)
+        template <typename Clock>
+        void MatchingEngine<Clock>::CheckOrderBooks(const TimeType Now)
         {
             auto iterator = m_MonitoredOrderBook.begin();
             while (iterator != m_MonitoredOrderBook.end())
@@ -208,9 +218,10 @@ namespace exchange
             }
         }
 
-        void MatchingEngine::EngineListen()
+        template <typename Clock>
+        void MatchingEngine<Clock>::EngineListen()
         {
-            const TimeType now = boost::posix_time::second_clock::local_time();
+            const TimeType now = Clock::local_time();
 
             /* Verify if some orderbook are in intraday auction state */
             /* TODO : Randomize end of auction */
@@ -261,7 +272,33 @@ namespace exchange
             }
         }
 
-        void MatchingEngine::CancelAllOrders()
+        template <typename Clock>
+        inline const typename MatchingEngine<Clock>::OrderBookType* MatchingEngine<Clock>::GetOrderBook(std::uint32_t iProductID) const
+        {
+            auto It = m_OrderBookContainer.find(iProductID);
+            return (It != m_OrderBookContainer.end()) ? It->second.get() : nullptr;
+        }
+
+        template <typename Clock>
+        inline void MatchingEngine<Clock>::MonitorOrderBook(OrderBookType * pOrderBook)
+        {
+            m_MonitoredOrderBook.insert(pOrderBook);
+        }
+
+        template <typename Clock>
+        inline void MatchingEngine<Clock>::UnMonitorOrderBook(OrderBookType * pOrderBook)
+        {
+            m_MonitoredOrderBook.erase(pOrderBook);
+        }
+
+        template <typename Clock>
+        inline typename MatchingEngine<Clock>::OrderBookList::size_type MatchingEngine<Clock>::GetMonitoredOrderBookCounter() const
+        {
+            return m_MonitoredOrderBook.size();
+        }
+
+        template <typename Clock>
+        void MatchingEngine<Clock>::CancelAllOrders()
         {
             for (auto && OrderBook : m_OrderBookContainer)
             {
@@ -269,7 +306,8 @@ namespace exchange
             }
         }
 
-        void MatchingEngine::OnUnsolicitedCancelledOrder(const Order & order)
+        template <typename Clock>
+        void MatchingEngine<Clock>::OnUnsolicitedCancelledOrder(const Order & order)
         {
             EXINFO("MatchingEngine::OnUnsolicitedCancelledOrder : " << order);
         }

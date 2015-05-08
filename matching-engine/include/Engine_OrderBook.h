@@ -18,7 +18,7 @@ namespace exchange
 {
     namespace engine
     {
-
+        template <typename Clock>
         class MatchingEngine;
 
         /*!
