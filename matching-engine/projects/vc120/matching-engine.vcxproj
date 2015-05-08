@@ -69,6 +69,7 @@
     <ClInclude Include="..\..\include\Engine_DealHandler.h" />
     <ClInclude Include="..\..\include\Engine_Defines.h" />
     <ClInclude Include="..\..\include\Engine_MatchingEngine.h" />
+    <ClInclude Include="..\..\include\Engine_MatchingEngine.hxx" />
     <ClInclude Include="..\..\include\Engine_Order.h" />
     <ClInclude Include="..\..\include\Engine_OrderBook.h" />
     <ClInclude Include="..\..\include\Engine_OrderBook.hxx" />
@@ -81,8 +82,8 @@
     <ClCompile Include="..\..\src\Engine_DealHandler.cpp" />
     <ClCompile Include="..\..\src\Engine_OrderBook.cpp" />
     <ClCompile Include="..\..\src\Engine_Deal.cpp" />
-    <ClCompile Include="..\..\src\Engine_MatchingEngine.cpp" />
     <ClCompile Include="..\..\src\Engine_Order.cpp" />
+    <ClCompile Include="..\..\tests\src\test_IntrumentManager.cpp" />
     <ClCompile Include="..\..\tests\src\test_MatchingEngine.cpp" />
     <ClCompile Include="..\..\tests\src\test_OrderBook.cpp" />
     <ClCompile Include="..\..\tests\src\test_OrderContainer.cpp" />
@@ -91,8 +92,10 @@
     <None Include="..\..\config\config.ini" />
     <None Include="..\..\tests\config\config.ini" />
     <None Include="..\..\tests\config\config_always_closed.ini" />
+    <None Include="..\..\tests\config\corrupted_db_config.ini" />
+    <None Include="..\..\tests\config\invalid_config.ini" />
+    <None Include="..\..\tests\config\missing_instrument_db_config.ini" />
     <None Include="..\..\wscript" />
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\tests\config\pom.xml" />

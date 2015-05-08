@@ -106,6 +106,23 @@ TEST_F(OrderBookTest, Should_post_auction_price_be_the_price_computed_after_a_cl
     ASSERT_EQ(post_closing_auction_price, m_pOrderBook->GetPostAuctionPrice());
 }
 
+TEST_F(OrderBookTest, Should_close_price_be_the_price_computed_after_a_closing_auction)
+{
+    ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CLOSING_AUCTION));
+
+    auto post_closing_auction_price = 150;
+
+    Order OrderBuy(OrderWay::BUY, 100, post_closing_auction_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, post_closing_auction_price, 1, 5);
+
+    ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
+    ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
+
+    ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CLOSE));
+
+    ASSERT_EQ(post_closing_auction_price, m_pOrderBook->GetClosePrice());
+}
+
 TEST_F(OrderBookTest, Should_post_auction_price_be_the_price_computed_after_an_opening_auction)
 {
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::OPENING_AUCTION));

@@ -35,8 +35,10 @@ namespace exchange
             template <typename TCallback>
             bool Load(const TCallback & callback);
 
+            bool Get(const std::string & key, ObjectType & object);
+
             template <typename TKeyExtractor>
-            bool Write(const ObjectType & object, const TKeyExtractor & extractor, bool bSync = true);
+            bool Write(const ObjectType & object, const TKeyExtractor & extractor, bool bSync = true, bool overwrite = false);
 
         protected:
 
@@ -89,8 +91,30 @@ namespace exchange
         }
 
         template <typename ObjectType, typename UnderlyingStorage>
+        bool NoSqlStorage<ObjectType, UnderlyingStorage>::Get(const std::string & key, ObjectType & object)
+        {
+            if (InitializeDB())
+            {
+                std::string result;
+
+                const key_type  sqlkey = key;
+
+                if (m_UdrStorage.DoRead(sqlkey, result))
+                {
+                    std::stringstream ss(result);
+                    boost::archive::text_iarchive ia(ss);
+
+                    ia >> object;
+                    return true;
+                }
+                return false;
+            }
+            return false;
+        }
+
+        template <typename ObjectType, typename UnderlyingStorage>
         template <typename TKeyExtractor>
-        bool NoSqlStorage<ObjectType, UnderlyingStorage>::Write(const ObjectType & object, const TKeyExtractor & extractor, bool bSync)
+        bool NoSqlStorage<ObjectType, UnderlyingStorage>::Write(const ObjectType & object, const TKeyExtractor & extractor, bool bSync, bool overwrite)
         {
             if (InitializeDB())
             {
@@ -104,12 +128,15 @@ namespace exchange
 
                 const key_type  value   = svalue;
 
-                if( m_UdrStorage.IsExistingKey(key) )
+                if (overwrite == false)
                 {
-                    EXERR("NoSqlStorage::Write : Already Existing Key");
-                    return false;
+                    if (m_UdrStorage.IsExistingKey(key))
+                    {
+                        EXERR("NoSqlStorage::Write : Already Existing Key");
+                        return false;
+                    }
                 }
- 
+
                 std::string error_msg;
                 if (!m_UdrStorage.DoWrite(bSync, key, value, error_msg))
                 {
@@ -144,6 +171,7 @@ namespace exchange
 
                 bool IsExistingKey(const key_type & key);
                 bool DoWrite(bool bSync, const key_type & key, const key_type & value, std::string & status_msg);
+                bool DoRead(const key_type & key, std::string & value);
 
                 void Close();
 

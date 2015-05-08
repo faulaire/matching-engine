@@ -57,6 +57,9 @@
     <ClInclude Include="..\..\include\Engine_Instrument.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Engine_MatchingEngine.hxx">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Engine_Order.cpp">
@@ -66,9 +69,6 @@
       <Filter>Tests\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Engine_Deal.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Engine_MatchingEngine.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Engine_OrderBook.cpp">
@@ -83,6 +83,9 @@
     <ClCompile Include="..\..\tests\src\test_OrderBook.cpp">
       <Filter>Tests\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\tests\src\test_IntrumentManager.cpp">
+      <Filter>Tests\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\wscript" />
@@ -95,7 +98,15 @@
     <None Include="..\..\tests\config\config_always_closed.ini">
       <Filter>Tests\Configuration</Filter>
     </None>
-    <None Include="ClassDiagram.cd" />
+    <None Include="..\..\tests\config\corrupted_db_config.ini">
+      <Filter>Tests\Configuration</Filter>
+    </None>
+    <None Include="..\..\tests\config\invalid_config.ini">
+      <Filter>Tests\Configuration</Filter>
+    </None>
+    <None Include="..\..\tests\config\missing_instrument_db_config.ini">
+      <Filter>Tests\Configuration</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\tests\config\pom.xml">

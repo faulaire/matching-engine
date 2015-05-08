@@ -48,6 +48,8 @@ namespace exchange
             price_type          GetClosePrice() const { return m_closeprice; }
             std::uint32_t       GetProductId() const { return m_productid; }
 
+            void                SetClosePrice(price_type iprice) { m_closeprice = iprice; }
+
         private:
 
             friend class boost::serialization::access;

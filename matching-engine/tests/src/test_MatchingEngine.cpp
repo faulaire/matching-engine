@@ -533,9 +533,40 @@ TEST_F(MatchingEngineTest, Should_orderbook_be_unmonitored_at_the_end_of_intrada
     
     ASSERT_EQ(0, m_pEngine->GetMonitoredOrderBookCounter());
 }
+
+TEST_F(MatchingEngineTest, Should_close_price_be_saved_when_global_phase_switch_to_close)
+{
+    ASSERT_TRUE(m_pEngine->Configure(m_Config));
+
+    auto pOrderBook = m_pEngine->GetOrderBook(product_id);
+    ASSERT_NE(pOrderBook, nullptr);
+
+    auto PreviousClosePrice = pOrderBook->GetClosePrice();
+    auto NewClosePrice = PreviousClosePrice + 1;
+
+    Order ob(OrderWay::BUY, 1000, NewClosePrice, 1, 5);
+    Order os(OrderWay::SELL, 1000, NewClosePrice, 1, 6);
+
+    ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CLOSING_AUCTION));
+
+    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
+    ASSERT_TRUE(m_pEngine->Insert(os, product_id));
+
+    ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CLOSE));
+
+    ASSERT_EQ(NewClosePrice, pOrderBook->GetClosePrice());
+
+    std::string  InstrumentDBPath = m_Config.get<std::string>("Engine.instrument_db_path");
+    InstrumentManager<Order> InstrMgr(InstrumentDBPath);
+
+    Instrument<Order> Instrument;
+    InstrMgr.Get(pOrderBook->GetSecurityName(), Instrument);
+
+    ASSERT_EQ(NewClosePrice, Instrument.GetClosePrice());
+}
 /*
     TODO  Test that we cannot reinsert a full executed order
-    TODO : The close price must be saved at the end of the day
+    // TODO : Save the close price the database
 */
 
 int main(int argc, char ** argv)

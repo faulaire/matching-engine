@@ -98,7 +98,10 @@ namespace exchange
             bool LoadConfiguration(boost::property_tree::ptree & iConfig);
 
             /**/
-            bool LoadInstruments(boost::property_tree::ptree & iConfig);
+            bool LoadInstruments();
+
+            /**/
+            void SaveClosePrices();
 
 
         private:
@@ -123,6 +126,8 @@ namespace exchange
             PriceDevFactors        m_PriceDeviationFactor;
             /* Trading phase of all products ( but Intraday Auction ) */
             TradingPhase           m_GlobalPhase;
+            /* Path of the database which store instruments */
+            std::string            m_InstrumentDBPath;
         };
 
     }

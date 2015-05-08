@@ -24,18 +24,18 @@ namespace exchange
         template <typename Clock>
         bool MatchingEngine<Clock>::Configure(boost::property_tree::ptree & iConfig)
         {
-            if (!LoadInstruments(iConfig))
-            {
-                EXERR("Failed to load instruments");
-                return false;
-            }
-
             if (!LoadConfiguration(iConfig))
             {
                 EXERR("Failed to load the configuration");
                 return false;
             }
- 
+
+            if (!LoadInstruments())
+            {
+                EXERR("Failed to load instruments");
+                return false;
+            }
+
             return true;
         }
 
@@ -64,6 +64,7 @@ namespace exchange
 
                 m_ClosingAuctionDuration = DurationType(iConfig.get<int>("Engine.closing_auction_duration"));
 
+                m_InstrumentDBPath       = iConfig.get<std::string>("Engine.instrument_db_path");
 
                 auto MaxPriceDeviationPercentage = iConfig.get<double>("Engine.max_price_deviation")*0.01;
 
@@ -81,7 +82,7 @@ namespace exchange
         }
 
         template <typename Clock>
-        bool MatchingEngine<Clock>::LoadInstruments(boost::property_tree::ptree & iConfig)
+        bool MatchingEngine<Clock>::LoadInstruments()
         {
             try
             {
@@ -98,9 +99,7 @@ namespace exchange
                     }
                 };
 
-                auto InstrumentDBPath = iConfig.get<std::string>("Engine.instrument_db_path");
-
-                InstrumentManager<Order> Loader(InstrumentDBPath);
+                InstrumentManager<Order> Loader(m_InstrumentDBPath);
 
                 return Loader.Load(InstrumentHandler);
             }
@@ -179,7 +178,51 @@ namespace exchange
             }
 
             UpdateInstrumentsPhase(iNewPhase);
+
+            if (iNewPhase == TradingPhase::CLOSE)
+            {
+                SaveClosePrices();
+            }
+
             return true;
+        }
+
+        template <typename Clock>
+        void MatchingEngine<Clock>::SaveClosePrices()
+        {
+            InstrumentManager<Order> InstrumentManager(m_InstrumentDBPath);
+
+            auto update_close_price = [&InstrumentManager](const std::string & SecurityName, Order::price_type NewClosePrice)
+            {
+                auto key_extractor = [](const Instrument<Order> & Instrument) -> const std::string &
+                {
+                    return Instrument.GetName();
+                };
+
+                Instrument<Order> Instrument;
+
+                if (InstrumentManager.Get(SecurityName, Instrument))
+                {
+                    Instrument.SetClosePrice(NewClosePrice);
+                    if (!InstrumentManager.Write(Instrument, key_extractor, true, true))
+                    {
+                        EXERR("MatchingEngine::SaveClosePrices : Unable to write instrument with SecurityName[" << SecurityName << "]");
+                    }
+                }
+                else
+                {
+                    EXERR("MatchingEngine::SaveClosePrices : Unable to load instrument with SecurityName[" << SecurityName << "]");
+                }
+            };
+
+            for (auto && OrderBookEntry : m_OrderBookContainer)
+            {
+                auto & OrderBook          = OrderBookEntry.second;
+                const auto & SecurityName = OrderBook->GetSecurityName();
+                auto NewClosePrice        = OrderBook->GetClosePrice();
+
+                update_close_price(SecurityName, NewClosePrice);
+            }
         }
 
         template <typename Clock>

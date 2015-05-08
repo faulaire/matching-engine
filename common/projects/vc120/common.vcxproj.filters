@@ -51,6 +51,9 @@
     <ClInclude Include="..\..\include\ScopedExit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\NoSqlStorage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\logger\LoggerFile.cpp">
@@ -58,6 +61,9 @@
     </ClCompile>
     <ClCompile Include="..\..\tests\src\test_logger.cpp">
       <Filter>Tests\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\NoSqlStorage.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -29,6 +29,12 @@ namespace exchange
             return m_db->Get(leveldb::ReadOptions(), key, &dummy_res).ok();
         }
 
+        bool LevelDBStorage::DoRead(const key_type & key, std::string &value)
+        {
+            return m_db->Get(leveldb::ReadOptions(), key, &value).ok();
+        }
+
+
         bool LevelDBStorage::DoWrite(bool bSync, const key_type & key, const key_type & value, std::string & status_msg)
         {
             leveldb::WriteOptions write_options;
