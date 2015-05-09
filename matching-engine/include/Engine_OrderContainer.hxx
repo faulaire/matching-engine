@@ -165,6 +165,12 @@ namespace exchange
         template <typename TOrder, typename TEventHandler>
         bool OrderContainer<TOrder, TEventHandler>::Insert(TOrder & iOrder, bool Match)
         {
+            auto OrderID = OrderIDGenerator<TOrder>()(iOrder);
+            if (m_InsertedOrderIDs.find(OrderID) != m_InsertedOrderIDs.end())
+            {
+                return false;
+            }
+
             if (Match)
             {
                 std::uint64_t MatchQty = (std::min)(GetExecutableQuantity(iOrder, iOrder.GetWay()), static_cast<std::uint64_t>(iOrder.GetQuantity()));
@@ -177,8 +183,13 @@ namespace exchange
 
             if (iOrder.GetQuantity())
             {
-                return AuctionInsert(iOrder);
+                if (AuctionInsert(iOrder) == false )
+                {
+                    return false;
+                }
             }
+
+            m_InsertedOrderIDs.insert(OrderID);
 
             return true;
         }
@@ -244,7 +255,13 @@ namespace exchange
                 return true;
             };
 
-            auto OrderID = OrderIDGenerator<TOrder>()(iOrderReplace.GetClientID(), iOrderReplace.GetExistingOrderID());
+            auto OrderID    = OrderIDGenerator<TOrder>()(iOrderReplace.GetClientID(), iOrderReplace.GetExistingOrderID());
+            auto NewOrderID = OrderIDGenerator<TOrder>()(iOrderReplace.GetClientID(), iOrderReplace.GetReplacedOrderID());
+
+            if (m_InsertedOrderIDs.find(NewOrderID) != m_InsertedOrderIDs.end())
+            {
+                return false;
+            }
 
             auto ApplyModify = [&](auto & Container)
             {
@@ -259,15 +276,15 @@ namespace exchange
                                          iOrderReplace.GetReplacedOrderID(), iOrderReplace.GetClientID() };
 
                         Container.erase(Order);
-
-                        return Container.insert(ReplacedOrder).second;
+                        Container.insert(ReplacedOrder);
                     }
                     else
                     {
                         // No quantity left on the order, erase it from the container
-                    	Container.erase(Order);
-                    	return true;
+                        Container.erase(Order);
                     }
+                    m_InsertedOrderIDs.insert(OrderID);
+                    return true;
                 }
                 return false;
             };

@@ -14,6 +14,7 @@
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 
+#include <unordered_set>
 
 namespace exchange
 {
@@ -96,6 +97,8 @@ namespace exchange
                 using LimitContainer      = std::vector<LimitType>;
 
                 using OpenInformationType = std::tuple<std::uint32_t, std::uint64_t>;
+
+                using OrderIDContainer    = std::unordered_set < typename OrderIDGenerator<TOrder>::result_type >;
 
             protected:
 
@@ -196,13 +199,15 @@ namespace exchange
 
             protected:
                 /* */
-                BidStorage      m_BidOrders;
+                BidStorage       m_BidOrders;
                 /* */
-                AskStorage      m_AskOrders;
+                AskStorage       m_AskOrders;
                 /* */
-                TEventHandler&  m_EventHandler;
+                TEventHandler&   m_EventHandler;
                 /* */
-                ViewMode        m_ViewMode;
+                ViewMode         m_ViewMode;
+                /* */
+                OrderIDContainer m_InsertedOrderIDs;
         };
 
     }

@@ -534,7 +534,7 @@ TEST_F(MatchingEngineTest, Should_orderbook_be_monitored_when_switching_to_intra
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
 
     Order ob(OrderWay::BUY, 1000, 2000, 1, 5);
-    Order os(OrderWay::SELL, 1000, 2000, 1, 5);
+    Order os(OrderWay::SELL, 1000, 2000, 1, 6);
 
     ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
     ASSERT_TRUE(m_pEngine->Insert(os, product_id));
@@ -551,7 +551,7 @@ TEST_F(MatchingEngineTest, Should_intraday_auction_duration_be_updated_when_intr
     auto current_intraday_auction_duration = m_pEngine->GetIntradayAuctionDuration();
 
     Order ob(OrderWay::BUY, 1000, 2000, 1, 5);
-    Order os(OrderWay::SELL, 1000, 2000, 1, 5);
+    Order os(OrderWay::SELL, 1000, 2000, 1, 6);
 
     ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
     ASSERT_TRUE(m_pEngine->Insert(os, product_id));
@@ -568,7 +568,7 @@ TEST_F(MatchingEngineTest, Should_orderbook_be_unmonitored_at_the_end_of_intrada
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
 
     Order ob(OrderWay::BUY, 1000, 2000, 1, 5);
-    Order os(OrderWay::SELL, 1000, 2000, 1, 5);
+    Order os(OrderWay::SELL, 1000, 2000, 1, 6);
 
     ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
     ASSERT_TRUE(m_pEngine->Insert(os, product_id));
@@ -617,9 +617,6 @@ TEST_F(MatchingEngineTest, Should_close_price_be_saved_when_global_phase_switch_
 
     ASSERT_EQ(NewClosePrice, Instrument.GetClosePrice());
 }
-/*
-    TODO  Test that we cannot reinsert a order with the same identifier ( it's works if the order is still alive but doesn't if the order is executed / cancelled )
-*/
 
 int main(int argc, char ** argv)
 {

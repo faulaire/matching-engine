@@ -63,7 +63,7 @@ TEST_F(OrderBookTest, Should_open_price_be_the_price_computed_after_opening_auct
     auto post_opening_auction_price = 150;
 
     Order OrderBuy(OrderWay::BUY, 100, post_opening_auction_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, 100, post_opening_auction_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, post_opening_auction_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
@@ -80,7 +80,7 @@ TEST_F(OrderBookTest, Should_close_price_be_the_price_computed_after_closing_auc
     auto post_closing_auction_price = 150;
 
     Order OrderBuy(OrderWay::BUY, 100, post_closing_auction_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, 100, post_closing_auction_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, post_closing_auction_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
@@ -97,7 +97,7 @@ TEST_F(OrderBookTest, Should_post_auction_price_be_the_price_computed_after_a_cl
     auto post_closing_auction_price = 150;
 
     Order OrderBuy(OrderWay::BUY, 100, post_closing_auction_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, 100, post_closing_auction_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, post_closing_auction_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
@@ -114,7 +114,7 @@ TEST_F(OrderBookTest, Should_close_price_be_the_price_computed_after_a_closing_a
     auto post_closing_auction_price = 150;
 
     Order OrderBuy(OrderWay::BUY, 100, post_closing_auction_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, 100, post_closing_auction_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, post_closing_auction_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
@@ -131,7 +131,7 @@ TEST_F(OrderBookTest, Should_post_auction_price_be_the_price_computed_after_an_o
     auto post_opening_auction_price = 150;
 
     Order OrderBuy(OrderWay::BUY, 100, post_opening_auction_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, 100, post_opening_auction_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, post_opening_auction_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
@@ -152,7 +152,7 @@ TEST_F(OrderBookTest, Should_post_auction_price_be_the_price_computed_after_a_in
     auto to_low_price = ref_price * (1 - MaxPriceDev*0.01);
 
     Order OrderBuy(OrderWay::BUY, 100, to_low_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, 100, to_low_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, to_low_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
@@ -171,7 +171,7 @@ TEST_F(OrderBookTest, Should_post_auction_price_not_be_modified_when_regular_dea
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
 
     Order OrderBuy(OrderWay::BUY, 100, regular_deal_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, 100, regular_deal_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, regular_deal_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
@@ -198,7 +198,7 @@ TEST_F(OrderBookTest, Should_open_price_not_be_modified_when_regular_deal)
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
 
     Order OrderBuy(OrderWay::BUY, 100, regular_deal_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, 100, regular_deal_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, regular_deal_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
@@ -224,7 +224,7 @@ TEST_F(OrderBookTest, Should_close_price_not_be_modified_when_regular_deal)
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
 
     Order OrderBuy(OrderWay::BUY, 100, regular_deal_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, 100, regular_deal_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, regular_deal_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
@@ -243,7 +243,7 @@ TEST_F(OrderBookTest, Should_phase_switch_to_intraday_aution_when_deal_price_is_
     auto to_low_price = ref_price * (1 - MaxPriceDev*0.01);
 
     Order OrderBuy(OrderWay::BUY, 100, to_low_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, 100, to_low_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, to_low_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
@@ -262,7 +262,7 @@ TEST_F(OrderBookTest, Should_phase_switch_to_intraday_aution_when_deal_price_is_
     auto to_high_price = ref_price * (1 + MaxPriceDev*0.01);
 
     Order OrderBuy(OrderWay::BUY, 100, to_high_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, 100, to_high_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, to_high_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
@@ -274,7 +274,7 @@ TEST_F(OrderBookTest, Should_order_be_rejected_when_quantity_is_null)
 {
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
     Order OrderBuy(OrderWay::BUY, 0, 1000, 1, 5);
-    Order OrderSell(OrderWay::BUY, 0, 1000, 1, 5);
+    Order OrderSell(OrderWay::BUY, 0, 1000, 1, 6);
 
     ASSERT_FALSE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_FALSE(m_pOrderBook->Insert(OrderSell));
@@ -284,7 +284,7 @@ TEST_F(OrderBookTest, Should_order_be_rejected_when_price_is_null)
 {
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
     Order OrderBuy(OrderWay::BUY, 1000, 0, 1, 5);
-    Order OrderSell(OrderWay::SELL, 1000, 0, 1, 5);
+    Order OrderSell(OrderWay::SELL, 1000, 0, 1, 6);
 
     EXINFO(OrderBuy);
     EXINFO(OrderSell);
@@ -297,7 +297,7 @@ TEST_F(OrderBookTest, Should_order_be_rejected_when_way_is_invalid)
 {
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
     Order OrderBuy(OrderWay::MAX_WAY, 1000, 0, 1, 5);
-    Order WeirOrder((OrderWay)27, 1000, 0, 1, 5);
+    Order WeirOrder((OrderWay)27, 1000, 0, 1, 6);
 
     EXINFO(OrderBuy);
     EXINFO(WeirOrder);
@@ -314,7 +314,7 @@ TEST_F(OrderBookTest, Should_turnover_be_updated_after_a_deal)
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
 
     Order OrderBuy(OrderWay::BUY, order_quantity, post_auction_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, order_quantity, post_auction_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, order_quantity, post_auction_price, 1, 6);
 
     const auto current_turnover = m_pOrderBook->GetTurnover();
 
@@ -334,7 +334,7 @@ TEST_F(OrderBookTest, Should_dailyvolume_be_updated_after_a_deal)
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
 
     Order OrderBuy(OrderWay::BUY, order_quantity, post_auction_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, order_quantity, post_auction_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, order_quantity, post_auction_price, 1, 6);
 
     const auto current_dailyvolume = m_pOrderBook->GetDailyVolume();
 
@@ -361,7 +361,7 @@ TEST_F(OrderBookTest, Should_last_price_be_updated_after_a_deal)
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
 
     Order OrderBuy(OrderWay::BUY, order_quantity, new_last_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, order_quantity, new_last_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, order_quantity, new_last_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
@@ -396,7 +396,7 @@ TEST_F(OrderBookTest, Should_orderbook_be_monitored_when_switching_from_continuo
     auto to_low_price = ref_price * (1 - MaxPriceDev*0.01);
 
     Order OrderBuy(OrderWay::BUY, 100, to_low_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, 100, to_low_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, to_low_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
@@ -415,7 +415,7 @@ TEST_F(OrderBookTest, Should_orderbook_be_unmonitored_when_switching_from_intrad
     auto to_low_price = ref_price * (1 - MaxPriceDev*0.01);
 
     Order OrderBuy(OrderWay::BUY, 100, to_low_price, 1, 5);
-    Order OrderSell(OrderWay::SELL, 100, to_low_price, 1, 5);
+    Order OrderSell(OrderWay::SELL, 100, to_low_price, 1, 6);
 
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
