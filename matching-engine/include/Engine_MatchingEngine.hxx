@@ -6,6 +6,9 @@
 #include <Engine_MatchingEngine.h>
 #include <Engine_Instrument.h>
 
+#include <random>
+#include <algorithm>
+
 namespace exchange
 {
     namespace engine
@@ -13,6 +16,7 @@ namespace exchange
         template <typename Clock>
         MatchingEngine<Clock>::MatchingEngine() :
             m_StartTime(), m_StopTime(), m_AuctionEnd(),
+            m_RawIntradayAuctionDuration(0), m_AuctionDurationOffsetRange(0),
             m_IntradayAuctionDuration(0), m_OpeningAuctionDuration(0), m_ClosingAuctionDuration(0),
             m_PriceDeviationFactor(), m_GlobalPhase(TradingPhase::CLOSE)
         {}
@@ -58,12 +62,6 @@ namespace exchange
                 m_StartTime = today_midnight + boost::posix_time::duration_from_string(StartTime);
                 m_StopTime = today_midnight + boost::posix_time::duration_from_string(StopTime);
 
-                m_IntradayAuctionDuration = DurationType(iConfig.get<int>("Engine.intraday_auction_duration"));
-
-                m_OpeningAuctionDuration = DurationType(iConfig.get<int>("Engine.opening_auction_duration"));
-
-                m_ClosingAuctionDuration = DurationType(iConfig.get<int>("Engine.closing_auction_duration"));
-
                 m_InstrumentDBPath       = iConfig.get<std::string>("Engine.instrument_db_path");
 
                 auto MaxPriceDeviationPercentage = iConfig.get<double>("Engine.max_price_deviation")*0.01;
@@ -72,13 +70,67 @@ namespace exchange
                                                             1 - MaxPriceDeviationPercentage,
                                                             1 + MaxPriceDeviationPercentage
                                                         );
-                return true;
+
+                return LoadAuctionConfiguration(iConfig);
             }
             catch (const boost::property_tree::ptree_error & Error)
             {
                 EXERR("MatchingEngine::LoadConfiguration : " << Error.what());
                 return false;
             }
+        }
+
+        template <typename Clock>
+        bool MatchingEngine<Clock>::LoadAuctionConfiguration(boost::property_tree::ptree & iConfig)
+        {
+            m_RawIntradayAuctionDuration = DurationType(iConfig.get<int>("Engine.intraday_auction_duration"));
+
+            m_OpeningAuctionDuration = DurationType(iConfig.get<int>("Engine.opening_auction_duration"));
+
+            m_ClosingAuctionDuration = DurationType(iConfig.get<int>("Engine.closing_auction_duration"));
+
+            auto AuctionDurations = { m_RawIntradayAuctionDuration, m_OpeningAuctionDuration, m_ClosingAuctionDuration };
+
+            auto MinimalDuration = std::min_element(std::begin(AuctionDurations), std::end(AuctionDurations));
+
+            m_AuctionDurationOffsetRange = iConfig.get<std::uint16_t>("Engine.auction_duration_offset_range");
+            auto MaxDurationOffset = DurationType(m_AuctionDurationOffsetRange);
+
+            if (MaxDurationOffset > *MinimalDuration)
+            {
+                EXERR("MatchingEngine::LoadConfiguration : The auction_duration_offset_range is too high. It must be lesser than the minimal auction duration." <<
+                    "MaxDurationOffset[" << MaxDurationOffset << "] ; MinimalDuration[" << *MinimalDuration << "]");
+                return false;
+            }
+
+            m_OpeningAuctionDuration += DurationType(GetAuctionDurationOffset(m_AuctionDurationOffsetRange));
+            m_ClosingAuctionDuration += DurationType(GetAuctionDurationOffset(m_AuctionDurationOffsetRange));
+
+            UpdateIntradayAuctionDuration();
+
+            EXINFO("MatchingEngine::LoadAuctionConfiguration : OpeningAuctionDuration[" << m_OpeningAuctionDuration << "]");
+            EXINFO("MatchingEngine::LoadAuctionConfiguration : ClosingAuctionDuration[" << m_ClosingAuctionDuration << "]");
+            EXINFO("MatchingEngine::LoadAuctionConfiguration : IntradayAuctionDuration[" << m_IntradayAuctionDuration << "]");
+
+            return true;
+        }
+
+        template <typename Clock>
+        void MatchingEngine<Clock>::UpdateIntradayAuctionDuration()
+        {
+            m_IntradayAuctionDuration = m_RawIntradayAuctionDuration;
+            m_IntradayAuctionDuration += DurationType(GetAuctionDurationOffset(m_AuctionDurationOffsetRange));
+            EXINFO("MatchingEngine::UpdateIntradayAuctionDuration : IntradayAuctionDuration[" << m_IntradayAuctionDuration << "]");
+        }
+
+        template <typename Clock>
+        int MatchingEngine<Clock>::GetAuctionDurationOffset(int range)
+        {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> dis(-range, range);
+
+            return dis(gen);
         }
 
         template <typename Clock>
@@ -267,7 +319,6 @@ namespace exchange
             const TimeType now = Clock::local_time();
 
             /* Verify if some orderbook are in intraday auction state */
-            /* TODO : Randomize end of auction */
 
             CheckOrderBooks(now);
 

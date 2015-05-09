@@ -53,9 +53,15 @@ class MatchingEngineTest : public testing::Test
             if (boost::filesystem::exists("config.ini"))
             {
                 boost::property_tree::ini_parser::read_ini("config.ini", m_Config);
-            }
 
-            WriteInstruments();
+                m_AuctionDurationOffset = m_Config.get<std::uint16_t>("Engine.auction_duration_offset_range");
+
+                WriteInstruments();
+            }
+            else
+            {
+                ASSERT_TRUE(false);
+            }
         }
 
     private:
@@ -81,7 +87,7 @@ class MatchingEngineTest : public testing::Test
         }
 
     protected:
-
+        std::uint16_t                   m_AuctionDurationOffset;
         boost::property_tree::ptree     m_Config;
         std::unique_ptr<engine_type>    m_pEngine;
         
@@ -145,6 +151,19 @@ TEST_F(MatchingEngineTest, Should_configuration_fail_when_database_is_inconsiste
     ASSERT_FALSE(m_pEngine->Configure(aConfig));
 }
 
+TEST_F(MatchingEngineTest, Should_configuration_fail_when_auction_duration_offset_is_higher_than_the_smallest_auction_duration)
+{
+    boost::property_tree::ptree aConfig;
+    const std::string config_path = "invalid_auction_offset.ini";
+
+    ASSERT_TRUE(boost::filesystem::exists(config_path));
+
+    boost::property_tree::ini_parser::read_ini(config_path, aConfig);
+
+    ASSERT_FALSE(m_pEngine->Configure(aConfig));
+}
+
+
 TEST_F(MatchingEngineTest, Should_configuration_fail_when_database_is_already_locked)
 {
     std::string  InstrumentDBPath = m_Config.get<std::string>("Engine.instrument_db_path");
@@ -160,7 +179,7 @@ TEST_F(MatchingEngineTest, Should_engine_state_be_closed_at_startup)
 {
     ASSERT_TRUE(m_pEngine->Configure(m_Config));
 
-    ASSERT_EQ(m_pEngine->GetGlobalPhase(), TradingPhase::CLOSE);
+    ASSERT_EQ(TradingPhase::CLOSE, m_pEngine->GetGlobalPhase());
 }
 
 TEST_F(MatchingEngineTest, Should_engine_state_be_opening_auction_after_close_during_trading_hours)
@@ -168,7 +187,7 @@ TEST_F(MatchingEngineTest, Should_engine_state_be_opening_auction_after_close_du
     ASSERT_TRUE(m_pEngine->Configure(m_Config));
 
     m_pEngine->EngineListen();
-    ASSERT_EQ(m_pEngine->GetGlobalPhase(), TradingPhase::OPENING_AUCTION);
+    ASSERT_EQ(TradingPhase::OPENING_AUCTION, m_pEngine->GetGlobalPhase());
 }
 
 TEST_F(MatchingEngineTest, Should_engine_state_be_contiunous_trading_after_opening_auction)
@@ -179,11 +198,11 @@ TEST_F(MatchingEngineTest, Should_engine_state_be_contiunous_trading_after_openi
 
     auto auction_delay  = m_Config.get<unsigned int>("Engine.opening_auction_duration");
 
-    clock_type::go_to_future(auction_delay + 1);
+    clock_type::go_to_future(auction_delay + m_AuctionDurationOffset + 1);
 
     m_pEngine->EngineListen();
 
-    ASSERT_EQ(m_pEngine->GetGlobalPhase(), TradingPhase::CONTINUOUS_TRADING);
+    ASSERT_EQ(TradingPhase::CONTINUOUS_TRADING, m_pEngine->GetGlobalPhase());
 }
 
 TEST_F(MatchingEngineTest, Should_engine_state_be_close_after_closing_auction)
@@ -195,11 +214,11 @@ TEST_F(MatchingEngineTest, Should_engine_state_be_close_after_closing_auction)
 
     auto auction_delay = m_Config.get<unsigned int>("Engine.closing_auction_duration");
 
-    clock_type::go_to_future(auction_delay + 1);
+    clock_type::go_to_future(auction_delay + m_AuctionDurationOffset + 1);
 
     m_pEngine->EngineListen();
 
-    ASSERT_EQ(m_pEngine->GetGlobalPhase(), TradingPhase::CLOSE);
+    ASSERT_EQ(TradingPhase::CLOSE, m_pEngine->GetGlobalPhase());
 }
 
 TEST_F(MatchingEngineTest, Should_engine_state_be_closing_auction_after_continous_trading_outside_trading_hours)
@@ -215,7 +234,7 @@ TEST_F(MatchingEngineTest, Should_engine_state_be_closing_auction_after_continou
     m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING);
     m_pEngine->EngineListen();
 
-    ASSERT_EQ(m_pEngine->GetGlobalPhase(), TradingPhase::CLOSING_AUCTION);
+    ASSERT_EQ(TradingPhase::CLOSING_AUCTION, m_pEngine->GetGlobalPhase());
 }
 
 TEST_F(MatchingEngineTest, Should_set_global_phase_success_when_valid_global_phase)
@@ -355,7 +374,7 @@ TEST_F(MatchingEngineTest, Should_order_insertion_success_when_engine_state_is_o
     ASSERT_TRUE(m_pEngine->Configure(m_Config));
 
     m_pEngine->EngineListen();
-    ASSERT_EQ(m_pEngine->GetGlobalPhase(), TradingPhase::OPENING_AUCTION);
+    ASSERT_EQ(TradingPhase::OPENING_AUCTION, m_pEngine->GetGlobalPhase());
 
     Order o(OrderWay::BUY, 1000, 1234, 1, 5);
 
@@ -484,7 +503,7 @@ TEST_F(MatchingEngineTest, Should_non_persistent_orders_being_cancelled_after_cl
     m_pEngine->SetGlobalPhase(TradingPhase::CLOSING_AUCTION);
 
     auto auction_delay = m_Config.get<unsigned int>("Engine.closing_auction_duration");
-    clock_type::go_to_future(auction_delay + 1);
+    clock_type::go_to_future(auction_delay + m_AuctionDurationOffset + 1);
 
     m_pEngine->EngineListen();
 
@@ -508,6 +527,25 @@ TEST_F(MatchingEngineTest, Should_orderbook_be_monitored_when_switching_to_intra
     ASSERT_EQ(1, m_pEngine->GetMonitoredOrderBookCounter());
 }
 
+TEST_F(MatchingEngineTest, Should_intraday_auction_duration_be_updated_when_intraday_auction_occurs)
+{
+    ASSERT_TRUE(m_pEngine->Configure(m_Config));
+
+    ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
+
+    auto current_intraday_auction_duration = m_pEngine->GetIntradayAuctionDuration();
+
+    Order ob(OrderWay::BUY, 1000, 2000, 1, 5);
+    Order os(OrderWay::SELL, 1000, 2000, 1, 5);
+
+    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
+    ASSERT_TRUE(m_pEngine->Insert(os, product_id));
+
+    auto new_intraday_auction_duration = m_pEngine->GetIntradayAuctionDuration();
+
+    ASSERT_NE(current_intraday_auction_duration, new_intraday_auction_duration);
+}
+
 TEST_F(MatchingEngineTest, Should_orderbook_be_unmonitored_at_the_end_of_intraday_auction)
 {
     ASSERT_TRUE(m_pEngine->Configure(m_Config));
@@ -527,7 +565,7 @@ TEST_F(MatchingEngineTest, Should_orderbook_be_unmonitored_at_the_end_of_intrada
     ASSERT_EQ(1, m_pEngine->GetMonitoredOrderBookCounter());
     
     auto auction_delay = m_Config.get<unsigned int>("Engine.intraday_auction_duration");
-    clock_type::go_to_future(auction_delay + 1);
+    clock_type::go_to_future(auction_delay + m_AuctionDurationOffset + 1);
     
     m_pEngine->EngineListen();
     
@@ -565,8 +603,8 @@ TEST_F(MatchingEngineTest, Should_close_price_be_saved_when_global_phase_switch_
     ASSERT_EQ(NewClosePrice, Instrument.GetClosePrice());
 }
 /*
-    TODO  Test that we cannot reinsert a full executed order
-    // TODO : Save the close price the database
+    TODO  Test that we cannot reinsert a order with the same identifier ( it's works if the order is still alive but doesn't if the order is executed / cancelled )
+    TODO : Test are not working if we are not in open period
 */
 
 int main(int argc, char ** argv)

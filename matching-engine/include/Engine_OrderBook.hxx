@@ -138,6 +138,8 @@ namespace exchange
                     SetTradingPhase(TradingPhase::INTRADAY_AUCTION);
                     m_AuctionEnd = TMatchingEngine::ClockType::local_time() + m_rMatchingEngine.GetIntradayAuctionDuration();
 
+                    m_rMatchingEngine.UpdateIntradayAuctionDuration();
+
                     m_rMatchingEngine.MonitorOrderBook(this);
                 }
             }

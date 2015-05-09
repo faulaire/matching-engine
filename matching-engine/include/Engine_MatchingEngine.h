@@ -15,6 +15,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <cstdint>
+
 namespace exchange
 {
     namespace engine
@@ -84,6 +86,9 @@ namespace exchange
             DurationType GetIntradayAuctionDuration() const { return m_IntradayAuctionDuration; }
 
             /**/
+            void UpdateIntradayAuctionDuration();
+
+            /**/
             void OnUnsolicitedCancelledOrder(const Order & order);
 
         protected:
@@ -98,10 +103,16 @@ namespace exchange
             bool LoadConfiguration(boost::property_tree::ptree & iConfig);
 
             /**/
+            bool LoadAuctionConfiguration(boost::property_tree::ptree & iConfig);
+
+            /**/
             bool LoadInstruments();
 
             /**/
             void SaveClosePrices();
+
+            /**/
+            int GetAuctionDurationOffset(int range);
 
 
         private:
@@ -116,6 +127,10 @@ namespace exchange
             TimeType               m_StopTime;
             /* End time of any auction phase but intraday */
             TimeType               m_AuctionEnd;
+            /* Duration of the intraday auction state read from configuration file */
+            DurationType           m_RawIntradayAuctionDuration;
+            /* Range of available offset for auctions durations ( randomization ) */
+            std::uint16_t          m_AuctionDurationOffsetRange;
             /* Duration of the intraday auction state */
             DurationType           m_IntradayAuctionDuration;
             /* Duration of the open auction state */

@@ -49,6 +49,7 @@ protected:
 };
 
 // ENH_TODO  : For later, orders must be rejected if the price is outside the reservation range
+// ENH_TODO  : Learn more about circuit breakers
 
 TEST_F(OrderBookTest, Should_post_auction_price_be_the_previous_close_price_when_no_auctions_occurs)
 {
