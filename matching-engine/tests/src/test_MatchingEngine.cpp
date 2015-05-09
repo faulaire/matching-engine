@@ -9,7 +9,6 @@
 
 using namespace exchange::engine;
 
-
 class test_clock : public boost::posix_time::second_clock
 {
 public:
@@ -22,8 +21,18 @@ public:
     static time_type local_time()
     {
         time_type local_time = boost::posix_time::second_clock::local_time();
+        local_time -= static_offset.time_of_day();
         local_time += boost::posix_time::seconds(time_offset);
         return local_time;
+    }
+
+    static void set_now(const std::string & snow)
+    {
+        boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
+        boost::posix_time::ptime today_midnight(now.date());
+        boost::posix_time::ptime today_start_time = today_midnight + boost::posix_time::duration_from_string(snow);
+
+        static_offset = now - today_start_time.time_of_day();
     }
 
     static void go_to_future(long seconds)
@@ -33,9 +42,11 @@ public:
 
 private:
     static long time_offset;
+    static boost::posix_time::ptime static_offset;
 };
 
 long test_clock::time_offset = 0;
+boost::posix_time::ptime test_clock::static_offset = boost::posix_time::ptime();
 
 class MatchingEngineTest : public testing::Test
 {
@@ -48,19 +59,23 @@ class MatchingEngineTest : public testing::Test
 
         virtual void SetUp()
         {
-            m_pEngine.reset(new engine_type());
-
             if (boost::filesystem::exists("config.ini"))
             {
                 boost::property_tree::ini_parser::read_ini("config.ini", m_Config);
 
                 m_AuctionDurationOffset = m_Config.get<std::uint16_t>("Engine.auction_duration_offset_range");
 
+                auto StartTime = m_Config.get<std::string>("Engine.start_time");
+
+                test_clock::set_now(StartTime);
+
                 WriteInstruments();
+
+                m_pEngine.reset(new engine_type());
             }
             else
             {
-                ASSERT_TRUE(false);
+                FAIL();
             }
         }
 
@@ -604,7 +619,6 @@ TEST_F(MatchingEngineTest, Should_close_price_be_saved_when_global_phase_switch_
 }
 /*
     TODO  Test that we cannot reinsert a order with the same identifier ( it's works if the order is still alive but doesn't if the order is executed / cancelled )
-    TODO : Test are not working if we are not in open period
 */
 
 int main(int argc, char ** argv)

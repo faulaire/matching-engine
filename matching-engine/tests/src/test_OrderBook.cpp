@@ -36,7 +36,7 @@ public:
         }
         else
         {
-            ASSERT_TRUE(false);
+            FAIL();
         }  
     }
 

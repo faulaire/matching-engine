@@ -322,7 +322,7 @@ namespace exchange
 
             CheckOrderBooks(now);
 
-            const bool bInOpenPeriod = (now < m_StopTime) && (now > m_StartTime);
+            const bool bInOpenPeriod = (now < m_StopTime) && (now >= m_StartTime);
 
             switch (GetGlobalPhase())
             {
