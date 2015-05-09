@@ -122,7 +122,7 @@ namespace exchange
         template <typename TOrder, typename TMatchingEngine>
         void OrderBook<TOrder,TMatchingEngine>::ProcessDeal(const Deal * ipDeal)
         {
-            SetTurnover( GetTurnover() + ipDeal->GetQuantity()*ipDeal->GetPrice() );
+            SetTurnover(GetTurnover() + ipDeal->GetQuantity().AsScalar()*ipDeal->GetPrice().AsScalar());
             SetDailyVolume( GetDailyVolume() + ipDeal->GetQuantity() );
             SetLastPrice( ipDeal->GetPrice() );
 

@@ -7,6 +7,8 @@
 
 #include <iosfwd>
 
+#include <Engine_Types.h>
+
 namespace exchange
 {
     namespace engine
@@ -36,8 +38,8 @@ namespace exchange
 
             public:
 
-                using price_type = std::uint32_t;
-                using qty_type   = std::uint32_t;
+                using price_type = Price;
+                using qty_type   = Quantity;
             
             protected:
 
@@ -50,8 +52,8 @@ namespace exchange
                     {}
 
                     OrderWay          m_Way      = OrderWay::MAX_WAY;
-                    qty_type          m_Qty      = 0;
-                    price_type        m_Price    = 0;
+                    qty_type          m_Qty      = qty_type(0);
+                    price_type        m_Price    = price_type(0);
                     std::uint32_t     m_OrderID  = 0;
                     std::uint32_t     m_ClientID = 0;
                 };
@@ -168,8 +170,8 @@ namespace exchange
                         {}
                 
                         OrderWay          m_Way             = OrderWay::MAX_WAY;
-                        qty_type          m_Qty             = 0;
-                        price_type        m_Price           = 0;
+                        qty_type          m_Qty             = qty_type(0);
+                        price_type        m_Price           = price_type(0);
                         std::uint32_t     m_ExistingOrderID = 0;
                         std::uint32_t     m_ReplacedOrderID = 0;
                         std::uint32_t     m_ClientID        = 0;
@@ -289,12 +291,13 @@ namespace exchange
         *  \tparam Operator : Accessor to call
         *
         */
-        template <void(Order::*Operator)(std::uint32_t)>
+
+        template <void(Order::*Operator)(Order::qty_type)>
         class OrderUpdaterSingle
         {
             public:
 
-                OrderUpdaterSingle(std::uint32_t NewValue) :m_new_value(NewValue){}
+                OrderUpdaterSingle(Order::qty_type NewValue) :m_new_value(NewValue){}
 
                 void operator()(Order& iOrder) const
                 {
@@ -304,7 +307,7 @@ namespace exchange
             private:
 
                 /*!< New value to set */
-                std::uint32_t m_new_value;
+                Order::qty_type m_new_value;
         };
 
     }

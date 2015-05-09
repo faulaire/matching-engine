@@ -339,8 +339,8 @@ namespace exchange
         {
             auto OpeningInformation = GetTheoriticalAuctionInformations();
 
-            std::uint32_t MatchingPrice = std::get<0>(OpeningInformation);
-            std::uint64_t MatchingQty = std::get<1>(OpeningInformation);
+            price_type      MatchingPrice( std::get<0>(OpeningInformation) );
+            std::uint64_t   MatchingQty  ( std::get<1>(OpeningInformation) );
 
             bid_index_type & BidIndex = GetBidIndex();
             ask_index_type & AskIndex = GetAskIndex();
@@ -401,7 +401,7 @@ namespace exchange
                     {
                         ContainerIndex++;
                         CurrentPrice = Price;
-                        Container.emplace_back(0, 0, Price);
+                        Container.emplace_back(0, 0_qty, Price);
                     }
 
                     LimitType & Limit = Container[ContainerIndex - 1];
