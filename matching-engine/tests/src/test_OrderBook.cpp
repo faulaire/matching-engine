@@ -67,6 +67,7 @@ TEST_F(OrderBookTest, Should_open_price_be_the_price_computed_after_opening_auct
     Order OrderBuy(OrderWay::BUY, 100_qty, post_opening_auction_price, 1, 5);
     Order OrderSell(OrderWay::SELL, 100_qty, post_opening_auction_price, 1, 6);
 
+    std::cout << "Trading phase[" << TradingPhaseToString(m_pOrderBook->GetTradingPhase()) << "]" << std::endl;
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
 

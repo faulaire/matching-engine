@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include <cstdint>
 
 namespace exchange
@@ -93,7 +94,27 @@ namespace exchange
         {
             return Quantity(n);
         }
-
     }
 }
 
+// supposed to be undef behavior to modify stuff in namespace std, look for a better solution?
+namespace std {
+template <>
+class numeric_limits<exchange::engine::Price>
+{
+    using T = exchange::engine::Price;
+public:
+    static constexpr T min() noexcept { return T(std::numeric_limits<exchange::engine::Price::underlying_type>::min()); }
+    static constexpr T max() noexcept { return T(std::numeric_limits<exchange::engine::Price::underlying_type>::max()); }
+};
+
+template <>
+class numeric_limits<exchange::engine::Quantity>
+{
+    using T = exchange::engine::Quantity;
+public:
+    static constexpr T min() noexcept { return T(std::numeric_limits<exchange::engine::Price::underlying_type>::min()); }
+    static constexpr T max() noexcept { return T(std::numeric_limits<exchange::engine::Price::underlying_type>::max()); }
+};
+
+}
