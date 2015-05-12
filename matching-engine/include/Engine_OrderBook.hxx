@@ -27,7 +27,7 @@ namespace exchange
                 return false;
             }
 
-            if (iMsg.GetPrice() < constants::MinPrice || iMsg.GetQuantity() > constants::MaxPrice)
+            if (iMsg.GetPrice() < constants::MinPrice || iMsg.GetPrice() > constants::MaxPrice)
             {
                 return false;
             }

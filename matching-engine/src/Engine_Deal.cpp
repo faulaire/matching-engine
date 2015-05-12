@@ -31,7 +31,7 @@ namespace exchange
 
         std::ostream& operator<<(std::ostream& o, const Deal & x)
         {
-            o << "Deal : Price[" << x.GetPrice() << "] ; Qty[" << x.GetQuantity() << "] ;"
+            o << "Deal : Price[" << x.GetPrice().AsScalar() << "] ; Qty[" << x.GetQuantity().AsScalar() << "] ;"
                 << " BuyerClientID[" << x.GetBuyerClientID() << "] ; BuyerOrderID[" << x.GetBuyerOrderID()
                 << "] ; SellerClientID[" << x.GetSellerClientID() << "] ; SellerOrderID[" << x.GetSellerOrderID() << "] ;"
                 << " Reference[" << x.GetReference().data() << "]";

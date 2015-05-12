@@ -282,8 +282,8 @@ TEST_F(OrderContainerTest, AuctionFixing)
 
     auto OpenPrice = m_Container.GetTheoriticalAuctionInformations();
 
-    ASSERT_EQ(std::get<0>(OpenPrice), 90);
-    ASSERT_EQ(std::get<1>(OpenPrice), 900);
+    ASSERT_EQ(std::get<0>(OpenPrice), 90_price);
+    ASSERT_EQ(std::get<1>(OpenPrice), 900_qty);
 
     m_Container.CancelAllOrders();
 
@@ -303,8 +303,8 @@ TEST_F(OrderContainerTest, AuctionFixing)
 
     OpenPrice = m_Container.GetTheoriticalAuctionInformations();
 
-    ASSERT_EQ(std::get<0>(OpenPrice), 39);
-    ASSERT_EQ(std::get<1>(OpenPrice), 550);
+    ASSERT_EQ(std::get<0>(OpenPrice), 39_price);
+    ASSERT_EQ(std::get<1>(OpenPrice), 550_qty);
 }
 
 

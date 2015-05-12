@@ -96,7 +96,7 @@ namespace exchange
                     Getter/Setter
                 */
                 inline std::uint64_t       GetTurnover() const { return m_Turnover;                 }
-                inline std::uint64_t       GetDailyVolume() const { return m_DailyVolume;           }
+                inline Quantity            GetDailyVolume() const { return m_DailyVolume;           }
                 inline price_type          GetOpenPrice() const { return m_OpenPrice;               }
                 inline price_type          GetClosePrice() const { return m_ClosePrice;             }
                 inline price_type          GetLastPrice() const { return m_LastPrice;               }
@@ -107,7 +107,7 @@ namespace exchange
                 inline void SetClosePrice(price_type iPrice) { m_ClosePrice = iPrice;                                   }
                 inline void SetLastPrice(price_type iPrice) { m_LastPrice = iPrice;                                     }
                 inline void SetTurnover(std::uint64_t iTurnOver) { m_Turnover = iTurnOver;                              }
-                inline void SetDailyVolume(std::uint64_t iDailyVolume) { m_DailyVolume = iDailyVolume;                  }
+                inline void SetDailyVolume(Quantity iDailyVolume) { m_DailyVolume = iDailyVolume;                  }
                 inline void SetOpenPrice(price_type iOpenPrice) { m_OpenPrice = iOpenPrice;                             }
                 inline void SetPostAuctionPrice(price_type iPostAuctionPrice) { m_PostAuctionPrice = iPostAuctionPrice; }
 
@@ -145,7 +145,7 @@ namespace exchange
                 price_type             m_LastPrice;
 
                 std::uint64_t          m_Turnover;
-                std::uint64_t          m_DailyVolume;
+                Quantity               m_DailyVolume;
                 price_type             m_OpenPrice;
                 price_type             m_ClosePrice;
                 price_type             m_PostAuctionPrice;

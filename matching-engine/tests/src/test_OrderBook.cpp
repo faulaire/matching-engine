@@ -62,7 +62,7 @@ TEST_F(OrderBookTest, Should_open_price_be_the_price_computed_after_opening_auct
 {
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::OPENING_AUCTION));
 
-    auto post_opening_auction_price = Price(150);
+    const auto post_opening_auction_price = Price(150);
 
     Order OrderBuy(OrderWay::BUY, 100_qty, post_opening_auction_price, 1, 5);
     Order OrderSell(OrderWay::SELL, 100_qty, post_opening_auction_price, 1, 6);
@@ -343,7 +343,7 @@ TEST_F(OrderBookTest, Should_dailyvolume_be_updated_after_a_deal)
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
 
-    const auto new_dailyvolume = order_quantity.AsScalar() + current_dailyvolume;
+    const auto new_dailyvolume = order_quantity + current_dailyvolume;
 
     ASSERT_EQ(new_dailyvolume, m_pOrderBook->GetDailyVolume());
 }
