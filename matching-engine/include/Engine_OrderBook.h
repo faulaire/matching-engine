@@ -107,7 +107,7 @@ namespace exchange
                 inline void SetClosePrice(price_type iPrice) { m_ClosePrice = iPrice;                                   }
                 inline void SetLastPrice(price_type iPrice) { m_LastPrice = iPrice;                                     }
                 inline void SetTurnover(std::uint64_t iTurnOver) { m_Turnover = iTurnOver;                              }
-                inline void SetDailyVolume(Quantity iDailyVolume) { m_DailyVolume = iDailyVolume;                  }
+                inline void SetDailyVolume(Quantity iDailyVolume) { m_DailyVolume = iDailyVolume;                       }
                 inline void SetOpenPrice(price_type iOpenPrice) { m_OpenPrice = iOpenPrice;                             }
                 inline void SetPostAuctionPrice(price_type iPostAuctionPrice) { m_PostAuctionPrice = iPostAuctionPrice; }
 
