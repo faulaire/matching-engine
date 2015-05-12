@@ -24,13 +24,11 @@ namespace exchange
         {
             if (iMsg.GetQuantity() < constants::MinQty || iMsg.GetQuantity() > constants::MaxQty)
             {
-                std::cout << "Wrong quantity[" << iMsg.GetQuantity().AsScalar() << "] constants::MinQty[" << constants::MinQty.AsScalar() << "] constants::MaxQty[" << constants::MaxQty.AsScalar() << "]" << std::endl;
                 return false;
             }
 
             if (iMsg.GetPrice() < constants::MinPrice || iMsg.GetPrice() > constants::MaxPrice)
             {
-                std::cout << "Wrong price[" << iMsg.GetPrice().AsScalar() << "]" << std::endl;
                 return false;
             }
 
@@ -87,17 +85,13 @@ namespace exchange
         template <typename TOrder, typename TMatchingEngine>
         bool OrderBook<TOrder,TMatchingEngine>::Insert(TOrder & iOrder)
         {
-            std::cout << "[DBG] OrderBook::Insert[" << __LINE__ << "]" << std::endl;
             if (m_Phase != TradingPhase::CLOSE)
             {
                 if (CheckOrder(iOrder))
                 {
-                    std::cout << "[DBG] OrderBook::Insert[" << __LINE__ << "]" << std::endl;
                     return m_Orders.Insert(iOrder, TradingPhase::CONTINUOUS_TRADING==m_Phase);
                 }
-                std::cout << "[DBG] OrderBook::Insert[" << __LINE__ << "]" << std::endl;
             }
-            std::cout << "[DBG] OrderBook::Insert[" << __LINE__ << "]" << std::endl;
             return false;
         }
 

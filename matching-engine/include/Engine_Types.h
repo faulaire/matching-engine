@@ -27,7 +27,7 @@ namespace exchange
                 return m_value;
             }
 
-            Underlying  AsScalar() const
+            constexpr Underlying  AsScalar() const
             {
                 return m_value;
             }
@@ -38,24 +38,19 @@ namespace exchange
                 ar & m_value;
             }
 
-            bool operator==(const Numeric & rhs) const  { return m_value == rhs.m_value; }
-            bool operator!=(const Numeric & rhs) const  { return m_value != rhs.m_value; }
-            bool operator<(const Numeric & rhs)  const  { return m_value < rhs.m_value; }
-            bool operator>(const Numeric & rhs)  const  { return m_value > rhs.m_value; }
-            bool operator>=(const Numeric & rhs) const  { return m_value >= rhs.m_value; }
-            bool operator<=(const Numeric & rhs) const  { return m_value <= rhs.m_value; }
+            constexpr bool operator==(const Numeric & rhs) const  { return m_value == rhs.m_value; }
+            constexpr bool operator!=(const Numeric & rhs) const  { return m_value != rhs.m_value; }
+            constexpr bool operator<(const Numeric & rhs)  const  { return m_value < rhs.m_value; }
+            constexpr bool operator>(const Numeric & rhs)  const  { return m_value > rhs.m_value; }
+            constexpr bool operator>=(const Numeric & rhs) const  { return m_value >= rhs.m_value; }
+            constexpr bool operator<=(const Numeric & rhs) const  { return m_value <= rhs.m_value; }
 
-            Daughter operator +(const Underlying & rhs) const { return Daughter(m_value + rhs); }
-            Daughter operator -(const Underlying & rhs) const { return Daughter(m_value - rhs); }
-            Daughter operator +(const Numeric & rhs) const { return Daughter(m_value + rhs.m_value); }
-            Daughter operator -(const Numeric & rhs) const { return Daughter(m_value - rhs.m_value); }
+            constexpr Daughter operator +(const Underlying & rhs) const { return Daughter(m_value + rhs); }
+            constexpr Daughter operator -(const Underlying & rhs) const { return Daughter(m_value - rhs); }
+            constexpr Daughter operator +(const Numeric & rhs) const { return Daughter(m_value + rhs.m_value); }
+            constexpr Daughter operator -(const Numeric & rhs) const { return Daughter(m_value - rhs.m_value); }
 
-            Daughter operator *(double rhs) const { return Daughter(m_value * rhs); }
-
-            Daughter& that()
-            {
-                return static_cast<Daughter&>(*this);
-            }
+            constexpr Daughter operator *(double rhs) const { return Daughter(m_value * rhs); }
 
             Daughter& operator -=(const Numeric & rhs)
             {
@@ -70,6 +65,11 @@ namespace exchange
             }
 
         private:
+            Daughter& that()
+            {
+                return static_cast<Daughter&>(*this);
+            }
+
             Underlying m_value;
         };
 
