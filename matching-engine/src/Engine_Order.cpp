@@ -28,7 +28,7 @@ namespace exchange
 
         std::ostream& operator<<(std::ostream& o, const Order & x)
         {
-            o << "Order : Price[" << x.GetPrice() << "] ; Quantity[" << x.GetQuantity() << "] ;"
+            o << "Order : Price[" << x.GetPrice().AsScalar() << "] ; Quantity[" << x.GetQuantity().AsScalar() << "] ;"
               << "Way[" << OrderWayToString(x.GetWay()) << "] ; ClientID[" << x.GetClientID() << "] ; OrderID[" << x.GetOrderID() << "]";
             return o;
         }

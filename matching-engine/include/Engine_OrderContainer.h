@@ -96,7 +96,7 @@ namespace exchange
                 using LimitType           = std::tuple<std::uint32_t, qty_type, price_type>;
                 using LimitContainer      = std::vector<LimitType>;
 
-                using OpenInformationType = std::tuple<std::uint32_t, std::uint64_t>;
+                using OpenInformationType = std::tuple<Price, Quantity>;
 
                 using OrderIDContainer    = std::unordered_set < typename OrderIDGenerator<TOrder>::result_type >;
 
@@ -165,16 +165,16 @@ namespace exchange
                 bool AuctionInsert(const TOrder & iOrder);
 
                 template <typename Container>
-                std::uint64_t GetExecutableQuantity(const Container & Orders, price_type iPrice) const;
+                Quantity GetExecutableQuantity(const Container & Orders, price_type iPrice) const;
 
                 template <typename Msg>
-                std::uint64_t GetExecutableQuantity(const Msg & iOrder, OrderWay iWay) const;
+                Quantity GetExecutableQuantity(const Msg & iOrder, OrderWay iWay) const;
 
                 template <typename Container, typename Msg>
-                void ProcessDeals(Container & Orders, Msg & iMsg, std::uint64_t iMatchQty);
+                void ProcessDeals(Container & Orders, Msg & iMsg, Quantity iMatchQty);
 
                 template <typename Msg>
-                void ProcessDeals(Msg & iMsg, OrderWay iWay, std::uint64_t iMatchQty);
+                void ProcessDeals(Msg & iMsg, OrderWay iWay, Quantity iMatchQty);
 
                 bid_index_type & GetBidIndex() { return bmi::get<price_tag>(m_BidOrders); }
                 ask_index_type & GetAskIndex() { return bmi::get<price_tag>(m_AskOrders); }

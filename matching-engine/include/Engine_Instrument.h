@@ -92,7 +92,7 @@ namespace exchange
         std::ostream & operator<<(std::ostream &os, const Instrument<TOrder> &gp)
         {
             return os << "Name[" << gp.GetName() << "] Isin[" << gp.GetIsin() << "] Currency[" << gp.GetCurrency() << "] "
-                << "ClosePrice[" << gp.GetClosePrice() << "] ProductId[" << gp.GetProductId() << "]";
+                << "ClosePrice[" << gp.GetClosePrice().AsScalar() << "] ProductId[" << gp.GetProductId() << "]";
         }
         
 
