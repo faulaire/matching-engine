@@ -440,7 +440,7 @@ namespace exchange
         {
             auto MaxIndex = (std::max)(m_BidOrders.size(), m_AskOrders.size());
 
-            auto MakeString = [](Quantity Qty, Price Price)
+            auto MakeString = [](qty_type Qty, price_type Price)
             {
                 std::ostringstream oss("");
                 oss << Qty << "@" << Price;
@@ -483,7 +483,7 @@ namespace exchange
             LimitContainer BidContainer;
             LimitContainer AskContainer;
 
-            auto MakeString = [](std::uint32_t NbOrder, Quantity Qty, Price Price)
+            auto MakeString = [](std::uint32_t NbOrder, qty_type Qty, price_type Price)
             {
                 std::ostringstream oss("");
                 oss << "  " << NbOrder << "   " << Qty << "@" << Price;

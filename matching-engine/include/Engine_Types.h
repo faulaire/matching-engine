@@ -115,7 +115,7 @@ namespace exchange
         public:
             constexpr explicit operator Volume() noexcept;
 
-            constexpr Nominal operator *(const Price & rhs);
+            constexpr Nominal operator *(const Price & rhs) const;
         };
         
         class Volume : public Numeric < std::uint64_t, Volume >
@@ -144,7 +144,7 @@ namespace exchange
             using Numeric<std::uint64_t, Nominal>::Numeric;
         };
 
-        constexpr Nominal Quantity::operator *(const Price & rhs)
+        constexpr Nominal Quantity::operator *(const Price & rhs) const
         {
             return Nominal(m_value * rhs.AsScalar());
         }

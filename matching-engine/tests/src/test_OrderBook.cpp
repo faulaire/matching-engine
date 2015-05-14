@@ -7,8 +7,6 @@
 
 using namespace exchange::engine;
 
-
-
 class OrderBookTest : public testing::Test
 {
 public:
@@ -51,6 +49,7 @@ protected:
 // ENH_TODO  : For later, orders must be rejected if the price is outside the reservation range
 // ENH_TODO  : Learn more about circuit breakers
 // TODO : bool is too basic return type for insert / modify / cancel, a new type must be introduce to give more information about errors
+// TODO : Add order types for hit ( IAC, FOK )
 // TODO : The Order container should container pointer to orders and not a copy of this order ( because the order will be store in another container for persistence and monitoring )
 
 TEST_F(OrderBookTest, Should_post_auction_price_be_the_previous_close_price_when_no_auctions_occurs)
