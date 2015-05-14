@@ -61,8 +61,8 @@ namespace exchange
 
             public:
 
-                inline std::uint32_t      GetInstrumentID() const;
-                inline std::uint64_t      GetDealCounter() const;
+                inline std::uint32_t   GetInstrumentID() const;
+                inline size_t          GetDealCounter() const;
 
             
             protected:
@@ -87,7 +87,7 @@ namespace exchange
         }
 
         template <typename TEventProcessor>
-        inline std::uint64_t EventHandler<TEventProcessor>::GetDealCounter() const
+        inline size_t EventHandler<TEventProcessor>::GetDealCounter() const
         {
             return m_DealContainer.size();
         }

@@ -90,13 +90,15 @@ namespace exchange
 
                 using price_type          = typename TOrder::price_type;
                 using qty_type            = typename TOrder::qty_type;
+                using nominal_type        = typename TOrder::nominal_type;
+                using volume_type         = typename TOrder::volume_type;
 
                 /* Types used to store the aggregated view of orders */
                 /* NbOrder Qty Price*/
                 using LimitType           = std::tuple<std::uint32_t, qty_type, price_type>;
                 using LimitContainer      = std::vector<LimitType>;
 
-                using OpenInformationType = std::tuple<std::uint32_t, std::uint64_t>;
+                using OpenInformationType = std::tuple<price_type, volume_type>;
 
                 using OrderIDContainer    = std::unordered_set < typename OrderIDGenerator<TOrder>::result_type >;
 
@@ -165,16 +167,16 @@ namespace exchange
                 bool AuctionInsert(const TOrder & iOrder);
 
                 template <typename Container>
-                std::uint64_t GetExecutableQuantity(const Container & Orders, price_type iPrice) const;
+                volume_type GetExecutableQuantity(const Container & Orders, price_type iPrice) const;
 
                 template <typename Msg>
-                std::uint64_t GetExecutableQuantity(const Msg & iOrder, OrderWay iWay) const;
+                volume_type GetExecutableQuantity(const Msg & iOrder, OrderWay iWay) const;
 
                 template <typename Container, typename Msg>
-                void ProcessDeals(Container & Orders, Msg & iMsg, std::uint64_t iMatchQty);
+                void ProcessDeals(Container & Orders, Msg & iMsg, volume_type iMatchQty);
 
                 template <typename Msg>
-                void ProcessDeals(Msg & iMsg, OrderWay iWay, std::uint64_t iMatchQty);
+                void ProcessDeals(Msg & iMsg, OrderWay iWay, volume_type iMatchQty);
 
                 bid_index_type & GetBidIndex() { return bmi::get<price_tag>(m_BidOrders); }
                 ask_index_type & GetAskIndex() { return bmi::get<price_tag>(m_AskOrders); }

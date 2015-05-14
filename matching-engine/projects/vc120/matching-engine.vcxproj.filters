@@ -51,13 +51,16 @@
     <ClInclude Include="..\..\include\Engine_OrderBook.hxx">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Engine_DealHandler.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Engine_Instrument.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Engine_MatchingEngine.hxx">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Engine_Types.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Engine_EventHandler.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
@@ -74,9 +77,6 @@
     <ClCompile Include="..\..\src\Engine_OrderBook.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Engine_DealHandler.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\tests\src\test_MatchingEngine.cpp">
       <Filter>Tests\Source Files</Filter>
     </ClCompile>
@@ -85,6 +85,12 @@
     </ClCompile>
     <ClCompile Include="..\..\tests\src\test_IntrumentManager.cpp">
       <Filter>Tests\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Engine_Types.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Engine_EventHandler.cpp">
+      <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -105,6 +111,9 @@
       <Filter>Tests\Configuration</Filter>
     </None>
     <None Include="..\..\tests\config\missing_instrument_db_config.ini">
+      <Filter>Tests\Configuration</Filter>
+    </None>
+    <None Include="..\..\tests\config\invalid_auction_offset.ini">
       <Filter>Tests\Configuration</Filter>
     </None>
   </ItemGroup>

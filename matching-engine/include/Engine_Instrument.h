@@ -8,6 +8,8 @@
 #include <ScopedExit.h>
 #include <NoSqlStorage.h>
 
+#include <Engine_Types.h>
+
 #include <sstream>
 
 #include <boost/archive/text_oarchive.hpp>
@@ -36,7 +38,7 @@ namespace exchange
 
             Instrument() = default;
 
-            Instrument(const std::string & name, const std::string & isin, const std::string & currency, int id, std::uint64_t closeprice)
+            Instrument(const std::string & name, const std::string & isin, const std::string & currency, int id, Price closeprice)
                 :m_name(name), m_isin(isin), m_currency(currency), m_closeprice(closeprice), m_productid(id)
             {}
 

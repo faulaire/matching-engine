@@ -45,10 +45,11 @@ namespace exchange
 
         template <typename TOrder, typename TEventHandler>
         template <typename Container>
-        std::uint64_t OrderContainer<TOrder, TEventHandler>::GetExecutableQuantity(const Container & Orders, price_type iPrice) const
+        typename OrderContainer<TOrder, TEventHandler>::volume_type
+        OrderContainer<TOrder, TEventHandler>::GetExecutableQuantity(const Container & Orders, price_type iPrice) const
         {
             auto & Index = bmi::get<price_tag>(Orders);
-            std::uint64_t Qty = 0;
+            volume_type Qty = 0_volume;
 
             typedef decltype(Index.key_comp())                                          SortingPredicate;
             typedef typename ExecutableQtyPredHelper<TOrder, SortingPredicate>::value   Predicate;
@@ -65,22 +66,23 @@ namespace exchange
 
         template <typename TOrder, typename TEventHandler>
         template <typename Msg>
-        std::uint64_t OrderContainer<TOrder, TEventHandler>::GetExecutableQuantity(const Msg & iMsg, OrderWay iWay) const
+        typename OrderContainer<TOrder, TEventHandler>::volume_type
+        OrderContainer<TOrder, TEventHandler>::GetExecutableQuantity(const Msg & iMsg, OrderWay iWay) const
         {
             switch (iWay)
             {
                 case OrderWay::BUY:
                 {
-                    std::uint64_t MaxQty = GetExecutableQuantity(m_AskOrders, iMsg.GetPrice());
-                    return (std::min)(MaxQty, static_cast<std::uint64_t>(iMsg.GetQuantity()));
+                    volume_type MaxQty = GetExecutableQuantity(m_AskOrders, iMsg.GetPrice());
+                    return (std::min)(MaxQty, static_cast<volume_type>(iMsg.GetQuantity()));
                 }
                 case OrderWay::SELL:
                 {
-                    std::uint64_t MaxQty = GetExecutableQuantity(m_BidOrders, iMsg.GetPrice());
-                    return (std::min)(MaxQty, static_cast<std::uint64_t>(iMsg.GetQuantity()));
+                    volume_type MaxQty = GetExecutableQuantity(m_BidOrders, iMsg.GetPrice());
+                    return (std::min)(MaxQty, static_cast<volume_type>(iMsg.GetQuantity()));
                 }
                 default:
-                    return 0;
+                    return 0_volume;
             }
         }
 
@@ -104,11 +106,11 @@ namespace exchange
 
         template <typename TOrder, typename TEventHandler>
         template <typename Container, typename Msg>
-        void OrderContainer<TOrder, TEventHandler>::ProcessDeals(Container & Orders, Msg & iMsg, std::uint64_t iMatchQty)
+        void OrderContainer<TOrder, TEventHandler>::ProcessDeals(Container & Orders, Msg & iMsg, volume_type iMatchQty)
         {
             auto & Index = bmi::get<price_tag>(Orders);
 
-            while (iMatchQty > 0)
+            while (iMatchQty > 0_volume)
             {
                 auto OrderToHit = Index.begin();
 
@@ -137,7 +139,7 @@ namespace exchange
 
                 m_EventHandler.OnDeal(std::move(pDeal));
 
-                if (0 == OrderToHit->GetQuantity())
+                if (0_qty == OrderToHit->GetQuantity())
                 {
                     Index.erase(OrderToHit);
                 }
@@ -146,7 +148,7 @@ namespace exchange
 
         template <typename TOrder, typename TEventHandler>
         template <typename Msg>
-        void OrderContainer<TOrder, TEventHandler>::ProcessDeals(Msg & iMsg, OrderWay iWay, std::uint64_t iMatchQty)
+        void OrderContainer<TOrder, TEventHandler>::ProcessDeals(Msg & iMsg, OrderWay iWay, volume_type iMatchQty)
         {
             switch (iWay)
             {
@@ -173,15 +175,15 @@ namespace exchange
 
             if (Match)
             {
-                std::uint64_t MatchQty = (std::min)(GetExecutableQuantity(iOrder, iOrder.GetWay()), static_cast<std::uint64_t>(iOrder.GetQuantity()));
+                volume_type MatchQty = (std::min)(GetExecutableQuantity(iOrder, iOrder.GetWay()), static_cast<volume_type>(iOrder.GetQuantity()));
 
-                if (MatchQty)
+                if (MatchQty != 0_volume)
                 {
                     ProcessDeals(iOrder, iOrder.GetWay(), MatchQty);
                 }
             }
 
-            if (iOrder.GetQuantity())
+            if (iOrder.GetQuantity() != 0_qty)
             {
                 if (AuctionInsert(iOrder) == false )
                 {
@@ -239,14 +241,14 @@ namespace exchange
             {
                 if (Match)
                 {
-                    std::uint64_t MaxExecQty = GetExecutableQuantity(iOrderReplace, iOrderReplace.GetWay());
-                    std::uint64_t MatchQty = (std::min)(MaxExecQty, static_cast<std::uint64_t>(iOrderReplace.GetQuantity()));
+                    volume_type MaxExecQty = GetExecutableQuantity(iOrderReplace, iOrderReplace.GetWay());
+                    volume_type MatchQty = (std::min)(MaxExecQty, static_cast<volume_type>(iOrderReplace.GetQuantity()));
 
-                    if (MatchQty)
+                    if (MatchQty != 0_volume)
                     {
                         ProcessDeals(iOrderReplace, iOrderReplace.GetWay(), MatchQty);
 
-                        if (0 == iOrderReplace.GetQuantity())
+                        if (0_qty == iOrderReplace.GetQuantity())
                         {
                             return false;
                         }
@@ -309,17 +311,18 @@ namespace exchange
             for now, this rules is not necessary
         */
         template <typename TOrder, typename TEventHandler>
-        std::tuple<std::uint32_t, std::uint64_t> OrderContainer<TOrder, TEventHandler>::GetTheoriticalAuctionInformations() const
+        typename OrderContainer<TOrder, TEventHandler>::OpenInformationType
+        OrderContainer<TOrder, TEventHandler>::GetTheoriticalAuctionInformations() const
         {
-            std::uint64_t MaxQty = 0;
-            std::uint32_t OpenPrice = 0;
+            volume_type MaxQty = 0_volume;
+            Price  OpenPrice = 0_price;
 
             for (auto & order : m_AskOrders)
             {
-                std::uint64_t BidQty = GetExecutableQuantity(m_BidOrders, order.GetPrice());
-                std::uint64_t AskQty = GetExecutableQuantity(m_AskOrders, order.GetPrice());
+                volume_type BidQty = GetExecutableQuantity(m_BidOrders, order.GetPrice());
+                volume_type AskQty = GetExecutableQuantity(m_AskOrders, order.GetPrice());
 
-                std::uint64_t CurrentQty = (std::min)(BidQty, AskQty);
+                volume_type CurrentQty = (std::min)(BidQty, AskQty);
 
                 if (CurrentQty > MaxQty)
                 {
@@ -339,17 +342,17 @@ namespace exchange
         {
             auto OpeningInformation = GetTheoriticalAuctionInformations();
 
-            price_type      MatchingPrice( std::get<0>(OpeningInformation) );
-            std::uint64_t   MatchingQty  ( std::get<1>(OpeningInformation) );
+            price_type   MatchingPrice( std::get<0>(OpeningInformation) );
+            volume_type  MatchingQty(std::get<1>(OpeningInformation));
 
             bid_index_type & BidIndex = GetBidIndex();
             ask_index_type & AskIndex = GetAskIndex();
 
-            while (MatchingQty > 0)
+            while (MatchingQty > 0_volume)
             {
                 price_index_iterator BidOrder = BidIndex.begin();
 
-                while (BidOrder->GetQuantity() > 0 && MatchingQty > 0)
+                while (BidOrder->GetQuantity() > 0_qty && MatchingQty > 0_volume)
                 {
                     price_index_iterator AskOrder = AskIndex.begin();
 
@@ -363,13 +366,13 @@ namespace exchange
 
                     MatchingQty -= ExecutedQty;
 
-                    if (0 == AskOrder->GetQuantity())
+                    if (0_qty == AskOrder->GetQuantity())
                     {
                         AskIndex.erase(AskOrder);
                     }
                 }
 
-                if (0 == BidOrder->GetQuantity())
+                if (0_qty == BidOrder->GetQuantity())
                 {
                     GetBidIndex().erase(BidOrder);
                 }
@@ -437,7 +440,7 @@ namespace exchange
         {
             auto MaxIndex = (std::max)(m_BidOrders.size(), m_AskOrders.size());
 
-            auto MakeString = [](std::uint32_t Qty, std::uint64_t Price)
+            auto MakeString = [](Quantity Qty, Price Price)
             {
                 std::ostringstream oss("");
                 oss << Qty << "@" << Price;
@@ -463,7 +466,7 @@ namespace exchange
             auto AskIterator = GetAskIndex().begin();
             auto BidIterator = GetBidIndex().begin();
 
-            for (std::uint64_t Index = 0; Index < MaxIndex; Index++)
+            for (size_t Index = 0; Index < MaxIndex; Index++)
             {
                 StreamEntry(BidIterator, GetBidIndex().end(), "       ");
                 StreamEntry(AskIterator, GetAskIndex().end(), "      |");
@@ -480,7 +483,7 @@ namespace exchange
             LimitContainer BidContainer;
             LimitContainer AskContainer;
 
-            auto MakeString = [](std::uint32_t NbOrder, std::uint32_t Qty, std::uint64_t Price)
+            auto MakeString = [](std::uint32_t NbOrder, Quantity Qty, Price Price)
             {
                 std::ostringstream oss("");
                 oss << "  " << NbOrder << "   " << Qty << "@" << Price;
@@ -507,7 +510,7 @@ namespace exchange
             oss << "|         BID          |         ASK         |" << std::endl;
             oss << "|                      |                     |" << std::endl;
 
-            for (std::uint64_t Index = 0; Index < MaxIndex; Index++)
+            for (size_t Index = 0; Index < MaxIndex; Index++)
             {
                 StreamEntry(Index, BidContainer, "       ");
                 StreamEntry(Index, AskContainer, "      |");

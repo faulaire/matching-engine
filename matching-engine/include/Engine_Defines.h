@@ -3,9 +3,9 @@
 * All rights reserved.
 */
 
-#include <limits>
-
 #pragma once
+
+#include <Engine_Types.h>
 
 namespace exchange
 {
@@ -13,11 +13,11 @@ namespace exchange
     {
         namespace constants
         {
-            static const std::uint32_t MaxPrice = std::numeric_limits<std::uint32_t>::max();
-            static const std::uint32_t MaxQty = std::numeric_limits<std::uint32_t>::max();
+            static const auto  MaxPrice = Price::max();
+            static const auto  MaxQty   = Quantity::max();
 
-            static const std::uint32_t MinPrice = std::numeric_limits<std::uint32_t>::min() + 1;
-            static const std::uint32_t MinQty = std::numeric_limits<std::uint32_t>::min() + 1;
+            static const auto  MinPrice = Price::min()    + 1_price;
+            static const auto  MinQty   = Quantity::min() + 1_qty;
         }
     }
 }

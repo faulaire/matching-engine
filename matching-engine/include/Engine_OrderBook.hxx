@@ -27,7 +27,7 @@ namespace exchange
                 return false;
             }
 
-            if (iMsg.GetPrice() < constants::MinPrice || iMsg.GetQuantity() > constants::MaxPrice)
+            if (iMsg.GetPrice() < constants::MinPrice || iMsg.GetPrice() > constants::MaxPrice)
             {
                 return false;
             }
@@ -122,7 +122,7 @@ namespace exchange
         template <typename TOrder, typename TMatchingEngine>
         void OrderBook<TOrder,TMatchingEngine>::ProcessDeal(const Deal * ipDeal)
         {
-            SetTurnover(GetTurnover() + ipDeal->GetQuantity().AsScalar()*ipDeal->GetPrice().AsScalar());
+            SetTurnover(GetTurnover() + ipDeal->GetQuantity()*ipDeal->GetPrice());
             SetDailyVolume( GetDailyVolume() + ipDeal->GetQuantity() );
             SetLastPrice( ipDeal->GetPrice() );
 

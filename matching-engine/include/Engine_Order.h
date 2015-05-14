@@ -38,8 +38,10 @@ namespace exchange
 
             public:
 
-                using price_type = Price;
-                using qty_type   = Quantity;
+                using price_type   = Price;
+                using qty_type     = Quantity;
+                using volume_type  = Volume;
+                using nominal_type = Nominal;
             
             protected:
 

@@ -92,9 +92,9 @@ class MatchingEngineTest : public testing::Test
 
             InstrumentManager<Order> InstrMgr(InstrumentDBPath);
 
-            Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
-            Instrument<Order> Natixis{ "Natixis", "ISINNATI", "EUR", 2, 1255 };
-            Instrument<Order> IBM{ "IBM", "ISINIBM", "USD", 3, 1256 };
+            Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254_price };
+            Instrument<Order> Natixis{ "Natixis", "ISINNATI", "EUR", 2, 1255_price };
+            Instrument<Order> IBM{ "IBM", "ISINIBM", "USD", 3, 1256_price };
 
             InstrMgr.Write(Michelin, key_extractor, true);
             InstrMgr.Write(Natixis, key_extractor, true);
@@ -156,8 +156,8 @@ TEST_F(MatchingEngineTest, Should_configuration_fail_when_database_is_inconsiste
     {
         InstrumentManager<Order> InstrMgr(InstrumentDBPath);
 
-        Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
-        Instrument<Order> MichelinBis{ "MichelinBis", "ISINMICH", "EUR", 1, 1254 };
+        Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254_price };
+        Instrument<Order> MichelinBis{ "MichelinBis", "ISINMICH", "EUR", 1, 1254_price };
 
         InstrMgr.Write(Michelin, key_extractor, true);
         InstrMgr.Write(MichelinBis, key_extractor, true);

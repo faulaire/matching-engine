@@ -18,7 +18,7 @@ public:
     using OrderBookType = OrderBook<Order, engine_type>;
 
     OrderBookTest():
-        m_Instrument{ "MingYiCorporation", "ISIN", "EUR", 1, 1000 }
+        m_Instrument{ "MingYiCorporation", "ISIN", "EUR", 1, 1000_price }
     {}
 
     virtual void SetUp()
@@ -168,7 +168,7 @@ TEST_F(OrderBookTest, Should_post_auction_price_be_the_price_computed_after_a_in
 TEST_F(OrderBookTest, Should_post_auction_price_not_be_modified_when_regular_deal)
 {
     const auto post_auction_price = m_pOrderBook->GetPostAuctionPrice();
-    const auto regular_deal_price = post_auction_price + 1;
+    const auto regular_deal_price = post_auction_price + 1_price;
 
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
 
@@ -190,7 +190,7 @@ TEST_F(OrderBookTest, Should_open_price_not_be_modified_when_regular_deal)
 
     if (open_price == post_auction_price)
     {
-        regular_deal_price = open_price + 1;
+        regular_deal_price = open_price + 1_price;
     }
     else
     {
@@ -216,7 +216,7 @@ TEST_F(OrderBookTest, Should_close_price_not_be_modified_when_regular_deal)
 
     if (close_price == post_auction_price)
     {
-        regular_deal_price = close_price + 1;
+        regular_deal_price = close_price + 1_price;
     }
     else
     {
@@ -323,7 +323,7 @@ TEST_F(OrderBookTest, Should_turnover_be_updated_after_a_deal)
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
 
-    const auto new_turnover = current_turnover + order_quantity.AsScalar() * post_auction_price.AsScalar();
+    const auto new_turnover = current_turnover + order_quantity * post_auction_price;
 
     ASSERT_EQ(new_turnover, m_pOrderBook->GetTurnover());
 }
@@ -343,7 +343,7 @@ TEST_F(OrderBookTest, Should_dailyvolume_be_updated_after_a_deal)
     ASSERT_TRUE(m_pOrderBook->Insert(OrderBuy));
     ASSERT_TRUE(m_pOrderBook->Insert(OrderSell));
 
-    const auto new_dailyvolume = order_quantity.AsScalar() + current_dailyvolume;
+    const auto new_dailyvolume = current_dailyvolume + order_quantity;
 
     ASSERT_EQ(new_dailyvolume, m_pOrderBook->GetDailyVolume());
 }
@@ -356,7 +356,7 @@ TEST_F(OrderBookTest, Should_last_price_be_the_previous_close_price_when_no_auct
 TEST_F(OrderBookTest, Should_last_price_be_updated_after_a_deal)
 {
     const auto previous_last_price = m_pOrderBook->GetLastPrice();
-    const auto new_last_price = previous_last_price + 1;
+    const auto new_last_price = previous_last_price + 1_price;
 
     const auto order_quantity = 100_qty;
 

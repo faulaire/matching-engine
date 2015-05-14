@@ -67,7 +67,7 @@ TEST_F(InstrumentManagerTest, Should_instrument_insertion_success_when_new_instr
 {
 	InstrumentManager<Order> InstrMgr(m_DBFilePath);
 
-	Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
+	Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254_price };
 
 	ASSERT_EQ(true, InstrMgr.Write(Michelin, key_extractor));
 }
@@ -76,7 +76,7 @@ TEST_F(InstrumentManagerTest, Should_instrument_insertion_fail_when_already_inse
 {
 	InstrumentManager<Order> InstrMgr(m_DBFilePath);
 
-	Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
+    Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254_price };
 
 	ASSERT_EQ(true, InstrMgr.Write(Michelin, key_extractor));
 	ASSERT_EQ(false, InstrMgr.Write(Michelin, key_extractor));
@@ -86,9 +86,9 @@ TEST_F(InstrumentManagerTest, Should_load_return_n_instruments_when_n_instrument
 {
 	InstrumentManager<Order> InstrMgr(m_DBFilePath);
 
-	Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
-	Instrument<Order> Natixis{ "Natixis", "ISINATIX", "JPY", 2, 1255 };
-	Instrument<Order> Ibm{ "IBM", "ISINIBM", "USD", 3, 1256 };
+    Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254_price };
+    Instrument<Order> Natixis{ "Natixis", "ISINATIX", "JPY", 2, 1255_price };
+    Instrument<Order> Ibm{ "IBM", "ISINIBM", "USD", 3, 1256_price };
 
 	ASSERT_EQ(true, InstrMgr.Write(Michelin, key_extractor));
 	ASSERT_EQ(true, InstrMgr.Write(Natixis, key_extractor));
@@ -104,7 +104,7 @@ TEST_F(InstrumentManagerTest, Should_load_return_the_same_instrument_as_the_inse
 {
 	InstrumentManager<Order> InstrMgr(m_DBFilePath);
 
-	Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254 };
+    Instrument<Order> Michelin{ "Michelin", "ISINMICH", "EUR", 1, 1254_price };
 
 	ASSERT_EQ(true, InstrMgr.Write(Michelin, key_extractor));
 

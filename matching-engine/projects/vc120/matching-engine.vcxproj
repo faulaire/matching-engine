@@ -66,8 +66,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Engine_Deal.h" />
-    <ClInclude Include="..\..\include\Engine_DealHandler.h" />
     <ClInclude Include="..\..\include\Engine_Defines.h" />
+    <ClInclude Include="..\..\include\Engine_EventHandler.h" />
     <ClInclude Include="..\..\include\Engine_MatchingEngine.h" />
     <ClInclude Include="..\..\include\Engine_MatchingEngine.hxx" />
     <ClInclude Include="..\..\include\Engine_Order.h" />
@@ -77,12 +77,14 @@
     <ClInclude Include="..\..\include\Engine_OrderContainer.hxx" />
     <ClInclude Include="..\..\include\Engine_Tools.h" />
     <ClInclude Include="..\..\include\Engine_Instrument.h" />
+    <ClInclude Include="..\..\include\Engine_Types.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Engine_DealHandler.cpp" />
+    <ClCompile Include="..\..\src\Engine_EventHandler.cpp" />
     <ClCompile Include="..\..\src\Engine_OrderBook.cpp" />
     <ClCompile Include="..\..\src\Engine_Deal.cpp" />
     <ClCompile Include="..\..\src\Engine_Order.cpp" />
+    <ClCompile Include="..\..\src\Engine_Types.cpp" />
     <ClCompile Include="..\..\tests\src\test_IntrumentManager.cpp" />
     <ClCompile Include="..\..\tests\src\test_MatchingEngine.cpp" />
     <ClCompile Include="..\..\tests\src\test_OrderBook.cpp" />
@@ -93,6 +95,7 @@
     <None Include="..\..\tests\config\config.ini" />
     <None Include="..\..\tests\config\config_always_closed.ini" />
     <None Include="..\..\tests\config\corrupted_db_config.ini" />
+    <None Include="..\..\tests\config\invalid_auction_offset.ini" />
     <None Include="..\..\tests\config\invalid_config.ini" />
     <None Include="..\..\tests\config\missing_instrument_db_config.ini" />
     <None Include="..\..\wscript" />
