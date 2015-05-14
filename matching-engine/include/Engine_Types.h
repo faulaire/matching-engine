@@ -35,11 +35,6 @@ namespace exchange
                 return m_value;
             }
 
-            constexpr Underlying  AsScalar() const
-            {
-                return m_value;
-            }
-
             template<class Archive>
             void serialize(Archive & ar, const unsigned int /* version */)
             {
@@ -92,7 +87,7 @@ namespace exchange
         template <typename Underlying, typename Daughter>
         std::ostream& operator<< (std::ostream& oss, const Numeric<Underlying, Daughter> & x)
         {
-            oss << x.AsScalar();
+            oss << static_cast<Underlying>( x );
             return oss;
         }
 
@@ -123,17 +118,17 @@ namespace exchange
         public:
             using Numeric<std::uint64_t, Volume>::Numeric;
         public:
-            constexpr Volume operator +(const Quantity & rhs) const { return Volume( m_value + rhs.AsScalar() ); }
+            constexpr Volume operator +(const Quantity & rhs) const { return Volume(m_value + static_cast<Quantity::underlying_type>(rhs) ); }
 
             Volume& operator +=(const Quantity & rhs)
             {
-                m_value += rhs.AsScalar();
+                m_value += static_cast<Quantity::underlying_type>(rhs);
                 return *this;
             }
 
             Volume& operator -=(const Quantity & rhs)
             {
-                m_value -= rhs.AsScalar();
+                m_value -= static_cast<Quantity::underlying_type>(rhs);
                 return *this;
             }
         };
@@ -146,7 +141,7 @@ namespace exchange
 
         constexpr Nominal Quantity::operator *(const Price & rhs) const
         {
-            return Nominal(m_value * rhs.AsScalar());
+            return Nominal(m_value * static_cast<Price::underlying_type>(rhs) );
         }
 
         constexpr Quantity::operator Volume() noexcept
