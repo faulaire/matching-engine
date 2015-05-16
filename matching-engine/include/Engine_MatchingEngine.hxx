@@ -136,6 +136,9 @@ namespace exchange
         template <typename Clock>
         bool MatchingEngine<Clock>::LoadInstruments()
         {
+            struct CorruptedDBException : public std::exception
+            {};
+
             try
             {
                 auto InstrumentHandler = [this](const Instrument<Order> & Instrument)
@@ -148,6 +151,7 @@ namespace exchange
                     if (!pIterator.second)
                     {
                         EXERR("MatchingEngine::LoadInstruments : Corrupted database, failed to insert instrument : " << Instrument.GetName());
+                        throw CorruptedDBException();
                     }
                 };
 
@@ -155,7 +159,7 @@ namespace exchange
 
                 return Loader.Load(InstrumentHandler);
             }
-            catch (const boost::property_tree::ptree_error & Error)
+            catch (const CorruptedDBException & Error)
             {
                 EXERR("MatchingEngine::LoadInstruments : " << Error.what());
                 return false;
@@ -163,7 +167,7 @@ namespace exchange
         }
 
         template <typename Clock>
-        bool MatchingEngine<Clock>::Insert(Order & iOrder, std::uint32_t iProductID)
+        Status MatchingEngine<Clock>::Insert(Order & iOrder, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())
@@ -172,12 +176,12 @@ namespace exchange
             }
             else
             {
-                return false;
+                return Status::InstrumentNotFound;
             }
         }
 
         template <typename Clock>
-        bool MatchingEngine<Clock>::Modify(OrderReplace & iOrderReplace, std::uint32_t iProductID)
+        Status MatchingEngine<Clock>::Modify(OrderReplace & iOrderReplace, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())
@@ -186,12 +190,12 @@ namespace exchange
             }
             else
             {
-                return false;
+                return Status::InstrumentNotFound;
             }
         }
 
         template <typename Clock>
-        bool MatchingEngine<Clock>::Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay, std::uint32_t iProductID)
+        Status MatchingEngine<Clock>::Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())
@@ -200,7 +204,7 @@ namespace exchange
             }
             else
             {
-                return false;
+                return Status::InstrumentNotFound;
             }
         }
 

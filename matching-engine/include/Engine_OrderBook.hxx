@@ -20,24 +20,24 @@ namespace exchange
 
         template <typename TOrder, typename TMatchingEngine>
         template <typename Msg>
-        bool OrderBook<TOrder,TMatchingEngine>::CheckOrder(const Msg & iMsg) const
+        Status OrderBook<TOrder, TMatchingEngine>::CheckOrder(const Msg & iMsg) const
         {
             if (iMsg.GetQuantity() < constants::MinQty || iMsg.GetQuantity() > constants::MaxQty)
             {
-                return false;
+                return Status::InvalidQuantity;
             }
 
             if (iMsg.GetPrice() < constants::MinPrice || iMsg.GetPrice() > constants::MaxPrice)
             {
-                return false;
+                return Status::InvalidPrice;
             }
 
             if( iMsg.GetWay() != OrderWay::BUY && iMsg.GetWay() != OrderWay::SELL)
             {
-                return false;
+                return Status::InvalidWay;
             }
 
-            return true;
+            return Status::Ok;;
         }
 
         template <typename TOrder, typename TMatchingEngine>
@@ -83,40 +83,51 @@ namespace exchange
         }
 
         template <typename TOrder, typename TMatchingEngine>
-        bool OrderBook<TOrder,TMatchingEngine>::Insert(TOrder & iOrder)
+        Status OrderBook<TOrder, TMatchingEngine>::Insert(TOrder & iOrder)
         {
             if (m_Phase != TradingPhase::CLOSE)
             {
-                if (CheckOrder(iOrder))
+                auto status = CheckOrder(iOrder);
+                if (Status::Ok == status)
                 {
                     return m_Orders.Insert(iOrder, TradingPhase::CONTINUOUS_TRADING==m_Phase);
                 }
+                else
+                {
+                    return status;
+                }
             }
-            return false;
+            return Status::MarketNotOpened;
         }
 
         template <typename TOrder, typename TMatchingEngine>
         template <typename TOrderReplace>
-        bool OrderBook<TOrder,TMatchingEngine>::Modify(TOrderReplace & iOrderReplace)
+        Status OrderBook<TOrder, TMatchingEngine>::Modify(TOrderReplace & iOrderReplace)
         {
             if (m_Phase != TradingPhase::CLOSE)
             {
-                if (CheckOrder(iOrderReplace))
+                auto status = CheckOrder(iOrderReplace);
+
+                if (Status::Ok == status)
                 {
                     return m_Orders.Modify(iOrderReplace, TradingPhase::CONTINUOUS_TRADING==m_Phase);
                 }
+                else
+                {
+                    return status;
+                }
             }
-            return false;
+            return Status::MarketNotOpened;
         }
 
         template <typename TOrder, typename TMatchingEngine>
-        bool OrderBook<TOrder,TMatchingEngine>::Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay)
+        Status OrderBook<TOrder, TMatchingEngine>::Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay)
         {
             if (m_Phase != TradingPhase::CLOSE)
             {
                 return m_Orders.Delete(iOrderID, iClientID, iWay);
             }
-            return false;
+            return Status::MarketNotOpened;
         }
 
         template <typename TOrder, typename TMatchingEngine>

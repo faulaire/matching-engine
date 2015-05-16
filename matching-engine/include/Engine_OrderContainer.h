@@ -14,6 +14,8 @@
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 
+#include <Engine_Status.h>
+
 #include <unordered_set>
 
 namespace exchange
@@ -126,16 +128,16 @@ namespace exchange
 
                 /**
                 */
-                bool Insert(TOrder & iOrder, bool Match = false);
+                Status Insert(TOrder & iOrder, bool Match = false);
 
                 /**
                 */
                 template <typename TOrderReplace>
-                bool Modify(TOrderReplace & iOrderReplace, bool Match = false);
+                Status Modify(TOrderReplace & iOrderReplace, bool Match = false);
 
                 /**
                 */
-                bool Delete(const std::uint32_t iOrderId, const std::uint32_t ClientId, OrderWay iWay);
+                Status Delete(const std::uint32_t iOrderId, const std::uint32_t ClientId, OrderWay iWay);
 
                 /**
                 */

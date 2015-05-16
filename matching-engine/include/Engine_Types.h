@@ -1,3 +1,8 @@
+/*
+* Copyright (C) 2015, Fabien Aulaire
+* All rights reserved.
+*/
+
 #pragma once
 
 #include <cstdint>

@@ -63,6 +63,9 @@
     <ClInclude Include="..\..\include\Engine_EventHandler.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Engine_Status.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Engine_Order.cpp">

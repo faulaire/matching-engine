@@ -165,12 +165,12 @@ namespace exchange
         }
 
         template <typename TOrder, typename TEventHandler>
-        bool OrderContainer<TOrder, TEventHandler>::Insert(TOrder & iOrder, bool Match)
+        Status OrderContainer<TOrder, TEventHandler>::Insert(TOrder & iOrder, bool Match)
         {
             auto OrderID = OrderIDGenerator<TOrder>()(iOrder);
             if (m_InsertedOrderIDs.find(OrderID) != m_InsertedOrderIDs.end())
             {
-                return false;
+                return Status::IDAlreadyUsed;
             }
 
             if (Match)
@@ -187,13 +187,13 @@ namespace exchange
             {
                 if (AuctionInsert(iOrder) == false )
                 {
-                    return false;
+                    return Status::InternalError;;
                 }
             }
 
             m_InsertedOrderIDs.insert(OrderID);
 
-            return true;
+            return Status::Ok;;
         }
 
         template <typename TOrder, typename TEventHandler>
@@ -219,23 +219,28 @@ namespace exchange
         * Erase an order from order book
         */
         template <typename TOrder, typename TEventHandler>
-        bool OrderContainer<TOrder, TEventHandler>::Delete(const std::uint32_t iOrderId, const std::uint32_t iClientId, OrderWay iWay)
+        Status OrderContainer<TOrder, TEventHandler>::Delete(const std::uint32_t iOrderId, const std::uint32_t iClientId, OrderWay iWay)
         {    
+            bool Result = false;
+
             switch (iWay)
             {
                 case OrderWay::BUY:
-                    return (1 == m_BidOrders.erase(OrderIDGenerator<TOrder>()(iClientId, iOrderId)));
+                    Result = (1 == m_BidOrders.erase(OrderIDGenerator<TOrder>()(iClientId, iOrderId)));
+                    break;
                 case OrderWay::SELL:
-                    return (1 == m_AskOrders.erase(OrderIDGenerator<TOrder>()(iClientId, iOrderId)));
+                    Result = (1 == m_AskOrders.erase(OrderIDGenerator<TOrder>()(iClientId, iOrderId)));
+                    break;
                 default:
                     assert(false);
-                    return false;
-            };
+                    return Status::InternalError;
+            }
+            return Result ? Status::Ok : Status::OrderNotFound;
         }
 
         template <typename TOrder, typename TEventHandler>
         template <typename TOrderReplace>
-        bool OrderContainer<TOrder, TEventHandler>::Modify(TOrderReplace & iOrderReplace, bool Match)
+        Status OrderContainer<TOrder, TEventHandler>::Modify(TOrderReplace & iOrderReplace, bool Match)
         {
             auto ProcessModify = [&]()
             {
@@ -262,7 +267,7 @@ namespace exchange
 
             if (m_InsertedOrderIDs.find(NewOrderID) != m_InsertedOrderIDs.end())
             {
-                return false;
+                return Status::IDAlreadyUsed;
             }
 
             auto ApplyModify = [&](auto & Container)
@@ -286,9 +291,9 @@ namespace exchange
                         Container.erase(Order);
                     }
                     m_InsertedOrderIDs.insert(OrderID);
-                    return true;
+                    return Status::Ok;
                 }
-                return false;
+                return Status::OrderNotFound;
             };
 
             switch (iOrderReplace.GetWay())
@@ -299,7 +304,7 @@ namespace exchange
                     return ApplyModify(m_AskOrders);
                 default:
                     assert(false);
-                    return false;
+                    return Status::InternalError;
             }
         }
 

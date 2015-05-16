@@ -11,6 +11,7 @@
 
 #include <Engine_Order.h>
 #include <Engine_OrderBook.h>
+#include <Engine_Status.h>
 
 #include <unordered_map>
 #include <unordered_set>
@@ -49,13 +50,13 @@ namespace exchange
             bool Configure(boost::property_tree::ptree & iConfig);
 
             /**/
-            bool Insert(Order & iOrder, std::uint32_t iProductID);
+            Status Insert(Order & iOrder, std::uint32_t iProductID);
 
             /**/
-            bool Modify(OrderReplace & iOrderReplace, std::uint32_t iProductID);
+            Status Modify(OrderReplace & iOrderReplace, std::uint32_t iProductID);
 
             /**/
-            bool Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay, std::uint32_t iProductID);
+            Status Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay, std::uint32_t iProductID);
 
             /**/
             void EngineListen();

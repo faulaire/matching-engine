@@ -11,6 +11,7 @@
 #include <Engine_EventHandler.h>
 #include <Engine_OrderContainer.h>
 #include <Engine_Instrument.h>
+#include <Engine_Status.h>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -74,14 +75,14 @@ namespace exchange
             public:
 
                 /**/
-                bool Insert(TOrder & iOrder);
+                Status Insert(TOrder & iOrder);
 
                 /**/
                 template <typename TOrderReplace>
-                bool Modify(TOrderReplace & iOrderReplace);
+                Status Modify(TOrderReplace & iOrderReplace);
 
                 /**/
-                bool Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay);
+                Status Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay);
 
                 /**/
                 void ProcessDeal(const Deal * ipDeal);
@@ -130,7 +131,7 @@ namespace exchange
 
                 /**/
                 template <typename Msg>
-                bool CheckOrder(const Msg & iMsg) const;
+                Status CheckOrder(const Msg & iMsg) const;
 
                 inline bool IsAuctionPhase(const TradingPhase iPhase) const;
                 inline bool IsValidPhase(const TradingPhase iPhase) const;

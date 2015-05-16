@@ -72,14 +72,14 @@ class OrderContainerTest : public testing::Test
         {
             for (auto & order : m_BidOrders)
             {
-                ASSERT_TRUE(m_Container.Insert(order));
-                ASSERT_FALSE(m_Container.Insert(order));
+                ASSERT_EQ(Status::Ok, m_Container.Insert(order));
+                ASSERT_EQ(Status::IDAlreadyUsed, m_Container.Insert(order));
             }
 
             for (auto & order : m_AskOrders)
             {
-                ASSERT_TRUE(m_Container.Insert(order));
-                ASSERT_FALSE(m_Container.Insert(order));
+                ASSERT_EQ(Status::Ok, m_Container.Insert(order));
+                ASSERT_EQ(Status::IDAlreadyUsed, m_Container.Insert(order));
             }
         }
 
@@ -160,15 +160,15 @@ TEST_F(OrderContainerTest, AuctionDelete)
 {
     InsertOrders();
     
-    ASSERT_TRUE(m_Container.Delete(1, 5, OrderWay::BUY));
-    ASSERT_FALSE(m_Container.Delete(1, 5, OrderWay::BUY));
+    ASSERT_EQ(Status::Ok, m_Container.Delete(1, 5, OrderWay::BUY));
+    ASSERT_EQ(Status::OrderNotFound, m_Container.Delete(1, 5, OrderWay::BUY));
 
-    ASSERT_TRUE(m_Container.Delete(1, 10, OrderWay::BUY));
+    ASSERT_EQ(Status::Ok, m_Container.Delete(1, 10, OrderWay::BUY));
 
-    ASSERT_TRUE(m_Container.Delete(2, 3, OrderWay::SELL));
-    ASSERT_FALSE(m_Container.Delete(2, 3, OrderWay::SELL));
+    ASSERT_EQ(Status::Ok, m_Container.Delete(2, 3, OrderWay::SELL));
+    ASSERT_EQ(Status::OrderNotFound, m_Container.Delete(2, 3, OrderWay::SELL));
 
-    ASSERT_TRUE(m_Container.Delete(2, 4, OrderWay::SELL));
+    ASSERT_EQ(Status::Ok, m_Container.Delete(2, 4, OrderWay::SELL));
 
     OrderContainerType::LimitContainer BidContainer;
     OrderContainerType::LimitContainer AskContainer;
@@ -217,10 +217,10 @@ TEST_F(OrderContainerTest, AuctionModify)
 
     /* OrderWay iWay, qty_type iQty, price_type iPrice, std::uint32_t iExistingOrderID, std::uint32_t iReplacedID, std::uint32_t iClientID */
     OrderReplace ReplaceBuy(OrderWay::BUY, 1337_qty, 2185_price, 1, 2, 8);
-    ASSERT_TRUE(m_Container.Modify(ReplaceBuy));
+    ASSERT_EQ(Status::Ok, m_Container.Modify(ReplaceBuy));
 
     OrderReplace ReplaceSell(OrderWay::SELL, 3000_qty, 4526_price, 2, 12, 4);
-    ASSERT_TRUE(m_Container.Modify(ReplaceSell));
+    ASSERT_EQ(Status::Ok, m_Container.Modify(ReplaceSell));
 
     /*
         Transition from
@@ -387,25 +387,24 @@ TEST_F(OrderContainerTest, InsertMatching)
     Order BuyOrder(OrderWay::BUY, 123_qty, 88_price, 5, 1);
     Order SellOrder(OrderWay::SELL, 123_qty, 91_price, 6, 1);
 
-    ASSERT_TRUE(m_Container.Insert(BuyOrder, true));
-    ASSERT_TRUE(m_Container.Insert(SellOrder, true));
+    ASSERT_EQ(Status::Ok, m_Container.Insert(BuyOrder, true));
+    ASSERT_EQ(Status::Ok, m_Container.Insert(SellOrder, true));
 
     ASSERT_EQ(DealContainer.size(), 0);
 
     BuyOrder = Order(OrderWay::BUY, 500_qty, 91_price, 7, 1);
     SellOrder = Order(OrderWay::SELL, 150_qty, 89_price, 8, 1);
 
-    ASSERT_TRUE(m_Container.Insert(BuyOrder, true));
-    ASSERT_TRUE(m_Container.Insert(SellOrder, true));
+    ASSERT_EQ(Status::Ok, m_Container.Insert(BuyOrder, true));
+    ASSERT_EQ(Status::Ok, m_Container.Insert(SellOrder, true));
 
     ASSERT_EQ(DealContainer.size(), 2);
 
     BuyOrder = Order(OrderWay::BUY, 2500_qty, 93_price, 9, 1);
     SellOrder = Order(OrderWay::SELL, 1500_qty, 87_price, 10, 1);
 
-    ASSERT_TRUE(m_Container.Insert(BuyOrder, true));
-
-    ASSERT_TRUE(m_Container.Insert(SellOrder, true));
+    ASSERT_EQ(Status::Ok, m_Container.Insert(BuyOrder, true));
+    ASSERT_EQ(Status::Ok, m_Container.Insert(SellOrder, true));
 
     m_BidContainerReference = {};
 
@@ -444,12 +443,12 @@ TEST_F(OrderContainerTest, ModifyMatching)
     OrderReplace SellReplace(OrderWay::SELL, 1200_qty, 91_price, 2, 4, 1);
 
 
-    ASSERT_TRUE(m_Container.Modify(BuyReplace, true));
-    ASSERT_TRUE(m_Container.Modify(SellReplace, true));
+    ASSERT_EQ(Status::Ok, m_Container.Modify(BuyReplace, true));
+    ASSERT_EQ(Status::Ok, m_Container.Modify(SellReplace, true));
     
     BuyReplace = OrderReplace(OrderWay::BUY, 2000_qty, 91_price, 1, 5, 8);
 
-    ASSERT_TRUE(m_Container.Modify(BuyReplace, true));
+    ASSERT_EQ(Status::Ok, m_Container.Modify(BuyReplace, true));
 
     ASSERT_EQ( DealContainer.size(), 2 );
 
@@ -458,7 +457,7 @@ TEST_F(OrderContainerTest, ModifyMatching)
     
     SellReplace = OrderReplace(OrderWay::SELL, 500_qty, 91_price, 2, 8, 4);
 
-    ASSERT_TRUE(m_Container.Modify(SellReplace, true));
+    ASSERT_EQ(Status::Ok, m_Container.Modify(SellReplace, true));
 
     m_BidContainerReference = { LimiteType(2, 650_qty, 88_price) };
 
@@ -484,7 +483,7 @@ TEST_F(OrderContainerTest, Modified_orders_should_be_removed_from_order_book_whe
 
     OrderReplace BuyReplace(OrderWay::BUY, 4000_qty, 4321_price, 1, 2, 8);
     
-    ASSERT_TRUE(m_Container.Modify(BuyReplace, true));
+    ASSERT_EQ(Status::Ok, m_Container.Modify(BuyReplace, true));
 
     m_BidContainerReference = {
                                     LimiteType(2, 11000_qty, 2185_price), LimiteType(1, 3000_qty, 1321_price),
@@ -526,8 +525,8 @@ TEST_F(OrderContainerTest, Orders_should_loses_their_prority_when_modified)
     OrderReplace BuyReplace(OrderWay::BUY, 300_qty, 11_price, 5, 15, 8);
     OrderReplace SellReplace(OrderWay::SELL, 400_qty, 12_price, 10, 20, 9);
 
-    ASSERT_TRUE(m_Container.Modify(BuyReplace, false));
-    ASSERT_TRUE(m_Container.Modify(SellReplace, false));
+    ASSERT_EQ(Status::Ok, m_Container.Modify(BuyReplace, false));
+    ASSERT_EQ(Status::Ok, m_Container.Modify(SellReplace, false));
 
     std::vector<Order> ByOrderBidContainer;
     std::vector<Order> ByOrderAskContainer;
@@ -548,12 +547,12 @@ TEST_F(OrderContainerTest, Orders_should_loses_their_prority_when_modified)
 TEST_F(OrderContainerTest, Order_insertion_should_fail_when_order_id_already_used)
 {
     Order ob(OrderWay::BUY, 8000_qty, 4321_price, 1, 1);
-    ASSERT_TRUE(m_Container.Insert(ob));
-    ASSERT_FALSE(m_Container.Insert(ob));
+    ASSERT_EQ(Status::Ok, m_Container.Insert(ob));
+    ASSERT_EQ(Status::IDAlreadyUsed, m_Container.Insert(ob));
 
-    ASSERT_TRUE(m_Container.Delete(1, 1, OrderWay::BUY));
+    ASSERT_EQ(Status::Ok, m_Container.Delete(1, 1, OrderWay::BUY));
 
-    ASSERT_FALSE(m_Container.Insert(ob));
+    ASSERT_EQ(Status::IDAlreadyUsed, m_Container.Insert(ob));
 }
 
 TEST_F(OrderContainerTest, Order_modification_should_fail_when_order_id_already_used)
@@ -561,12 +560,12 @@ TEST_F(OrderContainerTest, Order_modification_should_fail_when_order_id_already_
     Order ob(OrderWay::BUY, 8000_qty, 4321_price, 1, 1);
     Order os(OrderWay::SELL, 8000_qty, 4321_price, 2, 1);
 
-    ASSERT_TRUE(m_Container.Insert(ob));
-    ASSERT_TRUE(m_Container.Insert(os));
+    ASSERT_EQ(Status::Ok, m_Container.Insert(ob));
+    ASSERT_EQ(Status::Ok, m_Container.Insert(os));
     
     OrderReplace BuyReplace(OrderWay::BUY, 4000_qty, 4321_price, 1, 2, 1);
 
-    ASSERT_FALSE(m_Container.Modify(BuyReplace));
+    ASSERT_EQ(Status::IDAlreadyUsed, m_Container.Modify(BuyReplace));
 }
 
 int main(int argc, char ** argv)

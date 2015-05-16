@@ -278,7 +278,7 @@ TEST_F(MatchingEngineTest, Should_order_insertion_fail_when_engine_closed)
 
     Order o(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
 
-    ASSERT_FALSE(m_pEngine->Insert(o, product_id));
+    ASSERT_EQ(Status::MarketNotOpened, m_pEngine->Insert(o, product_id));
 }
 
 TEST_F(MatchingEngineTest, Should_order_modification_fail_when_engine_closed)
@@ -288,12 +288,12 @@ TEST_F(MatchingEngineTest, Should_order_modification_fail_when_engine_closed)
     Order o(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
     
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
-    ASSERT_TRUE(m_pEngine->Insert(o, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(o, product_id));
 
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CLOSE));
 
     OrderReplace Replace(OrderWay::BUY, 2000_qty, 1234_price, 1, 2, 5);
-    ASSERT_FALSE(m_pEngine->Modify(Replace, product_id));
+    ASSERT_EQ(Status::MarketNotOpened, m_pEngine->Modify(Replace, product_id));
 }
 
 TEST_F(MatchingEngineTest, Should_order_cancellation_fail_when_engine_closed)
@@ -303,11 +303,11 @@ TEST_F(MatchingEngineTest, Should_order_cancellation_fail_when_engine_closed)
     Order o(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
     
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
-    ASSERT_TRUE(m_pEngine->Insert(o, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(o, product_id));
 
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CLOSE));
     
-    ASSERT_FALSE(m_pEngine->Delete(1, 5, OrderWay::BUY, product_id));
+    ASSERT_EQ(Status::MarketNotOpened, m_pEngine->Delete(1, 5, OrderWay::BUY, product_id));
 }
 
 TEST_F(MatchingEngineTest, Should_order_insertion_fail_when_invalid_instrument)
@@ -317,7 +317,7 @@ TEST_F(MatchingEngineTest, Should_order_insertion_fail_when_invalid_instrument)
     Order o(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
 
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
-    ASSERT_FALSE(m_pEngine->Insert(o, 25));
+    ASSERT_EQ(Status::InstrumentNotFound, m_pEngine->Insert(o, 25));
 }
 
 TEST_F(MatchingEngineTest, Should_order_modification_fail_when_invalid_instrument)
@@ -327,10 +327,10 @@ TEST_F(MatchingEngineTest, Should_order_modification_fail_when_invalid_instrumen
     Order o(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
 
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
-    ASSERT_TRUE(m_pEngine->Insert(o, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(o, product_id));
 
     OrderReplace Replace(OrderWay::BUY, 2000_qty, 1234_price, 1, 2, 5);
-    ASSERT_FALSE(m_pEngine->Modify(Replace, 25));
+    ASSERT_EQ(Status::InstrumentNotFound, m_pEngine->Modify(Replace, 25));
 }
 
 TEST_F(MatchingEngineTest, Should_order_cancellation_fail_when_invalid_instrument)
@@ -340,9 +340,9 @@ TEST_F(MatchingEngineTest, Should_order_cancellation_fail_when_invalid_instrumen
     Order o(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
 
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
-    ASSERT_TRUE(m_pEngine->Insert(o, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(o, product_id));
 
-    ASSERT_FALSE(m_pEngine->Delete(1, 5, OrderWay::BUY, 25));
+    ASSERT_EQ(Status::InstrumentNotFound, m_pEngine->Delete(1, 5, OrderWay::BUY, 25));
 }
 
 TEST_F(MatchingEngineTest, Should_order_insertion_fail_when_already_inserted)
@@ -352,8 +352,8 @@ TEST_F(MatchingEngineTest, Should_order_insertion_fail_when_already_inserted)
     Order o(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
 
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
-    ASSERT_TRUE(m_pEngine->Insert(o, product_id));
-    ASSERT_FALSE(m_pEngine->Insert(o, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(o, product_id));
+    ASSERT_EQ(Status::IDAlreadyUsed, m_pEngine->Insert(o, product_id));
 }
 
 TEST_F(MatchingEngineTest, Should_order_cancellation_fail_when_already_cancelled)
@@ -363,10 +363,10 @@ TEST_F(MatchingEngineTest, Should_order_cancellation_fail_when_already_cancelled
     Order o(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
 
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
-    ASSERT_TRUE(m_pEngine->Insert(o, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(o, product_id));
 
-    ASSERT_TRUE(m_pEngine->Delete(1, 5, OrderWay::BUY, product_id));
-    ASSERT_FALSE(m_pEngine->Delete(1, 5, OrderWay::BUY, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Delete(1, 5, OrderWay::BUY, product_id));
+    ASSERT_EQ(Status::OrderNotFound, m_pEngine->Delete(1, 5, OrderWay::BUY, product_id));
 }
 
 TEST_F(MatchingEngineTest, Should_order_modification_fail_when_cancelled)
@@ -376,12 +376,12 @@ TEST_F(MatchingEngineTest, Should_order_modification_fail_when_cancelled)
     Order o(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
 
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
-    ASSERT_TRUE(m_pEngine->Insert(o, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(o, product_id));
 
-    ASSERT_TRUE(m_pEngine->Delete(1, 5, OrderWay::BUY, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Delete(1, 5, OrderWay::BUY, product_id));
 
     OrderReplace Replace(OrderWay::BUY, 2000_qty, 1234_price, 1, 2, 5);
-    ASSERT_FALSE(m_pEngine->Modify(Replace, product_id));
+    ASSERT_EQ(Status::OrderNotFound, m_pEngine->Modify(Replace, product_id));
 }
 
 TEST_F(MatchingEngineTest, Should_order_insertion_success_when_engine_state_is_opening_auction)
@@ -393,7 +393,7 @@ TEST_F(MatchingEngineTest, Should_order_insertion_success_when_engine_state_is_o
 
     Order o(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
 
-    ASSERT_TRUE(m_pEngine->Insert(o, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(o, product_id));
 }
 
 TEST_F(MatchingEngineTest, Should_order_insertion_success_when_engine_state_is_closing_auction)
@@ -404,7 +404,7 @@ TEST_F(MatchingEngineTest, Should_order_insertion_success_when_engine_state_is_c
 
     Order o(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
 
-    ASSERT_TRUE(m_pEngine->Insert(o, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(o, product_id));
 }
 
 TEST_F(MatchingEngineTest, Should_engine_not_generate_executions_during_opening_auction)
@@ -417,8 +417,8 @@ TEST_F(MatchingEngineTest, Should_engine_not_generate_executions_during_opening_
     Order ob(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
     Order os(OrderWay::SELL, 1000_qty, 1234_price, 2, 6);
 
-    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
-    ASSERT_TRUE(m_pEngine->Insert(os, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(ob, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(os, product_id));
 
     auto pOrderBook = m_pEngine->GetOrderBook(product_id);
     ASSERT_NE(pOrderBook, nullptr);
@@ -435,8 +435,8 @@ TEST_F(MatchingEngineTest, Should_engine_not_generate_executions_during_closing_
     Order ob(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
     Order os(OrderWay::SELL, 1000_qty, 1234_price, 2, 6);
 
-    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
-    ASSERT_TRUE(m_pEngine->Insert(os, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(ob, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(os, product_id));
 
     auto pOrderBook = m_pEngine->GetOrderBook(product_id);
     ASSERT_NE(pOrderBook, nullptr);
@@ -452,7 +452,7 @@ TEST_F(MatchingEngineTest, Should_order_insertion_success_when_engine_state_is_c
 
     Order o(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
 
-    ASSERT_TRUE(m_pEngine->Insert(o, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(o, product_id));
 }
 
 TEST_F(MatchingEngineTest, Should_engine_generate_executions_during_continous_trading)
@@ -464,8 +464,8 @@ TEST_F(MatchingEngineTest, Should_engine_generate_executions_during_continous_tr
     Order ob(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
     Order os(OrderWay::SELL, 1000_qty, 1234_price, 2, 6);
 
-    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
-    ASSERT_TRUE(m_pEngine->Insert(os, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(ob, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(os, product_id));
 
     auto pOrderBook = m_pEngine->GetOrderBook(product_id);
     ASSERT_NE(pOrderBook, nullptr);
@@ -482,12 +482,11 @@ TEST_F(MatchingEngineTest, Should_order_modification_fail_when_fully_executed)
     Order ob(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
     Order os(OrderWay::SELL, 1000_qty, 1234_price, 2, 6);
 
-    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
-    ASSERT_TRUE(m_pEngine->Insert(os, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(ob, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(os, product_id));
 
     OrderReplace Replace(OrderWay::BUY, 2000_qty, 1234_price, 1, 2, 5);
-    ASSERT_FALSE(m_pEngine->Modify(Replace, product_id));
-
+    ASSERT_EQ(Status::OrderNotFound, m_pEngine->Modify(Replace, product_id));
 }
 
 TEST_F(MatchingEngineTest, Should_order_cancellation_fail_when_fully_executed)
@@ -499,10 +498,10 @@ TEST_F(MatchingEngineTest, Should_order_cancellation_fail_when_fully_executed)
     Order ob(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
     Order os(OrderWay::SELL, 1000_qty, 1234_price, 2, 6);
 
-    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
-    ASSERT_TRUE(m_pEngine->Insert(os, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(ob, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(os, product_id));
 
-    ASSERT_FALSE(m_pEngine->Delete(1,5,OrderWay::BUY, product_id));
+    ASSERT_EQ(Status::OrderNotFound, m_pEngine->Delete(1, 5, OrderWay::BUY, product_id));
 }
 
 TEST_F(MatchingEngineTest, Should_non_persistent_orders_being_cancelled_after_clausing_auction)
@@ -513,7 +512,7 @@ TEST_F(MatchingEngineTest, Should_non_persistent_orders_being_cancelled_after_cl
 
     Order ob(OrderWay::BUY, 1000_qty, 1234_price, 1, 5);
 
-    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(ob, product_id));
 
     m_pEngine->SetGlobalPhase(TradingPhase::CLOSING_AUCTION);
 
@@ -523,8 +522,9 @@ TEST_F(MatchingEngineTest, Should_non_persistent_orders_being_cancelled_after_cl
     m_pEngine->EngineListen();
 
     ASSERT_EQ(m_pEngine->GetGlobalPhase(), TradingPhase::CLOSE);
+    ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::OPENING_AUCTION));
 
-    ASSERT_FALSE(m_pEngine->Delete(1, 5, OrderWay::BUY, product_id));
+    ASSERT_EQ(Status::OrderNotFound, m_pEngine->Delete(1, 5, OrderWay::BUY, product_id));
 }
 
 TEST_F(MatchingEngineTest, Should_orderbook_be_monitored_when_switching_to_intraday_auction)
@@ -536,8 +536,8 @@ TEST_F(MatchingEngineTest, Should_orderbook_be_monitored_when_switching_to_intra
     Order ob(OrderWay::BUY, 1000_qty, 2000_price, 1, 5);
     Order os(OrderWay::SELL, 1000_qty, 2000_price, 1, 6);
 
-    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
-    ASSERT_TRUE(m_pEngine->Insert(os, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(ob, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(os, product_id));
 
     ASSERT_EQ(1, m_pEngine->GetMonitoredOrderBookCounter());
 }
@@ -553,8 +553,8 @@ TEST_F(MatchingEngineTest, Should_intraday_auction_duration_be_updated_when_intr
     Order ob(OrderWay::BUY, 1000_qty, 2000_price, 1, 5);
     Order os(OrderWay::SELL, 1000_qty, 2000_price, 1, 6);
 
-    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
-    ASSERT_TRUE(m_pEngine->Insert(os, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(ob, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(os, product_id));
 
     auto new_intraday_auction_duration = m_pEngine->GetIntradayAuctionDuration();
 
@@ -570,8 +570,8 @@ TEST_F(MatchingEngineTest, Should_orderbook_be_unmonitored_at_the_end_of_intrada
     Order ob(OrderWay::BUY, 1000_qty, 2000_price, 1, 5);
     Order os(OrderWay::SELL, 1000_qty, 2000_price, 1, 6);
 
-    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
-    ASSERT_TRUE(m_pEngine->Insert(os, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(ob, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(os, product_id));
 
     ASSERT_EQ(1, m_pEngine->GetMonitoredOrderBookCounter());
     
@@ -602,8 +602,8 @@ TEST_F(MatchingEngineTest, Should_close_price_be_saved_when_global_phase_switch_
 
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CLOSING_AUCTION));
 
-    ASSERT_TRUE(m_pEngine->Insert(ob, product_id));
-    ASSERT_TRUE(m_pEngine->Insert(os, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(ob, product_id));
+    ASSERT_EQ(Status::Ok, m_pEngine->Insert(os, product_id));
 
     ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CLOSE));
 
