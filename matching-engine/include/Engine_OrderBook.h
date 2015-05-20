@@ -44,7 +44,6 @@ namespace exchange
         template <typename TOrder, typename TMatchingEngine>
         std::ostream& operator<< (std::ostream& o, const OrderBook<TOrder,TMatchingEngine> & x);
 
-
         template <typename TOrder, typename TMatchingEngine>
         class OrderBook : public EventHandler<OrderBook<TOrder,TMatchingEngine> >
         {
@@ -75,11 +74,11 @@ namespace exchange
             public:
 
                 /**/
-                Status Insert(TOrder & iOrder);
+                Status Insert(std::unique_ptr<TOrder> ipOrder);
 
                 /**/
                 template <typename TOrderReplace>
-                Status Modify(TOrderReplace & iOrderReplace);
+                Status Modify(std::unique_ptr<TOrderReplace> ipOrderReplace);
 
                 /**/
                 Status Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay);
@@ -88,7 +87,7 @@ namespace exchange
                 void ProcessDeal(const Deal * ipDeal);
 
                 /**/
-                void ProcessUnsolicitedCancelledOrder(const Order & order);
+                void ProcessUnsolicitedCancelledOrder(const Order * order);
 
                 /**/
                 TimeType GetAuctionEnd() const { return m_AuctionEnd; }
@@ -131,7 +130,7 @@ namespace exchange
 
                 /**/
                 template <typename Msg>
-                Status CheckOrder(const Msg & iMsg) const;
+                Status CheckOrder(const std::unique_ptr<Msg> & ipMsg) const;
 
                 inline bool IsAuctionPhase(const TradingPhase iPhase) const;
                 inline bool IsValidPhase(const TradingPhase iPhase) const;

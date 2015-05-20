@@ -35,7 +35,7 @@ namespace exchange
                 :m_value(quantity)
             {}
 
-            constexpr explicit operator Underlying() noexcept
+            constexpr explicit operator Underlying() const noexcept
             {
                 return m_value;
             }

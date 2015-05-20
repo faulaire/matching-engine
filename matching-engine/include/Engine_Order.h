@@ -6,7 +6,6 @@
 #pragma once
 
 #include <iosfwd>
-
 #include <Engine_Types.h>
 
 namespace exchange
@@ -67,6 +66,9 @@ namespace exchange
                 Order(OrderWay iWay, qty_type iQty, price_type iPrice, std::uint32_t iOrderID, std::uint32_t iClientID)
                     :m_Layout(iWay, iQty, iPrice, iOrderID, iClientID)
                 {}
+
+                Order(const Order & rhs) = delete;
+                Order& operator=(const Order & rhs) = delete;
 
                 inline OrderWay          GetWay()      const;
                 inline qty_type          GetQuantity() const;
@@ -151,7 +153,7 @@ namespace exchange
         /*!
         *  \brief OrderReplace
         *
-        *  This class is used to modify an order on the order book.
+        *  This class is used to modify an auto o = CREATE_ORDERn the order book.
         */
         class OrderReplace
         {
@@ -293,23 +295,28 @@ namespace exchange
         *  \tparam Operator : Accessor to call
         *
         */
-
-        template <void(Order::*Operator)(Order::qty_type)>
-        class OrderUpdaterSingle
+        
+        template <typename Order>
+        class QuantityUpdater
         {
             public:
 
-                OrderUpdaterSingle(Order::qty_type NewValue) :m_new_value(NewValue){}
+                using OrderType = typename std::remove_pointer<Order>::type;
+                using qty_type  = typename OrderType::qty_type;
+
+            public:
+
+                QuantityUpdater(qty_type NewValue) :m_new_value(NewValue){}
 
                 void operator()(Order& iOrder) const
                 {
-                    (iOrder.*Operator)(m_new_value);
+                    iOrder->SetQuantity(m_new_value);
                 }
 
             private:
 
                 /*!< New value to set */
-                Order::qty_type m_new_value;
+                qty_type m_new_value;
         };
 
     }

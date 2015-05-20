@@ -20,19 +20,19 @@ namespace exchange
 
         template <typename TOrder, typename TMatchingEngine>
         template <typename Msg>
-        Status OrderBook<TOrder, TMatchingEngine>::CheckOrder(const Msg & iMsg) const
+        Status OrderBook<TOrder, TMatchingEngine>::CheckOrder(const std::unique_ptr<Msg> & ipMsg) const
         {
-            if (iMsg.GetQuantity() < constants::MinQty || iMsg.GetQuantity() > constants::MaxQty)
+            if (ipMsg->GetQuantity() < constants::MinQty || ipMsg->GetQuantity() > constants::MaxQty)
             {
                 return Status::InvalidQuantity;
             }
 
-            if (iMsg.GetPrice() < constants::MinPrice || iMsg.GetPrice() > constants::MaxPrice)
+            if (ipMsg->GetPrice() < constants::MinPrice || ipMsg->GetPrice() > constants::MaxPrice)
             {
                 return Status::InvalidPrice;
             }
 
-            if( iMsg.GetWay() != OrderWay::BUY && iMsg.GetWay() != OrderWay::SELL)
+            if (ipMsg->GetWay() != OrderWay::BUY && ipMsg->GetWay() != OrderWay::SELL)
             {
                 return Status::InvalidWay;
             }
@@ -83,14 +83,14 @@ namespace exchange
         }
 
         template <typename TOrder, typename TMatchingEngine>
-        Status OrderBook<TOrder, TMatchingEngine>::Insert(TOrder & iOrder)
+        Status OrderBook<TOrder, TMatchingEngine>::Insert(std::unique_ptr<TOrder> ipOrder)
         {
             if (m_Phase != TradingPhase::CLOSE)
             {
-                auto status = CheckOrder(iOrder);
+                auto status = CheckOrder(ipOrder);
                 if (Status::Ok == status)
                 {
-                    return m_Orders.Insert(iOrder, TradingPhase::CONTINUOUS_TRADING==m_Phase);
+                    return m_Orders.Insert(std::move(ipOrder), TradingPhase::CONTINUOUS_TRADING == m_Phase);
                 }
                 else
                 {
@@ -102,15 +102,15 @@ namespace exchange
 
         template <typename TOrder, typename TMatchingEngine>
         template <typename TOrderReplace>
-        Status OrderBook<TOrder, TMatchingEngine>::Modify(TOrderReplace & iOrderReplace)
+        Status OrderBook<TOrder, TMatchingEngine>::Modify(std::unique_ptr<TOrderReplace> ipOrderReplace)
         {
             if (m_Phase != TradingPhase::CLOSE)
             {
-                auto status = CheckOrder(iOrderReplace);
+                auto status = CheckOrder(ipOrderReplace);
 
                 if (Status::Ok == status)
                 {
-                    return m_Orders.Modify(iOrderReplace, TradingPhase::CONTINUOUS_TRADING==m_Phase);
+                    return m_Orders.Modify(std::move(ipOrderReplace), TradingPhase::CONTINUOUS_TRADING == m_Phase);
                 }
                 else
                 {
@@ -195,7 +195,7 @@ namespace exchange
         }
         
         template <typename TOrder, typename TMatchingEngine>
-        void OrderBook<TOrder, TMatchingEngine>::ProcessUnsolicitedCancelledOrder(const Order & order)
+        void OrderBook<TOrder, TMatchingEngine>::ProcessUnsolicitedCancelledOrder(const Order * order)
         {
             m_rMatchingEngine.OnUnsolicitedCancelledOrder(order);
         }

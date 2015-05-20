@@ -50,10 +50,10 @@ namespace exchange
             bool Configure(boost::property_tree::ptree & iConfig);
 
             /**/
-            Status Insert(Order & iOrder, std::uint32_t iProductID);
+            Status Insert(std::unique_ptr<Order> ipOrder, std::uint32_t iProductID);
 
             /**/
-            Status Modify(OrderReplace & iOrderReplace, std::uint32_t iProductID);
+            Status Modify(std::unique_ptr<OrderReplace> ipOrderReplace, std::uint32_t iProductID);
 
             /**/
             Status Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay, std::uint32_t iProductID);
@@ -90,7 +90,7 @@ namespace exchange
             void UpdateIntradayAuctionDuration();
 
             /**/
-            void OnUnsolicitedCancelledOrder(const Order & order);
+            void OnUnsolicitedCancelledOrder(const Order * order);
 
         protected:
 

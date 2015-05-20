@@ -17,6 +17,7 @@
 #include <Engine_Status.h>
 
 #include <unordered_set>
+#include <memory>
 
 namespace exchange
 {
@@ -45,21 +46,22 @@ namespace exchange
                 return get_key(iClientID, iOrderID);
             }
 
-            result_type operator()(const TOrder & key) const
+            result_type operator()(const TOrder & Order) const
             {
-                return get_key(key.GetClientID(), key.GetOrderID());
+                return get_key(Order->GetClientID(), Order->GetOrderID());
             }
         };
 
         template <typename TOrder, typename SortingPredicate>
         struct OrderStorage
         {
+
             typedef boost::multi_index_container<
-                TOrder,
+                TOrder*,
                 bmi::indexed_by<
                 
                     bmi::hashed_unique<
-                    bmi::tag<order_id_tag>, OrderIDGenerator<TOrder> >,
+                    bmi::tag<order_id_tag>, OrderIDGenerator<TOrder*> >,
 
                     bmi::hashed_non_unique<
                     bmi::tag<client_id_tag>, bmi::const_mem_fun<TOrder, std::uint32_t, &TOrder::GetClientID> >,
@@ -103,8 +105,11 @@ namespace exchange
                 using OpenInformationType = std::tuple<price_type, volume_type>;
 
                 using OrderIDContainer    = std::unordered_set < typename OrderIDGenerator<TOrder>::result_type >;
+                using GlobalOrderContainer = std::unordered_set < std::unique_ptr<TOrder> > ;
 
             protected:
+
+                using OrderPtrType = TOrder*;
 
                 typedef std::greater<price_type>                                           BidPredicate;
                 typedef typename OrderStorage<TOrder, BidPredicate>::order_set             BidStorage;
@@ -128,12 +133,12 @@ namespace exchange
 
                 /**
                 */
-                Status Insert(TOrder & iOrder, bool Match = false);
+                Status Insert(std::unique_ptr<TOrder> ipOrder, bool Match = false);
 
                 /**
                 */
                 template <typename TOrderReplace>
-                Status Modify(TOrderReplace & iOrderReplace, bool Match = false);
+                Status Modify(std::unique_ptr<TOrderReplace> iOrderReplace, bool Match = false);
 
                 /**
                 */
@@ -153,7 +158,7 @@ namespace exchange
 
                 /**
                 */
-                void ByOrderView(std::vector<TOrder> & BidContainer, std::vector<TOrder> & AskContainer) const;
+                void ByOrderView(std::vector<TOrder*> & BidContainer, std::vector<TOrder*> & AskContainer) const;
 
                 /**
                 */
@@ -166,13 +171,13 @@ namespace exchange
 
             protected:
 
-                bool AuctionInsert(const TOrder & iOrder);
+                bool AuctionInsert(std::unique_ptr<TOrder> & ipOrde);
 
                 template <typename Container>
                 volume_type GetExecutableQuantity(const Container & Orders, price_type iPrice) const;
 
                 template <typename Msg>
-                volume_type GetExecutableQuantity(const Msg & iOrder, OrderWay iWay) const;
+                volume_type GetExecutableQuantity(const std::unique_ptr<Msg> & ipMsg, OrderWay iWay) const;
 
                 template <typename Container, typename Msg>
                 void ProcessDeals(Container & Orders, Msg & iMsg, volume_type iMatchQty);
@@ -212,6 +217,8 @@ namespace exchange
                 ViewMode         m_ViewMode;
                 /* */
                 OrderIDContainer m_InsertedOrderIDs;
+                /* */
+                GlobalOrderContainer m_InsertedOrders;
         };
 
     }

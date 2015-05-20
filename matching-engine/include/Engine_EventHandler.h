@@ -57,7 +57,7 @@ namespace exchange
                 void OnDeal(std::unique_ptr<Deal> ipDeal);
 
                 /**/
-                void OnUnsolicitedCancelledOrder(const Order & order);
+                void OnUnsolicitedCancelledOrder(const Order* order);
 
             public:
 
@@ -116,7 +116,7 @@ namespace exchange
         }
 
         template <typename TEventProcessor>
-        void EventHandler<TEventProcessor>::OnUnsolicitedCancelledOrder(const Order & order)
+        void EventHandler<TEventProcessor>::OnUnsolicitedCancelledOrder(const Order * order)
         {
             static_cast<TEventProcessor*>(this)->ProcessUnsolicitedCancelledOrder(order);
         }

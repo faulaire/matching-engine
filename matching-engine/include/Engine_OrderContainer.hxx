@@ -56,9 +56,9 @@ namespace exchange
 
             for (auto & order : Index)
             {
-                if (Predicate()(order.GetPrice(), iPrice))
+                if (Predicate()(order->GetPrice(), iPrice))
                 {
-                    Qty += order.GetQuantity();
+                    Qty += order->GetQuantity();
                 }
             }
             return Qty;
@@ -67,19 +67,19 @@ namespace exchange
         template <typename TOrder, typename TEventHandler>
         template <typename Msg>
         typename OrderContainer<TOrder, TEventHandler>::volume_type
-        OrderContainer<TOrder, TEventHandler>::GetExecutableQuantity(const Msg & iMsg, OrderWay iWay) const
+        OrderContainer<TOrder, TEventHandler>::GetExecutableQuantity(const std::unique_ptr<Msg> & ipMsg, OrderWay iWay) const
         {
             switch (iWay)
             {
                 case OrderWay::BUY:
                 {
-                    volume_type MaxQty = GetExecutableQuantity(m_AskOrders, iMsg.GetPrice());
-                    return (std::min)(MaxQty, static_cast<volume_type>(iMsg.GetQuantity()));
+                    volume_type MaxQty = GetExecutableQuantity(m_AskOrders, ipMsg->GetPrice());
+                    return (std::min)(MaxQty, static_cast<volume_type>(ipMsg->GetQuantity()));
                 }
                 case OrderWay::SELL:
                 {
-                    volume_type MaxQty = GetExecutableQuantity(m_BidOrders, iMsg.GetPrice());
-                    return (std::min)(MaxQty, static_cast<volume_type>(iMsg.GetQuantity()));
+                    volume_type MaxQty = GetExecutableQuantity(m_BidOrders, ipMsg->GetPrice());
+                    return (std::min)(MaxQty, static_cast<volume_type>(ipMsg->GetQuantity()));
                 }
                 default:
                     return 0_volume;
@@ -89,17 +89,17 @@ namespace exchange
         template <typename Msg, bool bIsReplaceOrder>
         struct AggressorIDHelper
         {
-            static std::uint32_t get(Msg & t) { return t.GetOrderID(); }
+            static std::uint32_t get(std::unique_ptr<Msg> & t) { return t->GetOrderID(); }
         };
 
         template <typename Msg>
         struct AggressorIDHelper<Msg, true>
         {
-            static std::uint32_t get(Msg & t) { return t.GetReplacedOrderID(); }
+            static std::uint32_t get(std::unique_ptr<Msg> & t) { return t->GetReplacedOrderID(); }
         };
 
         template <typename Msg>
-        std::uint32_t GetAggressorID(Msg & t)
+        std::uint32_t GetAggressorID(std::unique_ptr<Msg> & t)
         {
             return AggressorIDHelper<Msg, is_replaced_order<Msg>::value >::get(t);
         }
@@ -112,15 +112,17 @@ namespace exchange
 
             while (iMatchQty > 0_volume)
             {
-                auto OrderToHit = Index.begin();
+                auto OrderToHitIt = Index.begin();
+                auto OrderToHit   = *(OrderToHitIt);
 
                 // Get the exec price and the exec quantity
-                auto ExecQty = (std::min)(OrderToHit->GetQuantity(), iMsg.GetQuantity());
-                auto ExecPrice = (std::min)(OrderToHit->GetPrice(), iMsg.GetPrice());
+                auto ExecQty = (std::min)(OrderToHit->GetQuantity(), iMsg->GetQuantity());
+                auto ExecPrice = (std::min)(OrderToHit->GetPrice(), iMsg->GetPrice());
 
                 // Update quantity of both orders
-                iMsg.RemoveQuantity(ExecQty);
-                Index.modify(OrderToHit, OrderUpdaterSingle<&Order::SetQuantity>(OrderToHit->GetQuantity() - ExecQty));
+                iMsg->RemoveQuantity(ExecQty);
+                
+                Index.modify(OrderToHitIt, QuantityUpdater<OrderPtrType>(OrderToHit->GetQuantity() - ExecQty));
 
                 // Decrease the matching quantity
                 iMatchQty -= ExecQty;
@@ -130,18 +132,18 @@ namespace exchange
 
                 if (OrderToHit->GetWay() == OrderWay::BUY)
                 {
-                    pDeal = std::make_unique<Deal>(ExecPrice, ExecQty, OrderToHit->GetClientID(), OrderToHit->GetOrderID(), iMsg.GetClientID(), GetAggressorID(iMsg));
+                    pDeal = std::make_unique<Deal>(ExecPrice, ExecQty, OrderToHit->GetClientID(), OrderToHit->GetOrderID(), iMsg->GetClientID(), GetAggressorID(iMsg));
                 }
                 else
                 {
-                    pDeal = std::make_unique<Deal>(ExecPrice, ExecQty, iMsg.GetClientID(), GetAggressorID(iMsg), OrderToHit->GetClientID(), OrderToHit->GetOrderID());
+                    pDeal = std::make_unique<Deal>(ExecPrice, ExecQty, iMsg->GetClientID(), GetAggressorID(iMsg), OrderToHit->GetClientID(), OrderToHit->GetOrderID());
                 }
 
                 m_EventHandler.OnDeal(std::move(pDeal));
 
                 if (0_qty == OrderToHit->GetQuantity())
                 {
-                    Index.erase(OrderToHit);
+                    Index.erase(OrderToHitIt);
                 }
             }
         }
@@ -165,9 +167,9 @@ namespace exchange
         }
 
         template <typename TOrder, typename TEventHandler>
-        Status OrderContainer<TOrder, TEventHandler>::Insert(TOrder & iOrder, bool Match)
+        Status OrderContainer<TOrder, TEventHandler>::Insert(std::unique_ptr<TOrder> ipOrder, bool Match)
         {
-            auto OrderID = OrderIDGenerator<TOrder>()(iOrder);
+            auto OrderID = OrderIDGenerator<TOrder>()(ipOrder->GetClientID(), ipOrder->GetOrderID());
             if (m_InsertedOrderIDs.find(OrderID) != m_InsertedOrderIDs.end())
             {
                 return Status::IDAlreadyUsed;
@@ -175,40 +177,41 @@ namespace exchange
 
             if (Match)
             {
-                volume_type MatchQty = (std::min)(GetExecutableQuantity(iOrder, iOrder.GetWay()), static_cast<volume_type>(iOrder.GetQuantity()));
+                volume_type MatchQty = (std::min)(GetExecutableQuantity(ipOrder, ipOrder->GetWay()), static_cast<volume_type>(ipOrder->GetQuantity()));
 
                 if (MatchQty != 0_volume)
                 {
-                    ProcessDeals(iOrder, iOrder.GetWay(), MatchQty);
+                    ProcessDeals(ipOrder, ipOrder->GetWay(), MatchQty);
                 }
             }
 
-            if (iOrder.GetQuantity() != 0_qty)
+            if (ipOrder->GetQuantity() != 0_qty)
             {
-                if (AuctionInsert(iOrder) == false )
+                if (AuctionInsert(ipOrder) == false)
                 {
                     return Status::InternalError;;
                 }
             }
 
             m_InsertedOrderIDs.insert(OrderID);
+            m_InsertedOrders.insert(std::move(ipOrder));
 
             return Status::Ok;;
         }
 
         template <typename TOrder, typename TEventHandler>
-        bool OrderContainer<TOrder, TEventHandler>::AuctionInsert(const TOrder & iOrder)
+        bool OrderContainer<TOrder, TEventHandler>::AuctionInsert(std::unique_ptr<TOrder> & ipOrder)
         {
             /*
             *  insert return a pair, the second element indicate
             *  if the insertion fail or not.
             */
-            switch (iOrder.GetWay())
+            switch (ipOrder->GetWay())
             {
                 case OrderWay::BUY:
-                    return m_BidOrders.insert(iOrder).second;
+                    return m_BidOrders.insert( ipOrder.get() ).second;
                 case OrderWay::SELL:
-                    return m_AskOrders.insert(iOrder).second;
+                    return m_AskOrders.insert( ipOrder.get() ).second;
                 default:
                     assert(false);
                     return false;
@@ -240,20 +243,20 @@ namespace exchange
 
         template <typename TOrder, typename TEventHandler>
         template <typename TOrderReplace>
-        Status OrderContainer<TOrder, TEventHandler>::Modify(TOrderReplace & iOrderReplace, bool Match)
+        Status OrderContainer<TOrder, TEventHandler>::Modify(std::unique_ptr<TOrderReplace> iOrderReplace, bool Match)
         {
             auto ProcessModify = [&]()
             {
                 if (Match)
                 {
-                    volume_type MaxExecQty = GetExecutableQuantity(iOrderReplace, iOrderReplace.GetWay());
-                    volume_type MatchQty = (std::min)(MaxExecQty, static_cast<volume_type>(iOrderReplace.GetQuantity()));
+                    volume_type MaxExecQty = GetExecutableQuantity(iOrderReplace, iOrderReplace->GetWay());
+                    volume_type MatchQty = (std::min)(MaxExecQty, static_cast<volume_type>(iOrderReplace->GetQuantity()));
 
                     if (MatchQty != 0_volume)
                     {
-                        ProcessDeals(iOrderReplace, iOrderReplace.GetWay(), MatchQty);
+                        ProcessDeals(iOrderReplace, iOrderReplace->GetWay(), MatchQty);
 
-                        if (0_qty == iOrderReplace.GetQuantity())
+                        if (0_qty == iOrderReplace->GetQuantity())
                         {
                             return false;
                         }
@@ -262,8 +265,8 @@ namespace exchange
                 return true;
             };
 
-            auto OrderID    = OrderIDGenerator<TOrder>()(iOrderReplace.GetClientID(), iOrderReplace.GetExistingOrderID());
-            auto NewOrderID = OrderIDGenerator<TOrder>()(iOrderReplace.GetClientID(), iOrderReplace.GetReplacedOrderID());
+            auto OrderID    = OrderIDGenerator<TOrder>()(iOrderReplace->GetClientID(), iOrderReplace->GetExistingOrderID());
+            auto NewOrderID = OrderIDGenerator<TOrder>()(iOrderReplace->GetClientID(), iOrderReplace->GetReplacedOrderID());
 
             if (m_InsertedOrderIDs.find(NewOrderID) != m_InsertedOrderIDs.end())
             {
@@ -279,11 +282,13 @@ namespace exchange
                     {
                         // Order is not fully filled, re-queued the rest of the quantity
                         
-                        TOrder ReplacedOrder = { iOrderReplace.GetWay(), iOrderReplace.GetQuantity(), iOrderReplace.GetPrice(),
-                                         iOrderReplace.GetReplacedOrderID(), iOrderReplace.GetClientID() };
+                        auto OrderPtr = const_cast<TOrder*>( *(Order) );
+                        OrderPtr->SetQuantity(iOrderReplace->GetQuantity() );
+                        OrderPtr->SetPrice(iOrderReplace->GetPrice());
+                        OrderPtr->SetOrderID(iOrderReplace->GetReplacedOrderID());
 
                         Container.erase(Order);
-                        Container.insert(ReplacedOrder);
+                        Container.insert(OrderPtr);
                     }
                     else
                     {
@@ -296,7 +301,7 @@ namespace exchange
                 return Status::OrderNotFound;
             };
 
-            switch (iOrderReplace.GetWay())
+            switch (iOrderReplace->GetWay())
             {
                 case OrderWay::BUY:
                     return ApplyModify(m_BidOrders);
@@ -324,15 +329,15 @@ namespace exchange
 
             for (auto & order : m_AskOrders)
             {
-                volume_type BidQty = GetExecutableQuantity(m_BidOrders, order.GetPrice());
-                volume_type AskQty = GetExecutableQuantity(m_AskOrders, order.GetPrice());
+                volume_type BidQty = GetExecutableQuantity(m_BidOrders, order->GetPrice());
+                volume_type AskQty = GetExecutableQuantity(m_AskOrders, order->GetPrice());
 
                 volume_type CurrentQty = (std::min)(BidQty, AskQty);
 
                 if (CurrentQty > MaxQty)
                 {
                     MaxQty = CurrentQty;
-                    OpenPrice = order.GetPrice();
+                    OpenPrice = order->GetPrice();
                 }
             }
             return std::make_tuple(OpenPrice, MaxQty);
@@ -355,16 +360,18 @@ namespace exchange
 
             while (MatchingQty > 0_volume)
             {
-                price_index_iterator BidOrder = BidIndex.begin();
+                auto   BidOrderIt = BidIndex.begin();
+                auto   BidOrder   = *(BidOrderIt);
 
                 while (BidOrder->GetQuantity() > 0_qty && MatchingQty > 0_volume)
                 {
-                    price_index_iterator AskOrder = AskIndex.begin();
+                    auto   AskOrderIt = AskIndex.begin();
+                    auto   AskOrder   = *(AskOrderIt);
 
                     auto ExecutedQty = (std::min)(AskOrder->GetQuantity(), BidOrder->GetQuantity());
 
-                    AskIndex.modify(AskOrder, OrderUpdaterSingle<&Order::SetQuantity>(AskOrder->GetQuantity() - ExecutedQty));
-                    BidIndex.modify(BidOrder, OrderUpdaterSingle<&Order::SetQuantity>(BidOrder->GetQuantity() - ExecutedQty));
+                    AskIndex.modify(AskOrderIt, QuantityUpdater<OrderPtrType>(AskOrder->GetQuantity() - ExecutedQty));
+                    BidIndex.modify(BidOrderIt, QuantityUpdater<OrderPtrType>(BidOrder->GetQuantity() - ExecutedQty));
 
                     std::unique_ptr<Deal> pDeal = std::make_unique<Deal>(MatchingPrice, ExecutedQty, BidOrder->GetClientID(), BidOrder->GetOrderID(), AskOrder->GetClientID(), AskOrder->GetOrderID());
                     m_EventHandler.OnDeal(std::move(pDeal));
@@ -373,19 +380,19 @@ namespace exchange
 
                     if (0_qty == AskOrder->GetQuantity())
                     {
-                        AskIndex.erase(AskOrder);
+                        AskIndex.erase(AskOrderIt);
                     }
                 }
 
                 if (0_qty == BidOrder->GetQuantity())
                 {
-                    GetBidIndex().erase(BidOrder);
+                    GetBidIndex().erase(BidOrderIt);
                 }
             }
         }
 
         template <typename TOrder, typename TEventHandler>
-        void OrderContainer<TOrder, TEventHandler>::ByOrderView(std::vector<TOrder> & BidContainer, std::vector<TOrder> & AskContainer) const
+        void OrderContainer<TOrder, TEventHandler>::ByOrderView(std::vector<TOrder*> & BidContainer, std::vector<TOrder*> & AskContainer) const
         {
             BidContainer.reserve( GetBidIndex().size() );
             AskContainer.reserve( GetAskIndex().size() );
@@ -404,7 +411,7 @@ namespace exchange
 
                 for (; begin != end; begin++)
                 {
-                    price_type Price = begin->GetPrice();
+                    price_type Price = (*begin)->GetPrice();
                     if (Price != CurrentPrice)
                     {
                         ContainerIndex++;
@@ -414,7 +421,7 @@ namespace exchange
 
                     LimitType & Limit = Container[ContainerIndex - 1];
                     std::get<0>(Limit)++;
-                    std::get<1>(Limit) += begin->GetQuantity();
+                    std::get<1>(Limit) += (*begin)->GetQuantity();
                 }
             };
 
@@ -456,7 +463,7 @@ namespace exchange
             {
                 if (Entry != end)
                 {
-                    oss << "|" << std::setw(13) << MakeString(Entry->GetQuantity(), Entry->GetPrice()) << end_string;
+                    oss << "|" << std::setw(13) << MakeString((*Entry)->GetQuantity(), (*Entry)->GetPrice()) << end_string;
                     Entry++;
                 }
                 else

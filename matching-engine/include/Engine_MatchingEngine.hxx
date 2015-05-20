@@ -136,8 +136,10 @@ namespace exchange
         template <typename Clock>
         bool MatchingEngine<Clock>::LoadInstruments()
         {
-            struct CorruptedDBException : public std::exception
-            {};
+            struct CorruptedDBException : public std::runtime_error 
+            {
+                CorruptedDBException(const std::string & msg) : std::runtime_error(msg) { }
+            };
 
             try
             {
@@ -150,8 +152,9 @@ namespace exchange
                     auto pIterator = m_OrderBookContainer.emplace(Instrument.GetProductId(), std::move(pBook));
                     if (!pIterator.second)
                     {
-                        EXERR("MatchingEngine::LoadInstruments : Corrupted database, failed to insert instrument : " << Instrument.GetName());
-                        throw CorruptedDBException();
+                        std::string ErrorMsg = "MatchingEngine::LoadInstruments : Corrupted database, failed to insert instrument : " + Instrument.GetName();
+                        EXERR(ErrorMsg);
+                        throw CorruptedDBException(ErrorMsg);
                     }
                 };
 
@@ -167,12 +170,12 @@ namespace exchange
         }
 
         template <typename Clock>
-        Status MatchingEngine<Clock>::Insert(Order & iOrder, std::uint32_t iProductID)
+        Status MatchingEngine<Clock>::Insert(std::unique_ptr<Order> ipOrder, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())
             {
-                return OrderBookIt->second->Insert(iOrder);
+                return OrderBookIt->second->Insert( std::move(ipOrder) );
             }
             else
             {
@@ -181,12 +184,12 @@ namespace exchange
         }
 
         template <typename Clock>
-        Status MatchingEngine<Clock>::Modify(OrderReplace & iOrderReplace, std::uint32_t iProductID)
+        Status MatchingEngine<Clock>::Modify(std::unique_ptr<OrderReplace> ipOrderReplace, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())
             {
-                return OrderBookIt->second->Modify(iOrderReplace);
+                return OrderBookIt->second->Modify(std::move(ipOrderReplace));
             }
             else
             {
@@ -405,9 +408,9 @@ namespace exchange
         }
 
         template <typename Clock>
-        void MatchingEngine<Clock>::OnUnsolicitedCancelledOrder(const Order & order)
+        void MatchingEngine<Clock>::OnUnsolicitedCancelledOrder(const Order * order)
         {
-            EXINFO("MatchingEngine::OnUnsolicitedCancelledOrder : " << order);
+            EXINFO("MatchingEngine::OnUnsolicitedCancelledOrder : " << *order);
         }
 
     }
