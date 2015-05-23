@@ -121,7 +121,7 @@ namespace exchange
         }
 
         template <typename TOrder, typename TMatchingEngine>
-        Status OrderBook<TOrder, TMatchingEngine>::Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay)
+        Status OrderBook<TOrder, TMatchingEngine>::Delete(Order::client_orderid_type iOrderID, Order::client_id_type iClientID, OrderWay iWay)
         {
             if (m_Phase != TradingPhase::CLOSE)
             {

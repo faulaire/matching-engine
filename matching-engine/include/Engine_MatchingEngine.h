@@ -56,7 +56,7 @@ namespace exchange
             Status Modify(std::unique_ptr<OrderReplace> ipOrderReplace, std::uint32_t iProductID);
 
             /**/
-            Status Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay, std::uint32_t iProductID);
+            Status Delete(Order::client_orderid_type iOrderID, Order::client_id_type iClientID, OrderWay iWay, std::uint32_t iProductID);
 
             /**/
             void EngineListen();

@@ -37,10 +37,12 @@ namespace exchange
 
             public:
 
-                using price_type   = Price;
-                using qty_type     = Quantity;
-                using volume_type  = Volume;
-                using nominal_type = Nominal;
+                using price_type          = Price;
+                using qty_type            = Quantity;
+                using volume_type         = Volume;
+                using nominal_type        = Nominal;
+                using client_orderid_type = ClientOrderID;
+                using client_id_type      = ClientID;
             
             protected:
 
@@ -48,39 +50,39 @@ namespace exchange
                 struct Layout
                 {
                     Layout(){}
-                    Layout(OrderWay iWay, qty_type iQty, price_type iPrice, std::uint32_t iOrderID, std::uint32_t iClientID)
+                    Layout(OrderWay iWay, qty_type iQty, price_type iPrice, client_orderid_type iOrderID, client_id_type iClientID)
                         :m_Way(iWay), m_Qty(iQty), m_Price(iPrice), m_OrderID(iOrderID), m_ClientID(iClientID)
                     {}
 
-                    OrderWay          m_Way      = OrderWay::MAX_WAY;
-                    qty_type          m_Qty      = qty_type(0);
-                    price_type        m_Price    = price_type(0);
-                    std::uint32_t     m_OrderID  = 0;
-                    std::uint32_t     m_ClientID = 0;
+                    OrderWay              m_Way      = OrderWay::MAX_WAY;
+                    qty_type              m_Qty      = qty_type(0);
+                    price_type            m_Price    = price_type(0);
+                    client_orderid_type   m_OrderID  = client_orderid_type(0);
+                    client_id_type        m_ClientID = client_id_type(0);
                 };
                 #pragma pack()
 
             public:
 
                 Order(){}
-                Order(OrderWay iWay, qty_type iQty, price_type iPrice, std::uint32_t iOrderID, std::uint32_t iClientID)
+                Order(OrderWay iWay, qty_type iQty, price_type iPrice, client_orderid_type iOrderID, client_id_type iClientID)
                     :m_Layout(iWay, iQty, iPrice, iOrderID, iClientID)
                 {}
 
                 Order(const Order & rhs) = delete;
                 Order& operator=(const Order & rhs) = delete;
 
-                inline OrderWay          GetWay()      const;
-                inline qty_type          GetQuantity() const;
-                inline price_type        GetPrice()    const;
-                inline std::uint32_t     GetOrderID()  const;
-                inline std::uint32_t     GetClientID() const;
+                inline OrderWay            GetWay()      const;
+                inline qty_type            GetQuantity() const;
+                inline price_type          GetPrice()    const;
+                inline client_orderid_type GetOrderID()  const;
+                inline client_id_type      GetClientID() const;
 
-                inline void              SetQuantity(qty_type iQty);
-                inline void              SetOrderID(std::uint32_t iOrderID);
-                inline void              SetPrice(price_type iPrice);
+                inline void                SetQuantity(qty_type iQty);
+                inline void                SetOrderID(client_orderid_type iOrderID);
+                inline void                SetPrice(price_type iPrice);
                                   
-                inline void              RemoveQuantity(qty_type iDelta);
+                inline void                RemoveQuantity(qty_type iDelta);
 
                 inline bool operator==(const Order & rhs) const;
 
@@ -106,12 +108,12 @@ namespace exchange
             return m_Layout.m_Price;
         }
 
-        inline std::uint32_t Order::GetOrderID()  const
+        inline Order::client_orderid_type Order::GetOrderID()  const
         {
             return m_Layout.m_OrderID;
         }
 
-        inline std::uint32_t Order::GetClientID() const
+        inline Order::client_id_type Order::GetClientID() const
         {
             return m_Layout.m_ClientID;
         }
@@ -121,7 +123,7 @@ namespace exchange
             m_Layout.m_Qty = iQty;
         }
 
-        inline void Order::SetOrderID(std::uint32_t iOrderID)
+        inline void Order::SetOrderID(client_orderid_type iOrderID)
         {
             m_Layout.m_OrderID = iOrderID;
         }
@@ -153,14 +155,17 @@ namespace exchange
         /*!
         *  \brief OrderReplace
         *
-        *  This class is used to modify an auto o = CREATE_ORDERn the order book.
+        *  This class is used to modify an existing order in the order book.
         */
         class OrderReplace
         {
             public:
 
-                typedef typename Order::price_type  price_type;
-                typedef typename Order::qty_type    qty_type;
+                using price_type = typename Order::price_type;
+                using qty_type   = typename Order::qty_type;
+
+                using client_orderid_type = typename Order::client_orderid_type;
+                using client_id_type      = typename Order::client_id_type;
 
             protected:
 
@@ -168,50 +173,50 @@ namespace exchange
                     struct Layout
                     {
                         Layout(){}
-                        Layout(OrderWay iWay, qty_type iQty, price_type iPrice, std::uint32_t iExistingOrderID, std::uint32_t iReplacedID, std::uint32_t iClientID)
+                        Layout(OrderWay iWay, qty_type iQty, price_type iPrice, client_orderid_type iExistingOrderID, client_orderid_type iReplacedID, client_id_type iClientID)
                             :m_Way(iWay), m_Qty(iQty), m_Price(iPrice), m_ExistingOrderID(iExistingOrderID),
                              m_ReplacedOrderID(iReplacedID), m_ClientID(iClientID)
                         {}
                 
-                        OrderWay          m_Way             = OrderWay::MAX_WAY;
-                        qty_type          m_Qty             = qty_type(0);
-                        price_type        m_Price           = price_type(0);
-                        std::uint32_t     m_ExistingOrderID = 0;
-                        std::uint32_t     m_ReplacedOrderID = 0;
-                        std::uint32_t     m_ClientID        = 0;
+                        OrderWay             m_Way             = OrderWay::MAX_WAY;
+                        qty_type             m_Qty             = qty_type(0);
+                        price_type           m_Price           = price_type(0);
+                        client_orderid_type  m_ExistingOrderID = client_orderid_type(0);
+                        client_orderid_type  m_ReplacedOrderID = client_orderid_type(0);
+                        client_id_type        m_ClientID       = client_id_type(0);
                     };
                 #pragma pack()
 
             public:
 
                 OrderReplace(){}
-                OrderReplace(OrderWay iWay, qty_type iQty, price_type iPrice, std::uint32_t iExistingOrderID, std::uint32_t iReplacedID, std::uint32_t iClientID)
+                OrderReplace(OrderWay iWay, qty_type iQty, price_type iPrice, client_orderid_type iExistingOrderID, client_orderid_type iReplacedID, client_id_type iClientID)
                     :m_Layout(iWay, iQty, iPrice, iExistingOrderID, iReplacedID, iClientID)
                 {}
 
-                inline qty_type      GetQuantity() const;
-                inline void          SetQuantity(qty_type iQty);
+                inline qty_type            GetQuantity() const;
+                inline void                SetQuantity(qty_type iQty);
+                                           
+                inline price_type          GetPrice() const;
+                inline void                SetPrice(price_type iPrice);
 
-                inline price_type    GetPrice() const;
-                inline void          SetPrice(price_type iPrice);
-
-                inline std::uint32_t GetReplacedOrderID() const;
-                inline void          SetReplacedOrderID(std::uint32_t iReplacedID);
+                inline client_orderid_type GetReplacedOrderID() const;
+                inline void                SetReplacedOrderID(client_orderid_type iReplacedID);
 
                 /*
                     Read only informations. Use to retreive the existing order
                     All this attributes cannot be modified
                 */
-                inline std::uint32_t    GetExistingOrderID() const;
-                inline void             SetExistingOrderID(std::uint32_t iExistingID);
+                inline client_orderid_type  GetExistingOrderID() const;
+                inline void                 SetExistingOrderID(client_orderid_type iExistingID);
 
-                inline std::uint32_t    GetClientID() const;
-                inline void             SetClientID(std::uint32_t iClientID);
-
-                inline OrderWay         GetWay() const;
-                inline void             SetWay(OrderWay iWay);
-
-                inline void             RemoveQuantity(qty_type iDelta);
+                inline client_id_type       GetClientID() const;
+                inline void                 SetClientID(client_id_type iClientID);
+                                           
+                inline OrderWay             GetWay() const;
+                inline void                 SetWay(OrderWay iWay);
+                                           
+                inline void                 RemoveQuantity(qty_type iDelta);
 
 
             protected:
@@ -239,12 +244,12 @@ namespace exchange
             m_Layout.m_Price = iPrice;
         }
 
-        inline std::uint32_t OrderReplace::GetReplacedOrderID() const
+        inline OrderReplace::client_orderid_type OrderReplace::GetReplacedOrderID() const
         {
             return m_Layout.m_ReplacedOrderID;
         }
 
-        inline void OrderReplace::SetReplacedOrderID(std::uint32_t iReplacedID)
+        inline void OrderReplace::SetReplacedOrderID(client_orderid_type iReplacedID)
         {
             m_Layout.m_ReplacedOrderID = iReplacedID;
         }
@@ -252,22 +257,22 @@ namespace exchange
         /*
             Read only information
         */
-        inline std::uint32_t OrderReplace::GetExistingOrderID() const
+        inline OrderReplace::client_orderid_type OrderReplace::GetExistingOrderID() const
         {
             return m_Layout.m_ExistingOrderID;
         }
 
-        inline void OrderReplace::SetExistingOrderID(std::uint32_t iExistingID)
+        inline void OrderReplace::SetExistingOrderID(client_orderid_type iExistingID)
         {
             m_Layout.m_ExistingOrderID = iExistingID;
         }
 
-        inline std::uint32_t OrderReplace::GetClientID() const
+        inline OrderReplace::client_id_type OrderReplace::GetClientID() const
         {
             return m_Layout.m_ClientID;
         }
 
-        inline void OrderReplace::SetClientID(std::uint32_t iClientID)
+        inline void OrderReplace::SetClientID(client_id_type iClientID)
         {
             m_Layout.m_ClientID = iClientID;
         }

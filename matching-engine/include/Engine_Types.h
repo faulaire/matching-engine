@@ -9,6 +9,8 @@
 #include <limits>
 #include <iosfwd>
 
+#include <boost/functional/hash.hpp>
+
 namespace exchange
 {
     namespace engine
@@ -154,6 +156,35 @@ namespace exchange
             return Volume(m_value);
         }
 
+        class ClientOrderID : public Numeric <std::uint32_t, ClientOrderID>
+        {
+        public:
+            using Numeric<std::uint32_t, ClientOrderID>::Numeric;
+            
+            constexpr explicit operator std::uint64_t() noexcept
+            {
+                return m_value;
+            }
+
+        };
+
+        class ClientID : public Numeric <std::uint32_t, ClientID>
+        {
+        public:
+            using Numeric<std::uint32_t, ClientID>::Numeric;
+
+            constexpr explicit operator std::uint64_t() noexcept
+            {
+                return m_value;
+            }
+        };
+
+        class OrderID : public Numeric <std::uint64_t, OrderID>
+        {
+        public:
+            using Numeric<std::uint64_t, OrderID>::Numeric;
+        };
+
         inline Price operator"" _price(unsigned long long int n)
         {
             return Price(n);
@@ -173,6 +204,30 @@ namespace exchange
         {
             return Nominal(n);
         }
+
+        inline ClientID operator"" _clientid(unsigned long long int n)
+        {
+            return ClientID(n);
+        }
+
+        inline ClientOrderID operator"" _clorderid(unsigned long long int n)
+        {
+            return ClientOrderID(n);
+        }
+
+
+        template <typename T>
+        struct Hasher
+        {
+            using underlying_type = typename T::underlying_type;
+
+            std::size_t operator()(const T & value) const noexcept
+            {
+                boost::hash<underlying_type> hasher;
+                return hasher(static_cast<underlying_type>(value));
+            }
+        };
+
 
     }
 }

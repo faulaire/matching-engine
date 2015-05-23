@@ -29,19 +29,24 @@ namespace exchange
         struct client_id_tag{};
         struct price_tag{};
 
+
+
         template <typename TOrder>
         struct OrderIDGenerator
         {
-            using result_type = std::uint64_t;
+            using result_type         = OrderID;
+            using OrderType           = std::remove_pointer_t<TOrder>;
+            using client_id_type      = typename OrderType::client_id_type;
+            using client_orderid_type = typename OrderType::client_orderid_type;
 
-            result_type get_key(std::uint32_t iClientID, std::uint32_t iOrderID) const
+            result_type get_key(client_id_type iClientID, client_orderid_type iOrderID) const
             {
-                result_type Hash = (result_type)iClientID << 32;
-                Hash += iOrderID;
+                result_type Hash = OrderID ( static_cast<typename OrderID::underlying_type>(iClientID) << 32 );
+                Hash += OrderID( static_cast<typename client_orderid_type::underlying_type>(iOrderID) );
                 return Hash;
             }
 
-            result_type operator()(std::uint32_t iClientID, std::uint32_t iOrderID) const
+            result_type operator()(client_id_type iClientID, client_orderid_type iOrderID) const
             {
                 return get_key(iClientID, iOrderID);
             }
@@ -52,19 +57,21 @@ namespace exchange
             }
         };
 
+
         template <typename TOrder, typename SortingPredicate>
         struct OrderStorage
         {
+            using client_id_type = typename TOrder::client_id_type;
 
             typedef boost::multi_index_container<
                 TOrder*,
                 bmi::indexed_by<
                 
                     bmi::hashed_unique<
-                    bmi::tag<order_id_tag>, OrderIDGenerator<TOrder*> >,
+                    bmi::tag<order_id_tag>, OrderIDGenerator<TOrder*>, Hasher<OrderID> >,
 
                     bmi::hashed_non_unique<
-                    bmi::tag<client_id_tag>, bmi::const_mem_fun<TOrder, std::uint32_t, &TOrder::GetClientID> >,
+                    bmi::tag<client_id_tag>, bmi::const_mem_fun<TOrder, client_id_type, &TOrder::GetClientID>, Hasher<client_id_type> >,
 
                     bmi::ordered_non_unique<
                     bmi::tag<price_tag>, bmi::const_mem_fun<TOrder, typename TOrder::price_type, &TOrder::GetPrice>, SortingPredicate>
@@ -96,6 +103,8 @@ namespace exchange
                 using qty_type            = typename TOrder::qty_type;
                 using nominal_type        = typename TOrder::nominal_type;
                 using volume_type         = typename TOrder::volume_type;
+                using client_id_type      = typename TOrder::client_id_type;
+                using client_orderid_type = typename TOrder::client_orderid_type;
 
                 /* Types used to store the aggregated view of orders */
                 /* NbOrder Qty Price*/
@@ -104,7 +113,7 @@ namespace exchange
 
                 using OpenInformationType = std::tuple<price_type, volume_type>;
 
-                using OrderIDContainer    = std::unordered_set < typename OrderIDGenerator<TOrder>::result_type >;
+                using OrderIDContainer     = std::unordered_set < typename OrderIDGenerator<TOrder>::result_type, Hasher<OrderID> >;
                 using GlobalOrderContainer = std::unordered_set < std::unique_ptr<TOrder> > ;
 
             protected:
@@ -142,7 +151,7 @@ namespace exchange
 
                 /**
                 */
-                Status Delete(const std::uint32_t iOrderId, const std::uint32_t ClientId, OrderWay iWay);
+                Status Delete(const client_orderid_type iOrderId, const client_id_type ClientId, OrderWay iWay);
 
                 /**
                 */

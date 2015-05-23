@@ -32,12 +32,14 @@ namespace exchange
 
                 using TimestampType = std::chrono::system_clock::time_point;
 
-                using price_type = Order::price_type;
-                using qty_type   = Order::qty_type;
+                using price_type          = Order::price_type;
+                using qty_type            = Order::qty_type;
+                using client_orderid_type = Order::client_orderid_type;
+                using client_id_type      = Order::client_id_type;
 
             public:
 
-                Deal(price_type iPrice, qty_type iQty, std::uint32_t iBuyerClientID, std::uint32_t iBuyerOrderID, std::uint32_t iSellerClientID, std::uint32_t iSellerOrderID);
+                Deal(price_type iPrice, qty_type iQty, client_id_type iBuyerClientID, client_orderid_type iBuyerOrderID, client_id_type iSellerClientID, client_orderid_type iSellerOrderID);
 
                 Deal() = delete;
 
@@ -51,17 +53,17 @@ namespace exchange
                 inline qty_type              GetQuantity() const;
                 inline void                  SetQuantity(qty_type iQty);
                                              
-                inline std::uint32_t         GetBuyerClientID() const;
-                inline void                  SetBuyerClientID(std::uint32_t iId);
+                inline client_id_type        GetBuyerClientID() const;
+                inline void                  SetBuyerClientID(client_id_type iId);
                                              
-                inline std::uint32_t         GetSellerClientID() const;
-                inline void                  SetSellerClientID(std::uint32_t iId);
+                inline client_id_type        GetSellerClientID() const;
+                inline void                  SetSellerClientID(client_id_type iId);
                                              
-                inline std::uint32_t         GetBuyerOrderID() const;
-                inline void                  SetBuyerOrderID(std::uint32_t iId);
+                inline client_orderid_type   GetBuyerOrderID() const;
+                inline void                  SetBuyerOrderID(client_orderid_type iId);
                                              
-                inline std::uint32_t         GetSellerOrderID() const;
-                inline void                  SetSellerOrderID(std::uint32_t iId);
+                inline client_orderid_type   GetSellerOrderID() const;
+                inline void                  SetSellerOrderID(client_orderid_type iId);
                 
                 inline TimestampType         GetTimeStamp() const;
 
@@ -69,14 +71,14 @@ namespace exchange
                 inline void                  SetReference(std::string);
 
             protected:
-                std::string          m_Reference;
-                price_type           m_Price;
-                qty_type             m_Qty;
-                TimestampType        m_Timestamp;
-                std::uint32_t        m_BuyerClientID;
-                std::uint32_t        m_BuyerOrderID;
-                std::uint32_t        m_SellerClientID;
-                std::uint32_t        m_SellerOrderID;
+                std::string           m_Reference;
+                price_type            m_Price;
+                qty_type              m_Qty;
+                TimestampType         m_Timestamp;
+                client_id_type        m_BuyerClientID;
+                client_orderid_type   m_BuyerOrderID;
+                client_id_type        m_SellerClientID;
+                client_orderid_type   m_SellerOrderID;
         };
 
         std::ostream& operator<<(std::ostream& o, const Deal & x);
@@ -101,42 +103,42 @@ namespace exchange
             m_Qty = std::move(iQty);
         }
 
-        inline std::uint32_t Deal::GetBuyerClientID() const
+        inline Deal::client_id_type Deal::GetBuyerClientID() const
         {
             return m_BuyerClientID;
         }
 
-        inline void   Deal::SetBuyerClientID(std::uint32_t iId)
+        inline void   Deal::SetBuyerClientID(client_id_type iId)
         {
             m_BuyerClientID = std::move(iId);
         }
 
-        inline std::uint32_t Deal::GetSellerClientID() const
+        inline Deal::client_id_type Deal::GetSellerClientID() const
         {
             return m_SellerClientID;
         }
 
-        inline void   Deal::SetSellerClientID(std::uint32_t iId)
+        inline void   Deal::SetSellerClientID(client_id_type iId)
         {
             m_SellerClientID = std::move(iId);
         }
 
-        inline std::uint32_t Deal::GetBuyerOrderID() const
+        inline Deal::client_orderid_type Deal::GetBuyerOrderID() const
         {
             return m_BuyerOrderID;
         }
 
-        inline void Deal::SetBuyerOrderID(std::uint32_t iId)
+        inline void Deal::SetBuyerOrderID(client_orderid_type iId)
         {
             m_BuyerOrderID = std::move(iId);
         }
 
-        inline std::uint32_t Deal::GetSellerOrderID() const
+        inline Deal::client_orderid_type Deal::GetSellerOrderID() const
         {
             return m_SellerOrderID;
         }
 
-        inline void Deal::SetSellerOrderID(std::uint32_t iId)
+        inline void Deal::SetSellerOrderID(client_orderid_type iId)
         {
             m_SellerOrderID = std::move(iId);
         }

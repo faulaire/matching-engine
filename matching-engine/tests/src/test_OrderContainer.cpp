@@ -116,15 +116,15 @@ class OrderContainerTest : public testing::Test
                                       };
 
             m_BidOrders = {
-                CREATE_RAW_ORDER(OrderWay::BUY, 1000_qty, 1234_price, 1, 5), CREATE_RAW_ORDER(OrderWay::BUY, 2000_qty, 1234_price, 1, 6),
-                CREATE_RAW_ORDER(OrderWay::BUY, 3000_qty, 1321_price, 1, 7), CREATE_RAW_ORDER(OrderWay::BUY, 4000_qty, 1325_price, 1, 8),
-                CREATE_RAW_ORDER(OrderWay::BUY, 5000_qty, 2185_price, 1, 9), CREATE_RAW_ORDER(OrderWay::BUY, 6000_qty, 2185_price, 1, 10)
+                CREATE_RAW_ORDER(OrderWay::BUY, 1000_qty, 1234_price, 1_clorderid, 5_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 2000_qty, 1234_price, 1_clorderid, 6_clientid),
+                CREATE_RAW_ORDER(OrderWay::BUY, 3000_qty, 1321_price, 1_clorderid, 7_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 4000_qty, 1325_price, 1_clorderid, 8_clientid),
+                CREATE_RAW_ORDER(OrderWay::BUY, 5000_qty, 2185_price, 1_clorderid, 9_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 6000_qty, 2185_price, 1_clorderid, 10_clientid)
             };
 
             m_AskOrders = {
-                CREATE_RAW_ORDER(OrderWay::SELL, 8000_qty, 4321_price, 2, 1), CREATE_RAW_ORDER(OrderWay::SELL, 7000_qty, 4321_price, 2, 2),
-                CREATE_RAW_ORDER(OrderWay::SELL, 6000_qty, 4526_price, 2, 3), CREATE_RAW_ORDER(OrderWay::SELL, 5000_qty, 4580_price, 2, 4),
-                CREATE_RAW_ORDER(OrderWay::SELL, 4000_qty, 8526_price, 2, 5), CREATE_RAW_ORDER(OrderWay::SELL, 3000_qty, 8526_price, 2, 6)
+                CREATE_RAW_ORDER(OrderWay::SELL, 8000_qty, 4321_price, 2_clorderid, 1_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 7000_qty, 4321_price, 2_clorderid, 2_clientid),
+                CREATE_RAW_ORDER(OrderWay::SELL, 6000_qty, 4526_price, 2_clorderid, 3_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 5000_qty, 4580_price, 2_clorderid, 4_clientid),
+                CREATE_RAW_ORDER(OrderWay::SELL, 4000_qty, 8526_price, 2_clorderid, 5_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 3000_qty, 8526_price, 2_clorderid, 6_clientid)
             };
 
         }
@@ -157,11 +157,11 @@ TEST_F(OrderContainerTest, AuctionInsert)
     ASSERT_EQ(ByOrderAskContainer.size(), 6);
     ASSERT_EQ(ByOrderBidContainer.size(), 6);
 
-    ASSERT_EQ(*ByOrderAskContainer[0], Order(OrderWay::SELL, 8000_qty, 4321_price, 2, 1));
-    ASSERT_EQ(*ByOrderAskContainer[1], Order(OrderWay::SELL, 7000_qty, 4321_price, 2, 2));
+    ASSERT_EQ(*ByOrderAskContainer[0], Order(OrderWay::SELL, 8000_qty, 4321_price, 2_clorderid, 1_clientid));
+    ASSERT_EQ(*ByOrderAskContainer[1], Order(OrderWay::SELL, 7000_qty, 4321_price, 2_clorderid, 2_clientid));
 
-    ASSERT_EQ(*ByOrderBidContainer[0], Order(OrderWay::BUY, 5000_qty, 2185_price, 1, 9));
-    ASSERT_EQ(*ByOrderBidContainer[1], Order(OrderWay::BUY, 6000_qty, 2185_price, 1, 10));
+    ASSERT_EQ(*ByOrderBidContainer[0], Order(OrderWay::BUY, 5000_qty, 2185_price, 1_clorderid, 9_clientid));
+    ASSERT_EQ(*ByOrderBidContainer[1], Order(OrderWay::BUY, 6000_qty, 2185_price, 1_clorderid, 10_clientid));
 
     ASSERT_TRUE(BidContainer == m_BidContainerReference);
     ASSERT_TRUE(AskContainer == m_AskContainerReference);
@@ -171,15 +171,15 @@ TEST_F(OrderContainerTest, AuctionDelete)
 {
     InsertOrders();
     
-    ASSERT_EQ(Status::Ok, m_Container.Delete(1, 5, OrderWay::BUY));
-    ASSERT_EQ(Status::OrderNotFound, m_Container.Delete(1, 5, OrderWay::BUY));
+    ASSERT_EQ(Status::Ok, m_Container.Delete(1_clorderid, 5_clientid, OrderWay::BUY));
+    ASSERT_EQ(Status::OrderNotFound, m_Container.Delete(1_clorderid, 5_clientid, OrderWay::BUY));
 
-    ASSERT_EQ(Status::Ok, m_Container.Delete(1, 10, OrderWay::BUY));
+    ASSERT_EQ(Status::Ok, m_Container.Delete(1_clorderid, 10_clientid, OrderWay::BUY));
 
-    ASSERT_EQ(Status::Ok, m_Container.Delete(2, 3, OrderWay::SELL));
-    ASSERT_EQ(Status::OrderNotFound, m_Container.Delete(2, 3, OrderWay::SELL));
+    ASSERT_EQ(Status::Ok, m_Container.Delete(2_clorderid, 3_clientid, OrderWay::SELL));
+    ASSERT_EQ(Status::OrderNotFound, m_Container.Delete(2_clorderid, 3_clientid, OrderWay::SELL));
 
-    ASSERT_EQ(Status::Ok, m_Container.Delete(2, 4, OrderWay::SELL));
+    ASSERT_EQ(Status::Ok, m_Container.Delete(2_clorderid, 4_clientid, OrderWay::SELL));
 
     OrderContainerType::LimitContainer BidContainer;
     OrderContainerType::LimitContainer AskContainer;
@@ -227,12 +227,12 @@ TEST_F(OrderContainerTest, AuctionModify)
     InsertOrders();
 
     /* OrderWay iWay, qty_type iQty, price_type iPrice, std::uint32_t iExistingOrderID, std::uint32_t iReplacedID, std::uint32_t iClientID */
-    auto ReplaceBuy = CREATE_REPLACE(OrderWay::BUY, 1337_qty, 2185_price, 1, 2, 8);
+    auto ReplaceBuy = CREATE_REPLACE(OrderWay::BUY, 1337_qty, 2185_price, 1_clorderid, 2_clorderid, 8_clientid);
     ASSERT_EQ(Status::Ok, MODIFY_ORDER(m_Container, ReplaceBuy));
 
     
 
-    auto ReplaceSell = CREATE_REPLACE(OrderWay::SELL, 3000_qty, 4526_price, 2, 12, 4);
+    auto ReplaceSell = CREATE_REPLACE(OrderWay::SELL, 3000_qty, 4526_price, 2_clorderid, 12_clorderid, 4_clientid);
     ASSERT_EQ(Status::Ok, MODIFY_ORDER(m_Container, ReplaceSell));
 
     /*
@@ -281,14 +281,14 @@ TEST_F(OrderContainerTest, AuctionFixing)
     m_Container.CancelAllOrders();
 
     m_BidOrders = {
-                    CREATE_RAW_ORDER(OrderWay::BUY, 1200_qty, 90_price, 1, 5), CREATE_RAW_ORDER(OrderWay::BUY, 350_qty, 89_price, 1, 6),
-                    CREATE_RAW_ORDER(OrderWay::BUY, 150_qty, 88_price, 1, 7), CREATE_RAW_ORDER(OrderWay::BUY, 230_qty, 87_price, 1, 8)
+        CREATE_RAW_ORDER(OrderWay::BUY, 1200_qty, 90_price, 1_clorderid, 5_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 350_qty, 89_price, 1_clorderid, 6_clientid),
+        CREATE_RAW_ORDER(OrderWay::BUY, 150_qty, 88_price, 1_clorderid, 7_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 230_qty, 87_price, 1_clorderid, 8_clientid)
                   };
 
     m_AskOrders = {
-                    CREATE_RAW_ORDER(OrderWay::SELL, 900_qty, 90_price, 2, 1), CREATE_RAW_ORDER(OrderWay::SELL, 650_qty, 91_price, 2, 2),
-                    CREATE_RAW_ORDER(OrderWay::SELL, 500_qty, 92_price, 2, 3), CREATE_RAW_ORDER(OrderWay::SELL, 350_qty, 93_price, 2, 4),
-                    CREATE_RAW_ORDER(OrderWay::SELL, 400_qty, 94_price, 2, 5)
+        CREATE_RAW_ORDER(OrderWay::SELL, 900_qty, 90_price, 2_clorderid, 1_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 650_qty, 91_price, 2_clorderid, 2_clientid),
+        CREATE_RAW_ORDER(OrderWay::SELL, 500_qty, 92_price, 2_clorderid, 3_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 350_qty, 93_price, 2_clorderid, 4_clientid),
+        CREATE_RAW_ORDER(OrderWay::SELL, 400_qty, 94_price, 2_clorderid, 5_clientid)
                   };
     
     InsertOrders();
@@ -301,15 +301,15 @@ TEST_F(OrderContainerTest, AuctionFixing)
     m_Container.CancelAllOrders();
 
     m_BidOrders = {
-                     CREATE_RAW_ORDER(OrderWay::BUY, 200_qty, 41_price, 3, 5), CREATE_RAW_ORDER(OrderWay::BUY, 300_qty, 40_price, 3, 6),
-                     CREATE_RAW_ORDER(OrderWay::BUY, 150_qty, 39_price, 3, 7), CREATE_RAW_ORDER(OrderWay::BUY, 50_qty, 38_price, 3, 8),
-                     CREATE_RAW_ORDER(OrderWay::BUY, 10_qty, 37_price, 3, 9)
+        CREATE_RAW_ORDER(OrderWay::BUY, 200_qty, 41_price, 3_clorderid, 5_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 300_qty, 40_price, 3_clorderid, 6_clientid),
+        CREATE_RAW_ORDER(OrderWay::BUY, 150_qty, 39_price, 3_clorderid, 7_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 50_qty, 38_price, 3_clorderid, 8_clientid),
+        CREATE_RAW_ORDER(OrderWay::BUY, 10_qty, 37_price, 3_clorderid, 9_clientid)
                   };
     
     m_AskOrders = {
-                     CREATE_RAW_ORDER(OrderWay::SELL, 100_qty, 35_price, 4, 1), CREATE_RAW_ORDER(OrderWay::SELL, 200_qty, 36_price, 4, 2),
-                     CREATE_RAW_ORDER(OrderWay::SELL, 50_qty, 37_price, 4, 3), CREATE_RAW_ORDER(OrderWay::SELL, 200_qty, 39_price, 4, 4),
-                     CREATE_RAW_ORDER(OrderWay::SELL, 20_qty, 40_price, 4, 5)
+        CREATE_RAW_ORDER(OrderWay::SELL, 100_qty, 35_price, 4_clorderid, 1_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 200_qty, 36_price, 4_clorderid, 2_clientid),
+        CREATE_RAW_ORDER(OrderWay::SELL, 50_qty, 37_price, 4_clorderid, 3_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 200_qty, 39_price, 4_clorderid, 4_clientid),
+        CREATE_RAW_ORDER(OrderWay::SELL, 20_qty, 40_price, 4_clorderid, 5_clientid)
                   };
 
     InsertOrders();
@@ -326,14 +326,14 @@ TEST_F(OrderContainerTest, AuctionMatching)
     m_Container.CancelAllOrders();
 
     m_BidOrders = {
-                     CREATE_RAW_ORDER(OrderWay::BUY, 1200_qty, 90_price, 1, 5), CREATE_RAW_ORDER(OrderWay::BUY, 350_qty, 89_price, 1, 6),
-                     CREATE_RAW_ORDER(OrderWay::BUY, 150_qty, 88_price, 1, 7), CREATE_RAW_ORDER(OrderWay::BUY, 230_qty, 87_price, 1, 8)
+        CREATE_RAW_ORDER(OrderWay::BUY, 1200_qty, 90_price, 1_clorderid, 5_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 350_qty, 89_price, 1_clorderid, 6_clientid),
+        CREATE_RAW_ORDER(OrderWay::BUY, 150_qty, 88_price, 1_clorderid, 7_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 230_qty, 87_price, 1_clorderid, 8_clientid)
                   };
 
     m_AskOrders = {
-                     CREATE_RAW_ORDER(OrderWay::SELL, 900_qty, 90_price, 2, 1), CREATE_RAW_ORDER(OrderWay::SELL, 650_qty, 91_price, 2, 2),
-                     CREATE_RAW_ORDER(OrderWay::SELL, 500_qty, 92_price, 2, 3), CREATE_RAW_ORDER(OrderWay::SELL, 350_qty, 93_price, 2, 4),
-                     CREATE_RAW_ORDER(OrderWay::SELL, 400_qty, 94_price, 2, 5)
+        CREATE_RAW_ORDER(OrderWay::SELL, 900_qty, 90_price, 2_clorderid, 1_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 650_qty, 91_price, 2_clorderid, 2_clientid),
+        CREATE_RAW_ORDER(OrderWay::SELL, 500_qty, 92_price, 2_clorderid, 3_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 350_qty, 93_price, 2_clorderid, 4_clientid),
+        CREATE_RAW_ORDER(OrderWay::SELL, 400_qty, 94_price, 2_clorderid, 5_clientid)
                   };
 
     InsertOrders();
@@ -344,21 +344,21 @@ TEST_F(OrderContainerTest, AuctionMatching)
 
     ASSERT_EQ(DealContainer.size(), 1);
 
-    ASSERT_EQ(*DealContainer.at(0), Deal(90_price, 900_qty, 5, 1, 1, 2));
+    ASSERT_EQ(*DealContainer.at(0), Deal(90_price, 900_qty, 5_clientid, 1_clorderid, 1_clientid, 2_clorderid));
 
     m_EventHandler.Reset();
     m_Container.CancelAllOrders();
 
     m_BidOrders = {
-                    CREATE_RAW_ORDER(OrderWay::BUY, 200_qty, 41_price, 1, 9), CREATE_RAW_ORDER(OrderWay::BUY, 300_qty, 40_price, 1, 10),
-                    CREATE_RAW_ORDER(OrderWay::BUY, 150_qty, 39_price, 1, 11), CREATE_RAW_ORDER(OrderWay::BUY, 50_qty, 38_price, 1, 12),
-                    CREATE_RAW_ORDER(OrderWay::BUY, 10_qty, 37_price, 1, 13)
+        CREATE_RAW_ORDER(OrderWay::BUY, 200_qty, 41_price, 1_clorderid, 9_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 300_qty, 40_price, 1_clorderid, 10_clientid),
+        CREATE_RAW_ORDER(OrderWay::BUY, 150_qty, 39_price, 1_clorderid, 11_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 50_qty, 38_price, 1_clorderid, 12_clientid),
+        CREATE_RAW_ORDER(OrderWay::BUY, 10_qty, 37_price, 1_clorderid, 13_clientid)
                   };
 
     m_AskOrders = {
-                    CREATE_RAW_ORDER(OrderWay::SELL, 100_qty, 35_price, 2, 6), CREATE_RAW_ORDER(OrderWay::SELL, 200_qty, 36_price, 2, 7),
-                    CREATE_RAW_ORDER(OrderWay::SELL, 50_qty, 37_price, 2, 8), CREATE_RAW_ORDER(OrderWay::SELL, 200_qty, 39_price, 2, 9),
-                    CREATE_RAW_ORDER(OrderWay::SELL, 20_qty, 40_price, 2, 10)
+        CREATE_RAW_ORDER(OrderWay::SELL, 100_qty, 35_price, 2_clorderid, 6_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 200_qty, 36_price, 2_clorderid, 7_clientid),
+        CREATE_RAW_ORDER(OrderWay::SELL, 50_qty, 37_price, 2_clorderid, 8_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 200_qty, 39_price, 2_clorderid, 9_clientid),
+        CREATE_RAW_ORDER(OrderWay::SELL, 20_qty, 40_price, 2_clorderid, 10_clientid)
                   };
 
     InsertOrders();
@@ -367,12 +367,12 @@ TEST_F(OrderContainerTest, AuctionMatching)
 
     ASSERT_EQ(DealContainer.size(), 6);
 
-    ASSERT_EQ(*DealContainer.at(0), Deal(39_price, 100_qty, 9, 1, 6, 2));
-    ASSERT_EQ(*DealContainer.at(1), Deal(39_price, 100_qty, 9, 1, 7, 2));
-    ASSERT_EQ(*DealContainer.at(2), Deal(39_price, 100_qty, 10, 1, 7, 2));
-    ASSERT_EQ(*DealContainer.at(3), Deal(39_price, 50_qty, 10, 1, 8, 2));
-    ASSERT_EQ(*DealContainer.at(4), Deal(39_price, 150_qty, 10, 1, 9, 2));
-    ASSERT_EQ(*DealContainer.at(5), Deal(39_price, 50_qty, 11, 1, 9, 2));
+    ASSERT_EQ(*DealContainer.at(0), Deal(39_price, 100_qty, 9_clientid, 1_clorderid, 6_clientid, 2_clorderid));
+    ASSERT_EQ(*DealContainer.at(1), Deal(39_price, 100_qty, 9_clientid, 1_clorderid, 7_clientid, 2_clorderid));
+    ASSERT_EQ(*DealContainer.at(2), Deal(39_price, 100_qty, 10_clientid, 1_clorderid, 7_clientid, 2_clorderid));
+    ASSERT_EQ(*DealContainer.at(3), Deal(39_price, 50_qty, 10_clientid, 1_clorderid, 8_clientid, 2_clorderid));
+    ASSERT_EQ(*DealContainer.at(4), Deal(39_price, 150_qty, 10_clientid, 1_clorderid, 9_clientid, 2_clorderid));
+    ASSERT_EQ(*DealContainer.at(5), Deal(39_price, 50_qty, 11_clientid, 1_clorderid, 9_clientid, 2_clorderid));
 
     m_EventHandler.Reset();
     m_Container.CancelAllOrders();
@@ -386,36 +386,36 @@ TEST_F(OrderContainerTest, InsertMatching)
     m_Container.CancelAllOrders();
 
     m_BidOrders = {
-                    CREATE_RAW_ORDER(OrderWay::BUY, 350_qty, 89_price, 1, 6), CREATE_RAW_ORDER(OrderWay::BUY, 150_qty, 88_price, 1, 7),
-                    CREATE_RAW_ORDER(OrderWay::BUY, 230_qty, 87_price, 1, 8)
+        CREATE_RAW_ORDER(OrderWay::BUY, 350_qty, 89_price, 1_clorderid, 6_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 150_qty, 88_price, 1_clorderid, 7_clientid),
+        CREATE_RAW_ORDER(OrderWay::BUY, 230_qty, 87_price, 1_clorderid, 8_clientid)
                   };
 
     m_AskOrders = {
-                    CREATE_RAW_ORDER(OrderWay::SELL, 900_qty, 90_price, 2, 1), CREATE_RAW_ORDER(OrderWay::SELL, 650_qty, 91_price, 2, 2),
-                    CREATE_RAW_ORDER(OrderWay::SELL, 500_qty, 92_price, 2, 3), CREATE_RAW_ORDER(OrderWay::SELL, 350_qty, 93_price, 2, 4)
+        CREATE_RAW_ORDER(OrderWay::SELL, 900_qty, 90_price, 2_clorderid, 1_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 650_qty, 91_price, 2_clorderid, 2_clientid),
+        CREATE_RAW_ORDER(OrderWay::SELL, 500_qty, 92_price, 2_clorderid, 3_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 350_qty, 93_price, 2_clorderid, 4_clientid)
                   };
 
 
     InsertOrders();
 
-    auto BuyOrder = CREATE_ORDER(OrderWay::BUY, 123_qty, 88_price, 5, 1);
-    auto SellOrder = CREATE_ORDER(OrderWay::SELL, 123_qty, 91_price, 6, 1);
+    auto BuyOrder = CREATE_ORDER(OrderWay::BUY, 123_qty, 88_price, 5_clorderid, 1_clientid);
+    auto SellOrder = CREATE_ORDER(OrderWay::SELL, 123_qty, 91_price, 6_clorderid, 1_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, BuyOrder));
     ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, SellOrder));
 
     ASSERT_EQ(DealContainer.size(), 0);
 
-    BuyOrder = CREATE_ORDER(OrderWay::BUY, 500_qty, 91_price, 7, 1);
-    SellOrder = CREATE_ORDER(OrderWay::SELL, 150_qty, 89_price, 8, 1);
+    BuyOrder = CREATE_ORDER(OrderWay::BUY, 500_qty, 91_price, 7_clorderid, 1_clientid);
+    SellOrder = CREATE_ORDER(OrderWay::SELL, 150_qty, 89_price, 8_clorderid, 1_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, BuyOrder));
     ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, SellOrder));
 
     ASSERT_EQ(DealContainer.size(), 2);
 
-    BuyOrder = CREATE_ORDER(OrderWay::BUY, 2500_qty, 93_price, 9, 1);
-    SellOrder = CREATE_ORDER(OrderWay::SELL, 1500_qty, 87_price, 10, 1);
+    BuyOrder = CREATE_ORDER(OrderWay::BUY, 2500_qty, 93_price, 9_clorderid, 1_clientid);
+    SellOrder = CREATE_ORDER(OrderWay::SELL, 1500_qty, 87_price, 10_clorderid, 1_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, BuyOrder));
     ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, SellOrder));
@@ -442,33 +442,33 @@ TEST_F(OrderContainerTest, ModifyMatching)
     m_Container.CancelAllOrders();
 
     m_BidOrders =   {
-                        CREATE_RAW_ORDER(OrderWay::BUY, 350_qty, 89_price, 1, 6), CREATE_RAW_ORDER(OrderWay::BUY, 150_qty, 88_price, 1, 7),
-                        CREATE_RAW_ORDER(OrderWay::BUY, 230_qty, 87_price, 1, 8)
+        CREATE_RAW_ORDER(OrderWay::BUY, 350_qty, 89_price, 1_clorderid, 6_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 150_qty, 88_price, 1_clorderid, 7_clientid),
+        CREATE_RAW_ORDER(OrderWay::BUY, 230_qty, 87_price, 1_clorderid, 8_clientid)
                     };
 
     m_AskOrders = {
-                        CREATE_RAW_ORDER(OrderWay::SELL, 900_qty, 90_price, 2, 1), CREATE_RAW_ORDER(OrderWay::SELL, 650_qty, 91_price, 2, 2),
-                        CREATE_RAW_ORDER(OrderWay::SELL, 500_qty, 92_price, 2, 3), CREATE_RAW_ORDER(OrderWay::SELL, 350_qty, 93_price, 2, 4)
+        CREATE_RAW_ORDER(OrderWay::SELL, 900_qty, 90_price, 2_clorderid, 1_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 650_qty, 91_price, 2_clorderid, 2_clientid),
+        CREATE_RAW_ORDER(OrderWay::SELL, 500_qty, 92_price, 2_clorderid, 3_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 350_qty, 93_price, 2_clorderid, 4_clientid)
                   };
 
     InsertOrders();
 
-    auto BuyReplace = CREATE_REPLACE(OrderWay::BUY, 500_qty, 88_price, 1, 2, 6);
-    auto SellReplace = CREATE_REPLACE(OrderWay::SELL, 1200_qty, 91_price, 2, 4, 1);
+    auto BuyReplace = CREATE_REPLACE(OrderWay::BUY, 500_qty, 88_price, 1_clorderid, 2_clorderid, 6_clientid);
+    auto SellReplace = CREATE_REPLACE(OrderWay::SELL, 1200_qty, 91_price, 2_clorderid, 4_clorderid, 1_clientid);
 
     ASSERT_EQ(Status::Ok, MODIFY_MATCHING_ORDER(m_Container, BuyReplace));
     ASSERT_EQ(Status::Ok, MODIFY_MATCHING_ORDER(m_Container, SellReplace));
     
-    BuyReplace = CREATE_REPLACE(OrderWay::BUY, 2000_qty, 91_price, 1, 5, 8);
+    BuyReplace = CREATE_REPLACE(OrderWay::BUY, 2000_qty, 91_price, 1_clorderid, 5_clorderid, 8_clientid);
 
     ASSERT_EQ(Status::Ok, MODIFY_MATCHING_ORDER(m_Container, BuyReplace));
 
     ASSERT_EQ( DealContainer.size(), 2 );
 
-    ASSERT_EQ(*DealContainer.at(0), Deal(91_price, 650_qty, 8, 5, 2, 2));
-    ASSERT_EQ(*DealContainer.at(1), Deal(91_price, 1200_qty, 8, 5, 1, 4));
+    ASSERT_EQ(*DealContainer.at(0), Deal(91_price, 650_qty, 8_clientid, 5_clorderid, 2_clientid, 2_clorderid));
+    ASSERT_EQ(*DealContainer.at(1), Deal(91_price, 1200_qty, 8_clientid, 5_clorderid, 1_clientid, 4_clorderid));
     
-    SellReplace = CREATE_REPLACE(OrderWay::SELL, 500_qty, 91_price, 2, 8, 4);
+    SellReplace = CREATE_REPLACE(OrderWay::SELL, 500_qty, 91_price, 2_clorderid, 8_clorderid, 4_clientid);
 
     ASSERT_EQ(Status::Ok, MODIFY_MATCHING_ORDER(m_Container, SellReplace));
 
@@ -485,7 +485,7 @@ TEST_F(OrderContainerTest, ModifyMatching)
     ASSERT_TRUE(AskContainer == m_AskContainerReference);
 
     ASSERT_EQ( DealContainer.size(), 3 );
-    ASSERT_EQ(*DealContainer.at(2), Deal(91_price, 150_qty, 8, 5, 4, 8));
+    ASSERT_EQ(*DealContainer.at(2), Deal(91_price, 150_qty, 8_clientid, 5_clorderid, 4_clientid, 8_clorderid));
 
     m_EventHandler.Reset();
 }
@@ -494,7 +494,7 @@ TEST_F(OrderContainerTest, Modified_orders_should_be_removed_from_order_book_whe
 {
     InsertOrders();
 
-    auto BuyReplace = CREATE_REPLACE(OrderWay::BUY, 4000_qty, 4321_price, 1, 2, 8);
+    auto BuyReplace = CREATE_REPLACE(OrderWay::BUY, 4000_qty, 4321_price, 1_clorderid, 2_clorderid, 8_clientid);
     
     ASSERT_EQ(Status::Ok, MODIFY_MATCHING_ORDER(m_Container, BuyReplace));
 
@@ -523,19 +523,19 @@ TEST_F(OrderContainerTest, Orders_should_loses_their_prority_when_modified)
     m_Container.CancelAllOrders();
 
     m_BidOrders = {
-                    CREATE_RAW_ORDER(OrderWay::BUY, 100_qty, 10_price, 5, 6), CREATE_RAW_ORDER(OrderWay::BUY, 200_qty, 11_price, 5, 7),
-                    CREATE_RAW_ORDER(OrderWay::BUY, 300_qty, 12_price, 5, 8), CREATE_RAW_ORDER(OrderWay::BUY, 300_qty, 13_price, 5, 9)
+        CREATE_RAW_ORDER(OrderWay::BUY, 100_qty, 10_price, 5_clorderid, 6_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 200_qty, 11_price, 5_clorderid, 7_clientid),
+        CREATE_RAW_ORDER(OrderWay::BUY, 300_qty, 12_price, 5_clorderid, 8_clientid), CREATE_RAW_ORDER(OrderWay::BUY, 300_qty, 13_price, 5_clorderid, 9_clientid)
                   };
 
     m_AskOrders = {
-                    CREATE_RAW_ORDER(OrderWay::SELL, 100_qty, 10_price, 10, 6), CREATE_RAW_ORDER(OrderWay::SELL, 200_qty, 11_price, 10, 7),
-                    CREATE_RAW_ORDER(OrderWay::SELL, 300_qty, 12_price, 10, 8), CREATE_RAW_ORDER(OrderWay::SELL, 400_qty, 13_price, 10, 9)
+        CREATE_RAW_ORDER(OrderWay::SELL, 100_qty, 10_price, 10_clorderid, 6_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 200_qty, 11_price, 10_clorderid, 7_clientid),
+        CREATE_RAW_ORDER(OrderWay::SELL, 300_qty, 12_price, 10_clorderid, 8_clientid), CREATE_RAW_ORDER(OrderWay::SELL, 400_qty, 13_price, 10_clorderid, 9_clientid)
                   };
 
     InsertOrders();
 
-    auto BuyReplace = CREATE_REPLACE(OrderWay::BUY, 300_qty, 11_price, 5, 15, 8);
-    auto SellReplace = CREATE_REPLACE(OrderWay::SELL, 400_qty, 12_price, 10, 20, 9);
+    auto BuyReplace = CREATE_REPLACE(OrderWay::BUY, 300_qty, 11_price, 5_clorderid, 15_clorderid, 8_clientid);
+    auto SellReplace = CREATE_REPLACE(OrderWay::SELL, 400_qty, 12_price, 10_clorderid, 20_clorderid, 9_clientid);
 
     ASSERT_EQ(Status::Ok, MODIFY_ORDER(m_Container, BuyReplace));
     ASSERT_EQ(Status::Ok, MODIFY_ORDER(m_Container, SellReplace));
@@ -545,37 +545,37 @@ TEST_F(OrderContainerTest, Orders_should_loses_their_prority_when_modified)
 
     m_Container.ByOrderView(ByOrderBidContainer, ByOrderAskContainer);
     
-    ASSERT_EQ(*ByOrderBidContainer[0], Order(OrderWay::BUY, 300_qty, 13_price, 5, 9));
-    ASSERT_EQ(*ByOrderBidContainer[1], Order(OrderWay::BUY, 200_qty, 11_price, 5, 7));
-    ASSERT_EQ(*ByOrderBidContainer[2], Order(OrderWay::BUY, 300_qty, 11_price, 15, 8));
-    ASSERT_EQ(*ByOrderBidContainer[3], Order(OrderWay::BUY, 100_qty, 10_price, 5, 6));
+    ASSERT_EQ(*ByOrderBidContainer[0], Order(OrderWay::BUY, 300_qty, 13_price, 5_clorderid, 9_clientid));
+    ASSERT_EQ(*ByOrderBidContainer[1], Order(OrderWay::BUY, 200_qty, 11_price, 5_clorderid, 7_clientid));
+    ASSERT_EQ(*ByOrderBidContainer[2], Order(OrderWay::BUY, 300_qty, 11_price, 15_clorderid, 8_clientid));
+    ASSERT_EQ(*ByOrderBidContainer[3], Order(OrderWay::BUY, 100_qty, 10_price, 5_clorderid, 6_clientid));
     
-    ASSERT_EQ(*ByOrderAskContainer[0], Order(OrderWay::SELL, 100_qty, 10_price, 10, 6));
-    ASSERT_EQ(*ByOrderAskContainer[1], Order(OrderWay::SELL, 200_qty, 11_price, 10, 7));
-    ASSERT_EQ(*ByOrderAskContainer[2], Order(OrderWay::SELL, 300_qty, 12_price, 10, 8));
-    ASSERT_EQ(*ByOrderAskContainer[3], Order(OrderWay::SELL, 400_qty, 12_price, 20, 9));
+    ASSERT_EQ(*ByOrderAskContainer[0], Order(OrderWay::SELL, 100_qty, 10_price, 10_clorderid, 6_clientid));
+    ASSERT_EQ(*ByOrderAskContainer[1], Order(OrderWay::SELL, 200_qty, 11_price, 10_clorderid, 7_clientid));
+    ASSERT_EQ(*ByOrderAskContainer[2], Order(OrderWay::SELL, 300_qty, 12_price, 10_clorderid, 8_clientid));
+    ASSERT_EQ(*ByOrderAskContainer[3], Order(OrderWay::SELL, 400_qty, 12_price, 20_clorderid, 9_clientid));
 }
 
 TEST_F(OrderContainerTest, Order_insertion_should_fail_when_order_id_already_used)
 {
-    auto ob = CREATE_ORDER(OrderWay::BUY, 8000_qty, 4321_price, 1, 1);
+    auto ob = CREATE_ORDER(OrderWay::BUY, 8000_qty, 4321_price, 1_clorderid, 1_clientid);
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_Container, ob));
 
-    ASSERT_EQ(Status::Ok, m_Container.Delete(1, 1, OrderWay::BUY));
+    ASSERT_EQ(Status::Ok, m_Container.Delete(1_clorderid, 1_clientid, OrderWay::BUY));
 
-    ob = CREATE_ORDER(OrderWay::BUY, 8000_qty, 4321_price, 1, 1);
+    ob = CREATE_ORDER(OrderWay::BUY, 8000_qty, 4321_price, 1_clorderid, 1_clientid);
     ASSERT_EQ(Status::IDAlreadyUsed, INSERT_ORDER(m_Container, ob));
 }
 
 TEST_F(OrderContainerTest, Order_modification_should_fail_when_order_id_already_used)
 {
-    auto ob = CREATE_ORDER(OrderWay::BUY, 8000_qty, 4321_price, 1, 1);
-    auto os = CREATE_ORDER(OrderWay::SELL, 8000_qty, 4321_price, 2, 1);
+    auto ob = CREATE_ORDER(OrderWay::BUY, 8000_qty, 4321_price, 1_clorderid, 1_clientid);
+    auto os = CREATE_ORDER(OrderWay::SELL, 8000_qty, 4321_price, 2_clorderid, 1_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_Container, ob));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_Container, os));
     
-    auto BuyReplace = CREATE_REPLACE(OrderWay::BUY, 4000_qty, 4321_price, 1, 2, 1);
+    auto BuyReplace = CREATE_REPLACE(OrderWay::BUY, 4000_qty, 4321_price, 1_clorderid, 2_clorderid, 1_clientid);
 
     ASSERT_EQ(Status::IDAlreadyUsed, MODIFY_ORDER(m_Container, BuyReplace));
 }

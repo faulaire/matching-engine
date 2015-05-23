@@ -30,6 +30,8 @@ namespace exchange
                 struct buyer_id_tag{};
                 
                 
+                using client_id_type = typename Deal::client_id_type;
+
                 using DealContainerType = boost::multi_index_container
                                     <
                                         std::unique_ptr<Deal>,
@@ -39,10 +41,10 @@ namespace exchange
                                                 bmi::tag<deal_id_tag>, bmi::const_mem_fun<Deal, const std::string &, &Deal::GetReference> >,
 
                                                 bmi::hashed_non_unique<
-                                                bmi::tag<buyer_id_tag>, bmi::const_mem_fun<Deal, std::uint32_t, &Deal::GetBuyerClientID> >,
+                                                bmi::tag<buyer_id_tag>, bmi::const_mem_fun<Deal, client_id_type, &Deal::GetBuyerClientID>, Hasher<client_id_type> >,
 
                                                 bmi::hashed_non_unique<
-                                                bmi::tag<seller_id_tag>, bmi::const_mem_fun<Deal, std::uint32_t, &Deal::GetSellerClientID> >
+                                                bmi::tag<seller_id_tag>, bmi::const_mem_fun<Deal, client_id_type, &Deal::GetSellerClientID>, Hasher<client_id_type> >
                                             >
                                     >;
 

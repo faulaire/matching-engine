@@ -81,7 +81,7 @@ namespace exchange
                 Status Modify(std::unique_ptr<TOrderReplace> ipOrderReplace);
 
                 /**/
-                Status Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay);
+                Status Delete(Order::client_orderid_type iOrderID, Order::client_id_type iClientID, OrderWay iWay);
 
                 /**/
                 void ProcessDeal(const Deal * ipDeal);

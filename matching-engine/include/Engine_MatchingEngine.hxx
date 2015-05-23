@@ -198,7 +198,7 @@ namespace exchange
         }
 
         template <typename Clock>
-        Status MatchingEngine<Clock>::Delete(std::uint32_t iOrderID, std::uint32_t iClientID, OrderWay iWay, std::uint32_t iProductID)
+        Status MatchingEngine<Clock>::Delete(Order::client_orderid_type iOrderID, Order::client_id_type iClientID, OrderWay iWay, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())

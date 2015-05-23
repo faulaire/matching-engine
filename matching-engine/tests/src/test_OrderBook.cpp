@@ -50,8 +50,6 @@ protected:
 // ENH_TODO  : Learn more about circuit breakers
 // ENH_TODO  : Add a history of orders modifications
 // ENH_TODO  : Add order types for hit ( IAC, FOK )
-// TODO      : Add strong types for order and client ids
-
 
 TEST_F(OrderBookTest, Should_post_auction_price_be_the_previous_close_price_when_no_auctions_occurs)
 {
@@ -67,9 +65,8 @@ TEST_F(OrderBookTest, Should_open_price_be_the_price_computed_after_opening_auct
 
     auto post_opening_auction_price = Price(150);
 
-    //auto OrderBuy = std::make_unique<Order>(OrderWay::BUY, 100_qty, post_opening_auction_price, 1, 5 );
-    auto OrderBuy  = CREATE_ORDER(OrderWay::BUY, 100_qty, post_opening_auction_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, post_opening_auction_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, post_opening_auction_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, post_opening_auction_price, 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook, OrderBuy) );
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook, OrderSell));
@@ -86,8 +83,8 @@ TEST_F(OrderBookTest, Should_close_price_be_the_price_computed_after_closing_auc
 
     auto post_closing_auction_price = Price(150);
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, post_closing_auction_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, post_closing_auction_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, post_closing_auction_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, post_closing_auction_price, 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook, OrderBuy));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook, OrderSell));
@@ -103,8 +100,8 @@ TEST_F(OrderBookTest, Should_post_auction_price_be_the_price_computed_after_a_cl
 
     auto post_closing_auction_price = Price(150);
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, post_closing_auction_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, post_closing_auction_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, post_closing_auction_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, post_closing_auction_price, 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook, OrderBuy));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook, OrderSell));
@@ -122,8 +119,8 @@ TEST_F(OrderBookTest, Should_close_price_be_the_price_computed_after_a_closing_a
 
     auto post_closing_auction_price = Price(150);
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, post_closing_auction_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, post_closing_auction_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, post_closing_auction_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, post_closing_auction_price, 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderBuy));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderSell));
@@ -139,8 +136,8 @@ TEST_F(OrderBookTest, Should_post_auction_price_be_the_price_computed_after_an_o
 
     auto post_opening_auction_price = Price(150);
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, post_opening_auction_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, post_opening_auction_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, post_opening_auction_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, post_opening_auction_price, 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderBuy));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderSell));
@@ -160,8 +157,8 @@ TEST_F(OrderBookTest, Should_post_auction_price_be_the_price_computed_after_a_in
     auto ref_price = m_pOrderBook->GetPostAuctionPrice();
     auto to_low_price = Price(ref_price * (1 - MaxPriceDev*0.01));
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, to_low_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, to_low_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, to_low_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, to_low_price, 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderBuy));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderSell));
@@ -179,8 +176,8 @@ TEST_F(OrderBookTest, Should_post_auction_price_not_be_modified_when_regular_dea
 
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, regular_deal_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, regular_deal_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, regular_deal_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, regular_deal_price, 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderBuy));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderSell));
@@ -206,8 +203,8 @@ TEST_F(OrderBookTest, Should_open_price_not_be_modified_when_regular_deal)
 
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, regular_deal_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, regular_deal_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, regular_deal_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, regular_deal_price, 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderBuy));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderSell));
@@ -232,8 +229,8 @@ TEST_F(OrderBookTest, Should_close_price_not_be_modified_when_regular_deal)
 
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, regular_deal_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, regular_deal_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, regular_deal_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, regular_deal_price, 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderBuy));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderSell));
@@ -251,8 +248,8 @@ TEST_F(OrderBookTest, Should_phase_switch_to_intraday_aution_when_deal_price_is_
     auto ref_price = m_pOrderBook->GetPostAuctionPrice();
     auto to_low_price = Price( ref_price * (1 - MaxPriceDev*0.01) );
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, to_low_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, to_low_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, to_low_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, to_low_price, 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderBuy));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderSell));
@@ -270,8 +267,8 @@ TEST_F(OrderBookTest, Should_phase_switch_to_intraday_aution_when_deal_price_is_
     auto ref_price = m_pOrderBook->GetPostAuctionPrice();
     auto to_high_price = ref_price * (1 + MaxPriceDev*0.01);
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, Price(to_high_price), 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, Price(to_high_price), 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, Price(to_high_price), 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, Price(to_high_price), 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderBuy));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderSell));
@@ -282,8 +279,8 @@ TEST_F(OrderBookTest, Should_phase_switch_to_intraday_aution_when_deal_price_is_
 TEST_F(OrderBookTest, Should_order_be_rejected_when_quantity_is_null)
 {
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 0_qty, 1000_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::BUY, 0_qty, 1000_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 0_qty, 1000_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::BUY, 0_qty, 1000_price, 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::InvalidQuantity, INSERT_ORDER(m_pOrderBook,OrderBuy));
     ASSERT_EQ(Status::InvalidQuantity, INSERT_ORDER(m_pOrderBook,OrderSell));
@@ -292,8 +289,8 @@ TEST_F(OrderBookTest, Should_order_be_rejected_when_quantity_is_null)
 TEST_F(OrderBookTest, Should_order_be_rejected_when_price_is_null)
 {
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 1000_qty, 0_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 1000_qty, 0_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 1000_qty, 0_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 1000_qty, 0_price, 1_clorderid, 6_clientid);
 
     EXINFO(*OrderBuy);
     EXINFO(*OrderSell);
@@ -305,8 +302,8 @@ TEST_F(OrderBookTest, Should_order_be_rejected_when_price_is_null)
 TEST_F(OrderBookTest, Should_order_be_rejected_when_way_is_invalid)
 {
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
-    auto OrderBuy = CREATE_ORDER(OrderWay::MAX_WAY, 1000_qty, 100_price, 1, 5);
-    auto WeirOrder = CREATE_ORDER((OrderWay)27, 1000_qty, 100_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::MAX_WAY, 1000_qty, 100_price, 1_clorderid, 5_clientid);
+    auto WeirOrder = CREATE_ORDER((OrderWay)27, 1000_qty, 100_price, 1_clorderid, 6_clientid);
 
     EXINFO(*OrderBuy);
     EXINFO(*WeirOrder);
@@ -322,8 +319,8 @@ TEST_F(OrderBookTest, Should_turnover_be_updated_after_a_deal)
 
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, order_quantity, post_auction_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, order_quantity, post_auction_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, order_quantity, post_auction_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, order_quantity, post_auction_price, 1_clorderid, 6_clientid);
 
     const auto current_turnover = m_pOrderBook->GetTurnover();
 
@@ -342,8 +339,8 @@ TEST_F(OrderBookTest, Should_dailyvolume_be_updated_after_a_deal)
 
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, order_quantity, post_auction_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, order_quantity, post_auction_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, order_quantity, post_auction_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, order_quantity, post_auction_price, 1_clorderid, 6_clientid);
 
     const auto current_dailyvolume = m_pOrderBook->GetDailyVolume();
 
@@ -369,8 +366,8 @@ TEST_F(OrderBookTest, Should_last_price_be_updated_after_a_deal)
 
     ASSERT_TRUE(m_pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING));
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, order_quantity, new_last_price, 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, order_quantity, new_last_price, 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, order_quantity, new_last_price, 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, order_quantity, new_last_price, 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderBuy));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderSell));
@@ -404,8 +401,8 @@ TEST_F(OrderBookTest, Should_orderbook_be_monitored_when_switching_from_continuo
     auto ref_price = m_pOrderBook->GetPostAuctionPrice();
     auto to_low_price = ref_price * (1 - MaxPriceDev*0.01);
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, Price(to_low_price), 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, Price(to_low_price), 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, Price(to_low_price), 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, Price(to_low_price), 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderBuy));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderSell));
@@ -423,8 +420,8 @@ TEST_F(OrderBookTest, Should_orderbook_be_unmonitored_when_switching_from_intrad
     auto ref_price = m_pOrderBook->GetPostAuctionPrice();
     auto to_low_price = ref_price * (1 - MaxPriceDev*0.01);
 
-    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, Price(to_low_price), 1, 5);
-    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, Price(to_low_price), 1, 6);
+    auto OrderBuy = CREATE_ORDER(OrderWay::BUY, 100_qty, Price(to_low_price), 1_clorderid, 5_clientid);
+    auto OrderSell = CREATE_ORDER(OrderWay::SELL, 100_qty, Price(to_low_price), 1_clorderid, 6_clientid);
 
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderBuy));
     ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pOrderBook,OrderSell));

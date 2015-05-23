@@ -89,17 +89,17 @@ namespace exchange
         template <typename Msg, bool bIsReplaceOrder>
         struct AggressorIDHelper
         {
-            static std::uint32_t get(std::unique_ptr<Msg> & t) { return t->GetOrderID(); }
+            static auto get(std::unique_ptr<Msg> & t) { return t->GetOrderID(); }
         };
 
         template <typename Msg>
         struct AggressorIDHelper<Msg, true>
         {
-            static std::uint32_t get(std::unique_ptr<Msg> & t) { return t->GetReplacedOrderID(); }
+            static auto get(std::unique_ptr<Msg> & t) { return t->GetReplacedOrderID(); }
         };
 
         template <typename Msg>
-        std::uint32_t GetAggressorID(std::unique_ptr<Msg> & t)
+        auto GetAggressorID(std::unique_ptr<Msg> & t)
         {
             return AggressorIDHelper<Msg, is_replaced_order<Msg>::value >::get(t);
         }
@@ -222,7 +222,7 @@ namespace exchange
         * Erase an order from order book
         */
         template <typename TOrder, typename TEventHandler>
-        Status OrderContainer<TOrder, TEventHandler>::Delete(const std::uint32_t iOrderId, const std::uint32_t iClientId, OrderWay iWay)
+        Status OrderContainer<TOrder, TEventHandler>::Delete(const client_orderid_type iOrderId, const client_id_type iClientId, OrderWay iWay)
         {    
             bool Result = false;
 
