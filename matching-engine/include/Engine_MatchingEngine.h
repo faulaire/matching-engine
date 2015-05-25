@@ -50,10 +50,10 @@ namespace exchange
             bool Configure(boost::property_tree::ptree & iConfig);
 
             /**/
-            Status Insert(std::unique_ptr<Order> ipOrder, std::uint32_t iProductID);
+            Status Insert(std::unique_ptr<Order> & ipOrder, std::uint32_t iProductID);
 
             /**/
-            Status Modify(std::unique_ptr<OrderReplace> ipOrderReplace, std::uint32_t iProductID);
+            Status Modify(std::unique_ptr<OrderReplace> & ipOrderReplace, std::uint32_t iProductID);
 
             /**/
             Status Delete(Order::client_orderid_type iOrderID, Order::client_id_type iClientID, OrderWay iWay, std::uint32_t iProductID);

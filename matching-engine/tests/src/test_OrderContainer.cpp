@@ -51,11 +51,11 @@ class EventHandler
 
 #define CREATE_REPLACE(Way, Qty, Price, OldOrderID, NewOrderID, ClientID) ( std::make_unique<OrderReplace>(Way, Qty, Price, OldOrderID, NewOrderID, ClientID) )
 
-#define INSERT_ORDER(Container, pOrder) ( Container.Insert( std::move(pOrder) ) )
-#define INSERT_MATCHING_ORDER(Container, pOrder) ( Container.Insert( std::move(pOrder), true ) )
+#define INSERT_ORDER(Container, pOrder) ( Container.Insert( pOrder ) )
+#define INSERT_MATCHING_ORDER(Container, pOrder) ( Container.Insert( pOrder, true ) )
 
-#define MODIFY_ORDER(Container, pReplace) ( Container.Modify( std::move(pReplace), false ) )
-#define MODIFY_MATCHING_ORDER(Container, pReplace) ( Container.Modify( std::move(pReplace), true ) )
+#define MODIFY_ORDER(Container, pReplace) ( Container.Modify( pReplace, false ) )
+#define MODIFY_MATCHING_ORDER(Container, pReplace) ( Container.Modify( pReplace, true ) )
 
 // To use a test fixture, derive a class from testing::Test.
 class OrderContainerTest : public testing::Test
@@ -67,6 +67,7 @@ class OrderContainerTest : public testing::Test
         typedef LimitContainerType::value_type           LimiteType;
 
         using   order_vector          = std::vector <Order*> ;
+        using   smart_order_vector = std::vector < std::unique_ptr<Order> > ;
 
     protected:
         OrderContainerTest():m_Container(m_EventHandler)
@@ -85,12 +86,14 @@ class OrderContainerTest : public testing::Test
         {
             for (auto & order : m_BidOrders)
             {
-                ASSERT_EQ(Status::Ok, m_Container.Insert( std::unique_ptr<Order>(order) ));
+                m_sBidOrders.push_back( std::unique_ptr<Order>(order) );
+                ASSERT_EQ(Status::Ok, m_Container.Insert( *m_sBidOrders.rbegin() ));
             }
 
             for (auto & order : m_AskOrders)
             {
-                ASSERT_EQ(Status::Ok, m_Container.Insert(std::unique_ptr<Order>(order)  ));
+                m_sAskOrders.push_back(std::unique_ptr<Order>(order));
+                ASSERT_EQ(Status::Ok, m_Container.Insert(*m_sAskOrders.rbegin()));
             }
         }
 
@@ -103,6 +106,9 @@ class OrderContainerTest : public testing::Test
             {
                 boost::property_tree::ini_parser::read_ini("config.ini", aConfig);
             }
+
+            m_sBidOrders.clear();
+            m_sAskOrders.clear();
 
             m_BidContainerReference = {
                                             LimiteType(2, 11000_qty, 2185_price), LimiteType(1, 4000_qty, 1325_price),
@@ -138,6 +144,9 @@ class OrderContainerTest : public testing::Test
 
         order_vector  m_BidOrders;
         order_vector  m_AskOrders;
+
+        smart_order_vector m_sBidOrders;
+        smart_order_vector m_sAskOrders;
 };
 
 TEST_F(OrderContainerTest, AuctionInsert)
@@ -406,19 +415,19 @@ TEST_F(OrderContainerTest, InsertMatching)
 
     ASSERT_EQ(DealContainer.size(), 0);
 
-    BuyOrder = CREATE_ORDER(OrderWay::BUY, 500_qty, 91_price, 7_clorderid, 1_clientid);
-    SellOrder = CREATE_ORDER(OrderWay::SELL, 150_qty, 89_price, 8_clorderid, 1_clientid);
+    auto BuyOrder1 = CREATE_ORDER(OrderWay::BUY, 500_qty, 91_price, 7_clorderid, 1_clientid);
+    auto SellOrder1 = CREATE_ORDER(OrderWay::SELL, 150_qty, 89_price, 8_clorderid, 1_clientid);
 
-    ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, BuyOrder));
-    ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, SellOrder));
+    ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, BuyOrder1));
+    ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, SellOrder1));
 
     ASSERT_EQ(DealContainer.size(), 2);
 
-    BuyOrder = CREATE_ORDER(OrderWay::BUY, 2500_qty, 93_price, 9_clorderid, 1_clientid);
-    SellOrder = CREATE_ORDER(OrderWay::SELL, 1500_qty, 87_price, 10_clorderid, 1_clientid);
+    auto BuyOrder2 = CREATE_ORDER(OrderWay::BUY, 2500_qty, 93_price, 9_clorderid, 1_clientid);
+    auto SellOrder2 = CREATE_ORDER(OrderWay::SELL, 1500_qty, 87_price, 10_clorderid, 1_clientid);
 
-    ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, BuyOrder));
-    ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, SellOrder));
+    ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, BuyOrder2));
+    ASSERT_EQ(Status::Ok, INSERT_MATCHING_ORDER(m_Container, SellOrder2));
 
     m_BidContainerReference = {};
 
@@ -426,7 +435,7 @@ TEST_F(OrderContainerTest, InsertMatching)
 
     OrderContainerType::LimitContainer BidContainer;
     OrderContainerType::LimitContainer AskContainer;
-
+    
     m_Container.AggregatedView(BidContainer, AskContainer);
 
     ASSERT_TRUE(BidContainer == m_BidContainerReference);

@@ -56,16 +56,16 @@ def configure(cfg):
 
     if cfg.options.with_unittest:
         cfg.check(header_name='gtest/gtest.h', features='cxx cxxprogram')
-        
+     
+    if cfg.options.with_sanitizer:
+        cfg.env.append_value('CXXFLAGS', ['-fsanitize=address'])
+        cfg.env.append_value('LINKFLAGS', ['-fsanitize=address'])
+
     if cfg.options.release:
-        cfg.env.append_value('CXXFLAGS', ['-O3','-march=amdfam10'])
+        cfg.env.append_value('CXXFLAGS', ['-O3','-march=native'])
     else:
         cfg.env.append_value('CXXFLAGS', ['-ggdb3','-O0','-fno-inline','-fno-omit-frame-pointer'])
-        
-        if cfg.options.with_sanitizer:
-            cfg.env.append_value('CXXFLAGS', ['-fsanitize=address'])
-            cfg.env.append_value('LINKFLAGS', ['-fsanitize=address'])
-        
+
         if cfg.options.coverage:
             cfg.env.append_value('CXXFLAGS', ['--coverage','-fPIC'])
             cfg.env.append_value('LINKFLAGS', ['--coverage'])

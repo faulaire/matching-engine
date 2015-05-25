@@ -113,8 +113,6 @@ namespace exchange
 
                 using OpenInformationType = std::tuple<price_type, volume_type>;
 
-                using GlobalOrderContainer = std::unordered_set < std::unique_ptr<TOrder> > ;
-
             protected:
 
                 using OrderPtrType = TOrder*;
@@ -141,12 +139,12 @@ namespace exchange
 
                 /**
                 */
-                Status Insert(std::unique_ptr<TOrder> ipOrder, bool Match = false);
+                Status Insert(std::unique_ptr<TOrder>&  ipOrder, bool Match = false);
 
                 /**
                 */
                 template <typename TOrderReplace>
-                Status Modify(std::unique_ptr<TOrderReplace> iOrderReplace, bool Match = false);
+                Status Modify(std::unique_ptr<TOrderReplace> & iOrderReplace, bool Match = false);
 
                 /**
                 */
@@ -159,6 +157,9 @@ namespace exchange
                 /**
                 */
                 void CancelAllOrders();
+
+                /**/
+                void RehashIndexes(size_t size);
 
                 /**
                 */
@@ -223,8 +224,6 @@ namespace exchange
                 TEventHandler&   m_EventHandler;
                 /* */
                 ViewMode         m_ViewMode;
-                /* */
-                GlobalOrderContainer m_InsertedOrders;
         };
 
     }

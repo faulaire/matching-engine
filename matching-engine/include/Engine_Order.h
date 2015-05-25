@@ -64,11 +64,12 @@ namespace exchange
 
             public:
 
-                Order(){}
-                Order(OrderWay iWay, qty_type iQty, price_type iPrice, client_orderid_type iOrderID, client_id_type iClientID)
+                
+                Order(OrderWay iWay, qty_type iQty, price_type iPrice, client_orderid_type iOrderID, client_id_type iClientID) noexcept
                     :m_Layout(iWay, iQty, iPrice, iOrderID, iClientID)
                 {}
 
+                Order() = delete;
                 Order(const Order & rhs) = delete;
                 Order& operator=(const Order & rhs) = delete;
 

@@ -10,6 +10,7 @@
 #include <sstream>
 #include <queue>
 #include <thread>
+#include <atomic>
 #include <condition_variable>
 
 #include <ILogger.h>
@@ -62,7 +63,7 @@ namespace exchange
             template <class THolder, class TMsg>
             struct LoggerHelper
             {
-                void operator()(THolder & iHolder, const TMsg & iMsg)
+                void operator()(THolder & iHolder, const TMsg & iMsg) const
                 {
                     iHolder.Push(iMsg);
                 }
@@ -71,7 +72,7 @@ namespace exchange
             template <class THolder>
             struct LoggerHelper<THolder, eos_t>
             {
-                void operator()(THolder & iHolder, const eos_t &)
+                void operator()(THolder & iHolder, const eos_t &) const
                 {
                     iHolder.Flush();
                 }
@@ -170,13 +171,15 @@ namespace exchange
                 std::thread                 m_WriterThread;
                 std::mutex                  m_mutex;
                 std::condition_variable     m_cond;
-                bool m_Stopped;
+                std::atomic<bool>           m_Stopped;
 
             private:
 
-                LoggerHolder(void) :
-                    m_WriterThread(boost::bind(&LoggerHolder<Types>::Write, this)), m_Stopped(false)
-                {}
+                LoggerHolder() :
+                    m_Stopped(false)
+                {
+                    m_WriterThread = std::thread(boost::bind(&LoggerHolder<Types>::Write, this));
+                }
 
             private:
 

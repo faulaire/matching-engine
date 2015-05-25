@@ -167,7 +167,7 @@ namespace exchange
         }
 
         template <typename TOrder, typename TEventHandler>
-        Status OrderContainer<TOrder, TEventHandler>::Insert(std::unique_ptr<TOrder> ipOrder, bool Match)
+        Status OrderContainer<TOrder, TEventHandler>::Insert(std::unique_ptr<TOrder> & ipOrder, bool Match)
         {
             if (Match)
             {
@@ -186,8 +186,6 @@ namespace exchange
                     return Status::InternalError;;
                 }
             }
-
-            m_InsertedOrders.insert(std::move(ipOrder));
 
             return Status::Ok;;
         }
@@ -236,7 +234,7 @@ namespace exchange
 
         template <typename TOrder, typename TEventHandler>
         template <typename TOrderReplace>
-        Status OrderContainer<TOrder, TEventHandler>::Modify(std::unique_ptr<TOrderReplace> iOrderReplace, bool Match)
+        Status OrderContainer<TOrder, TEventHandler>::Modify(std::unique_ptr<TOrderReplace> & iOrderReplace, bool Match)
         {
             auto ProcessModify = [&]()
             {
@@ -376,6 +374,16 @@ namespace exchange
                     GetBidIndex().erase(BidOrderIt);
                 }
             }
+        }
+
+        template <typename TOrder, typename TEventHandler>
+        void OrderContainer<TOrder, TEventHandler>::RehashIndexes(size_t size)
+        {
+            bmi::get<order_id_tag>(m_BidOrders).rehash(size);
+            bmi::get<order_id_tag>(m_AskOrders).rehash(size);
+
+            bmi::get<client_id_tag>(m_BidOrders).rehash(size);
+            bmi::get<client_id_tag>(m_AskOrders).rehash(size);
         }
 
         template <typename TOrder, typename TEventHandler>
