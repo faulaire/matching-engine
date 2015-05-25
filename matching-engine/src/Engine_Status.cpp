@@ -14,9 +14,6 @@ namespace exchange
                 case Status::Ok:
                     oss << "Ok";
                     break;
-                case Status::IDAlreadyUsed:
-                    oss << "ID Already Used";
-                    break;
                 case Status::PriceOutOfReservationRange:
                     oss << "Price Out Of Reservation Range";
                     break;

@@ -15,7 +15,6 @@ namespace exchange
         enum class Status : char
         {
             Ok = 0,
-            IDAlreadyUsed,
             PriceOutOfReservationRange,
             InstrumentNotFound,
             MarketNotOpened,

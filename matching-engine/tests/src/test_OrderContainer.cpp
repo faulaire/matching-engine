@@ -556,31 +556,6 @@ TEST_F(OrderContainerTest, Orders_should_loses_their_prority_when_modified)
     ASSERT_EQ(*ByOrderAskContainer[3], Order(OrderWay::SELL, 400_qty, 12_price, 20_clorderid, 9_clientid));
 }
 
-TEST_F(OrderContainerTest, Order_insertion_should_fail_when_order_id_already_used)
-{
-    auto ob = CREATE_ORDER(OrderWay::BUY, 8000_qty, 4321_price, 1_clorderid, 1_clientid);
-    ASSERT_EQ(Status::Ok, INSERT_ORDER(m_Container, ob));
-
-    ASSERT_EQ(Status::Ok, m_Container.Delete(1_clorderid, 1_clientid, OrderWay::BUY));
-
-    ob = CREATE_ORDER(OrderWay::BUY, 8000_qty, 4321_price, 1_clorderid, 1_clientid);
-    ASSERT_EQ(Status::IDAlreadyUsed, INSERT_ORDER(m_Container, ob));
-}
-
-TEST_F(OrderContainerTest, Order_modification_should_fail_when_order_id_already_used)
-{
-    auto ob = CREATE_ORDER(OrderWay::BUY, 8000_qty, 4321_price, 1_clorderid, 1_clientid);
-    auto os = CREATE_ORDER(OrderWay::SELL, 8000_qty, 4321_price, 2_clorderid, 1_clientid);
-
-    ASSERT_EQ(Status::Ok, INSERT_ORDER(m_Container, ob));
-    ASSERT_EQ(Status::Ok, INSERT_ORDER(m_Container, os));
-    
-    auto BuyReplace = CREATE_REPLACE(OrderWay::BUY, 4000_qty, 4321_price, 1_clorderid, 2_clorderid, 1_clientid);
-
-    ASSERT_EQ(Status::IDAlreadyUsed, MODIFY_ORDER(m_Container, BuyReplace));
-}
-
-
 int main(int argc, char ** argv)
 {
     auto & Logger = LoggerHolder::GetInstance();

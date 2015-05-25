@@ -87,6 +87,7 @@
     <ClCompile Include="..\..\src\Engine_Order.cpp" />
     <ClCompile Include="..\..\src\Engine_Status.cpp" />
     <ClCompile Include="..\..\src\Engine_Types.cpp" />
+    <ClCompile Include="..\..\tests\src\test_Benchmark.cpp" />
     <ClCompile Include="..\..\tests\src\test_IntrumentManager.cpp" />
     <ClCompile Include="..\..\tests\src\test_MatchingEngine.cpp" />
     <ClCompile Include="..\..\tests\src\test_OrderBook.cpp" />

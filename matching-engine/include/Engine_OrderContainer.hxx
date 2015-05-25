@@ -169,12 +169,6 @@ namespace exchange
         template <typename TOrder, typename TEventHandler>
         Status OrderContainer<TOrder, TEventHandler>::Insert(std::unique_ptr<TOrder> ipOrder, bool Match)
         {
-            auto OrderID = OrderIDGenerator<TOrder>()(ipOrder->GetClientID(), ipOrder->GetOrderID());
-            if (m_InsertedOrderIDs.find(OrderID) != m_InsertedOrderIDs.end())
-            {
-                return Status::IDAlreadyUsed;
-            }
-
             if (Match)
             {
                 volume_type MatchQty = (std::min)(GetExecutableQuantity(ipOrder, ipOrder->GetWay()), static_cast<volume_type>(ipOrder->GetQuantity()));
@@ -193,7 +187,6 @@ namespace exchange
                 }
             }
 
-            m_InsertedOrderIDs.insert(OrderID);
             m_InsertedOrders.insert(std::move(ipOrder));
 
             return Status::Ok;;
@@ -266,12 +259,6 @@ namespace exchange
             };
 
             auto OrderID    = OrderIDGenerator<TOrder>()(iOrderReplace->GetClientID(), iOrderReplace->GetExistingOrderID());
-            auto NewOrderID = OrderIDGenerator<TOrder>()(iOrderReplace->GetClientID(), iOrderReplace->GetReplacedOrderID());
-
-            if (m_InsertedOrderIDs.find(NewOrderID) != m_InsertedOrderIDs.end())
-            {
-                return Status::IDAlreadyUsed;
-            }
 
             auto ApplyModify = [&](auto & Container)
             {
@@ -295,7 +282,7 @@ namespace exchange
                         // No quantity left on the order, erase it from the container
                         Container.erase(Order);
                     }
-                    m_InsertedOrderIDs.insert(OrderID);
+                    
                     return Status::Ok;
                 }
                 return Status::OrderNotFound;

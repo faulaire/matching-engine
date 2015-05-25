@@ -352,19 +352,6 @@ TEST_F(MatchingEngineTest, Should_order_cancellation_fail_when_invalid_instrumen
     ASSERT_EQ(Status::InstrumentNotFound, m_pEngine->Delete(1_clorderid, 5_clientid, OrderWay::BUY, 25));
 }
 
-TEST_F(MatchingEngineTest, Should_order_insertion_fail_when_already_inserted)
-{
-    ASSERT_TRUE(m_pEngine->Configure(m_Config));
-
-    auto o1 = CREATE_ORDER(OrderWay::BUY, 1000_qty, 1234_price, 1_clorderid, 5_clientid);
-
-    ASSERT_TRUE(m_pEngine->SetGlobalPhase(TradingPhase::CONTINUOUS_TRADING));
-    ASSERT_EQ(Status::Ok, INSERT_ORDER(m_pEngine, o1, product_id));
-
-    auto o2 = CREATE_ORDER(OrderWay::BUY, 1000_qty, 1234_price, 1_clorderid, 5_clientid);
-    ASSERT_EQ(Status::IDAlreadyUsed, INSERT_ORDER(m_pEngine, o2, product_id));
-}
-
 TEST_F(MatchingEngineTest, Should_order_cancellation_fail_when_already_cancelled)
 {
     ASSERT_TRUE(m_pEngine->Configure(m_Config));

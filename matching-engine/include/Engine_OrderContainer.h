@@ -113,7 +113,6 @@ namespace exchange
 
                 using OpenInformationType = std::tuple<price_type, volume_type>;
 
-                using OrderIDContainer     = std::unordered_set < typename OrderIDGenerator<TOrder>::result_type, Hasher<OrderID> >;
                 using GlobalOrderContainer = std::unordered_set < std::unique_ptr<TOrder> > ;
 
             protected:
@@ -224,8 +223,6 @@ namespace exchange
                 TEventHandler&   m_EventHandler;
                 /* */
                 ViewMode         m_ViewMode;
-                /* */
-                OrderIDContainer m_InsertedOrderIDs;
                 /* */
                 GlobalOrderContainer m_InsertedOrders;
         };
