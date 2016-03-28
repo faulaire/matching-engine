@@ -23,7 +23,7 @@ def IsClangCompiler(cfg):
 def CheckCompilerVersion(cfg):
     (major, minor, patch) = cfg.env['CC_VERSION']
     version_number = int(major)*100+int(minor)*10+int(patch)
-    error_string = "Sorry but to build this project you need to use clang >= 3.6 or a g++ >= 4.9"
+    error_string = "Sorry but to build this project you need to use clang >= 3.6 or g++ >= 4.9"
     if IsClangCompiler(cfg):
         if version_number < 360:
             cfg.fatal(error_string)
@@ -65,7 +65,7 @@ def configure(cfg):
 
     cfg.env.with_unittest = cfg.options.with_unittest
 
-    cfg.env.append_value('CXXFLAGS', ['-std=c++14','-W','-Wall','-Wno-unused-local-typedefs'])
+    cfg.env.append_value('CXXFLAGS', ['-std=c++14','-W','-Wall','-Wno-unused-local-typedefs', '-D_GLIBCXX_USE_CXX11_ABI=0'])
     
     if IsClangCompiler(cfg):
         # We need to link again libstdc++ and libm with clang

@@ -24,6 +24,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
+
+#include <iostream>
+
 namespace exchange
 {
 
