@@ -9,6 +9,7 @@ APPNAME = 'matching-engine'
 VERSION = '0.1'
 
 from waflib.Build import BuildContext
+
 class RunTestCtx(BuildContext):
         cmd = 'run_tests'
         fun = 'run_tests'
@@ -18,7 +19,19 @@ def IsClangCompiler(cfg):
       if compiler.find("clang") != -1:
          return True
    return False
-   
+
+def CheckCompilerVersion(cfg):
+    (major, minor, patch) = cfg.env['CC_VERSION']
+    version_number = int(major)*100+int(minor)*10+int(patch)
+    error_string = "Sorry but to build this project you need to use clang >= 3.6 or a g++ >= 4.9"
+    if IsClangCompiler(cfg):
+        if version_number < 360:
+            cfg.fatal(error_string)
+    else:
+        if version_number < 490:
+            cfg.fatal(error_string)
+
+
 def run_tests(ctx):
     ctx.recurse('common matching-engine')
 
@@ -31,7 +44,11 @@ def options(opt):
 
 def configure(cfg):
     cfg.check_waf_version(mini='1.7.5')
+
     cfg.load('compiler_cxx')
+
+    CheckCompilerVersion(cfg)
+
     cfg.check(features='cxx cxxprogram', lib=['pthread'], uselib_store='PTHREAD')
     cfg.check(features='cxx cxxprogram', lib=['z'], uselib_store='Z')
     cfg.check(features='cxx cxxprogram', lib=['m'], uselib_store='M')
@@ -45,10 +62,10 @@ def configure(cfg):
     cfg.check(features='cxx cxxprogram', lib=['boost_serialization'], uselib_store='BOOST_SERIALIZATION')
     
     cfg.check(header_name='leveldb/db.h', features='cxx cxxprogram')
-    
+
     cfg.env.with_unittest = cfg.options.with_unittest
 
-    cfg.env.append_value('CXXFLAGS', ['-std=c++1y','-W','-Wall','-Wno-unused-local-typedefs'])
+    cfg.env.append_value('CXXFLAGS', ['-std=c++14','-W','-Wall','-Wno-unused-local-typedefs'])
     
     if IsClangCompiler(cfg):
         # We need to link again libstdc++ and libm with clang
