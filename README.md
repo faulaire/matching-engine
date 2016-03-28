@@ -28,7 +28,7 @@ and contributions are welcome.
 
 Please report issues via https://github.com/Vladec/matching-engine/issues.<br />
 Patches are best submitted as pull requests, or via email
-(fabien.aulaire@free.fr).
+(fabien.aulaire@gmail.com).
 
 ## License
 
