@@ -124,7 +124,7 @@ namespace exchange
                 oa << object;
 
                 const key_type  key     = extractor(object);
-                const auto      svalue  = std::move(stringstream.str());
+                const auto      svalue  = stringstream.str();
 
                 const key_type  value   = svalue;
 
