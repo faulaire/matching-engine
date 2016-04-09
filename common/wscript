@@ -27,7 +27,7 @@ def configure(cfg):
         cfg.env.append_value('LIB',['gtest'])
 
     #system lib
-    cfg.env.append_value('LIB',['ssl','crypto','dl','z', 'pthread'])
+    cfg.env.append_value('LIB',['pthread'])
 
     # boost lib
     cfg.env.append_value('LIB',['boost_system','boost_filesystem','boost_date_time','boost_serialization'])

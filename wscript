@@ -50,9 +50,7 @@ def configure(cfg):
     CheckCompilerVersion(cfg)
 
     cfg.check(features='cxx cxxprogram', lib=['pthread'], uselib_store='PTHREAD')
-    cfg.check(features='cxx cxxprogram', lib=['z'], uselib_store='Z')
     cfg.check(features='cxx cxxprogram', lib=['m'], uselib_store='M')
-    cfg.check(features='cxx cxxprogram', lib=['dl'], uselib_store='DL')
     
     cfg.check(features='cxx cxxprogram', lib=['leveldb'], uselib_store='LEVELDB')
 
