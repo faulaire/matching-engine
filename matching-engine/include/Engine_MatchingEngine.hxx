@@ -145,11 +145,14 @@ namespace exchange
             {
                 auto InstrumentHandler = [this](const Instrument<Order> & Instrument)
                 {
-                    std::unique_ptr<OrderBookType> pBook = std::make_unique<OrderBookType>(Instrument, *this);
-
                     EXINFO("MatchingEngine::LoadInstruments : Adding Instrument : " << Instrument.GetName());
-
-                    auto pIterator = m_OrderBookContainer.emplace(Instrument.GetProductId(), std::move(pBook));
+#ifdef __INTEL_COMPILER
+                    auto pIterator = m_OrderBookContainer.insert( std::make_pair(Instrument.GetProductId(),
+                                                                  std::make_unique<OrderBookType>(Instrument, *this)));
+#else
+                    auto pIterator = m_OrderBookContainer.emplace(Instrument.GetProductId(),
+                                                                  std::make_unique<OrderBookType>(Instrument, *this));
+#endif
                     if (!pIterator.second)
                     {
                         std::string ErrorMsg = "MatchingEngine::LoadInstruments : Corrupted database, failed to insert instrument : " + Instrument.GetName();

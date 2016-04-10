@@ -77,7 +77,7 @@ def configure(cfg):
         cfg.env.append_value('LINKFLAGS', ['-fsanitize=address'])
 
     if cfg.options.release:
-        cfg.env.append_value('CXXFLAGS', ['-O3','-march=native'])
+        cfg.env.append_value('CXXFLAGS', ['-O3','-march=native', '-mtune=native'])
     else:
         cfg.env.append_value('CXXFLAGS', ['-ggdb3','-O0','-fno-inline','-fno-omit-frame-pointer'])
 

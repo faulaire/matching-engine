@@ -115,11 +115,11 @@ namespace exchange
         public:
             using Numeric<std::uint32_t, Quantity>::Numeric;
         public:
-            constexpr explicit operator Volume() noexcept;
+            constexpr explicit operator Volume() const noexcept;
 
             constexpr Nominal operator *(const Price & rhs) const;
         };
-        
+
         class Volume : public Numeric < std::uint64_t, Volume >
         {
         public:
@@ -151,7 +151,7 @@ namespace exchange
             return Nominal(m_value * static_cast<Price::underlying_type>(rhs) );
         }
 
-        constexpr Quantity::operator Volume() noexcept
+        constexpr Quantity::operator Volume() const noexcept
         {
             return Volume(m_value);
         }
@@ -161,7 +161,7 @@ namespace exchange
         public:
             using Numeric<std::uint32_t, ClientOrderID>::Numeric;
             
-            constexpr explicit operator std::uint64_t() noexcept
+            constexpr explicit operator std::uint64_t() const noexcept
             {
                 return m_value;
             }
@@ -173,7 +173,7 @@ namespace exchange
         public:
             using Numeric<std::uint32_t, ClientID>::Numeric;
 
-            constexpr explicit operator std::uint64_t() noexcept
+            constexpr explicit operator std::uint64_t() const noexcept
             {
                 return m_value;
             }
