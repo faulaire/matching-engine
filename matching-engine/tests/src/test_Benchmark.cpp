@@ -17,7 +17,7 @@ public:
 
     using engine_type = exchange::engine::MatchingEngine<>;
 
-    using OrderBookType = OrderBook<Order, engine_type>;
+    using OrderBookType = engine_type::OrderBookType;
 
     OrderBookBenchmark() :
         m_Instrument{ "MingYiCorporation", "ISIN", "EUR", 1, 1000_price }

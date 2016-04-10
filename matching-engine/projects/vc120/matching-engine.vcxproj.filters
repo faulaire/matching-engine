@@ -98,6 +98,9 @@
     <ClCompile Include="..\..\src\Engine_Status.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\tests\src\test_Benchmark.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\wscript" />
