@@ -20,6 +20,8 @@ class EventHandler
 
         typedef std::map<std::uint32_t, std::unique_ptr<Deal> > DealContainerType;
 
+        using deal_ptr_type = std::unique_ptr<Deal>;
+
     public:
         EventHandler()
         {}
@@ -34,6 +36,12 @@ class EventHandler
         /**/
         void OnUnsolicitedCancelledOrder(const Order * /* order*/ )
         {}
+
+        template <typename... Args>
+        deal_ptr_type CreateDeal(Args &&... args)
+        {
+            return std::make_unique<Deal>(std::forward<Args>(args)...);
+        }
 
         void Reset()
         {

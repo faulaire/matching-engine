@@ -18,13 +18,15 @@ def build(bld):
     sys.path.append(bld.top_dir)
     import waf_tools
 
-    IncludePaths = waf_tools.get_module_include_dirs(bld,'common')
+    IncludePaths =  waf_tools.get_module_include_dirs(bld,'common')
+    IncludePaths = IncludePaths + waf_tools.get_module_include_dirs(bld,'MemoryPool')
+
     IncludePaths.append('include')
 
     #Build the static library
     # find all .cpp files ( exclude unit tests )
     sources_files =  bld.path.ant_glob('**/*.cpp',excl=['**/test_*.cpp'])
     bld.stlib( source = sources_files, target="matching-engine", use="common", includes=IncludePaths )
-    
+    bld.program( source = sources_files, target="benchmark", use="matching-engine common LEVELDB", includes=IncludePaths )
     if bld.env.with_unittest:
         waf_tools.build_tests(bld, "common matching-engine GTEST", IncludePaths)
