@@ -33,7 +33,7 @@ def CheckCompilerVersion(cfg):
 
 
 def run_tests(ctx):
-    ctx.recurse('common matching-engine')
+    ctx.recurse('common matching-engine trading-gateway')
 
 def options(opt):
     opt.load('compiler_cxx')
@@ -63,7 +63,7 @@ def configure(cfg):
 
     cfg.env.with_unittest = cfg.options.with_unittest
 
-    cfg.env.append_value('CXXFLAGS', ['-std=c++14','-W','-Wall','-Wno-unused-local-typedefs', '-D_GLIBCXX_USE_CXX11_ABI=0'])
+    cfg.env.append_value('CXXFLAGS', ['-std=c++14','-W','-Wall','-Wno-unused-local-typedefs','-D_GLIBCXX_USE_CXX11_ABI=1',])
     
     if IsClangCompiler(cfg):
         # We need to link again libstdc++ and libm with clang
@@ -77,7 +77,7 @@ def configure(cfg):
         cfg.env.append_value('LINKFLAGS', ['-fsanitize=address'])
 
     if cfg.options.release:
-        cfg.env.append_value('CXXFLAGS', ['-O3','-march=native', '-mtune=native'])
+        cfg.env.append_value('CXXFLAGS', ['-ggdb3','-O3','-march=native', '-mtune=native', '-DNDEBUG'])
     else:
         cfg.env.append_value('CXXFLAGS', ['-ggdb3','-O0','-fno-inline','-fno-omit-frame-pointer'])
 
@@ -85,7 +85,7 @@ def configure(cfg):
             cfg.env.append_value('CXXFLAGS', ['--coverage','-fPIC'])
             cfg.env.append_value('LINKFLAGS', ['--coverage'])
     
-    cfg.recurse('common matching-engine')
+    cfg.recurse('common matching-engine trading-gateway')
 
 def build(bld):
-    bld.recurse('common matching-engine')
+    bld.recurse('common matching-engine trading-gateway')

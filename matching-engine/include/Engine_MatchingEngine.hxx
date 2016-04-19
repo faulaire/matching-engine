@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015, Fabien Aulaire
+* Copyright (C) 2016, Fabien Aulaire
 * All rights reserved.
 */
 
@@ -64,6 +64,7 @@ namespace exchange
 
                 m_InstrumentDBPath       = iConfig.get<std::string>("Engine.instrument_db_path");
 
+                // TODO : Check that that this value is not greater than 100
                 auto MaxPriceDeviationPercentage = iConfig.get<double>("Engine.max_price_deviation")*0.01;
 
                 m_PriceDeviationFactor = std::make_tuple(

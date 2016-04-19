@@ -1,3 +1,8 @@
+/*
+* Copyright (C) 2016, Fabien Aulaire
+* All rights reserved.
+*/
+
 #include <Engine_Defines.h>
 #include <Engine_MatchingEngine.h>
 

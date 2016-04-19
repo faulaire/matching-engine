@@ -71,7 +71,7 @@ TEST_F(OrderBookBenchmark, Should_open_price_be_the_price_computed_after_opening
         m_Orders.push_back(CREATE_ORDER(OrderWay::SELL, Quantity(dis(gen)), Price(dis(gen)), ClientOrderID(i + 1), 6_clientid));
     }
     
-    m_pOrderBook->RehashIndexes(1000000);
+    m_pOrderBook->RehashOrderIndexes(1000000);
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();

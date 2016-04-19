@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015, Fabien Aulaire
+* Copyright (C) 2016, Fabien Aulaire
 * All rights reserved.
 */
 
@@ -183,10 +183,10 @@ namespace exchange
                 bool AuctionInsert(std::unique_ptr<TOrder> & ipOrde);
 
                 template <typename Container>
-                volume_type GetExecutableQuantity(const Container & Orders, price_type iPrice) const;
+                volume_type GetExecutableQuantity(const Container & Orders, price_type iPrice, volume_type iMaxVolume) const;
 
                 template <typename Msg>
-                volume_type GetExecutableQuantity(const std::unique_ptr<Msg> & ipMsg, OrderWay iWay) const;
+                volume_type GetExecutableQuantity(const std::unique_ptr<Msg> & ipMsg) const;
 
                 template <typename Container, typename Msg>
                 void ProcessDeals(Container & Orders, Msg & iMsg, volume_type iMatchQty);

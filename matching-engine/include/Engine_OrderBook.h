@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015, Fabien Aulaire
+* Copyright (C) 2016, Fabien Aulaire
 * All rights reserved.
 */
 
@@ -96,7 +96,7 @@ namespace exchange
                 void CancelAllOrders();
 
                 /**/
-                void RehashIndexes(size_t size) { m_Orders.RehashIndexes(size); }
+                void RehashOrderIndexes(size_t size) { m_Orders.RehashIndexes(size); }
                 
             public:
 

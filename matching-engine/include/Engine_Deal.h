@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015, Fabien Aulaire
+* Copyright (C) 2016, Fabien Aulaire
 * All rights reserved.
 */
 
@@ -11,6 +11,8 @@
 #include <chrono>
 #include <iosfwd>
 #include <utility>
+#include <iostream>
+
 #include <boost/noncopyable.hpp>
 
 #include <Engine_Order.h>

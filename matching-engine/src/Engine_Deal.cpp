@@ -1,9 +1,10 @@
 /*
-* Copyright (C) 2015, Fabien Aulaire
+* Copyright (C) 2016, Fabien Aulaire
 * All rights reserved.
 */
 
 #include <ostream>
+
 #include <Engine_Deal.h>
 
 namespace exchange

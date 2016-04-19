@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2015, Fabien Aulaire
+* Copyright (C) 2016, Fabien Aulaire
 * All rights reserved.
 */
 
@@ -46,7 +46,7 @@ namespace exchange
         template <typename TOrder, typename TEventHandler>
         template <typename Container>
         typename OrderContainer<TOrder, TEventHandler>::volume_type
-        OrderContainer<TOrder, TEventHandler>::GetExecutableQuantity(const Container & Orders, price_type iPrice) const
+        OrderContainer<TOrder, TEventHandler>::GetExecutableQuantity(const Container & Orders, price_type iPrice, volume_type iMaxVolume) const
         {
             auto & Index = bmi::get<price_tag>(Orders);
             volume_type Qty = 0_volume;
@@ -59,6 +59,16 @@ namespace exchange
                 if (Predicate()(order->GetPrice(), iPrice))
                 {
                     Qty += order->GetQuantity();
+                    if ( Qty >= iMaxVolume )
+                    {
+                        // An order can't be over executed, we can stop
+                        return iMaxVolume;
+                    }
+                }
+                else
+                {
+                    // Because index is sorted if the Predicate doesn't match we can stop
+                    return Qty;
                 }
             }
             return Qty;
@@ -67,19 +77,18 @@ namespace exchange
         template <typename TOrder, typename TEventHandler>
         template <typename Msg>
         typename OrderContainer<TOrder, TEventHandler>::volume_type
-        OrderContainer<TOrder, TEventHandler>::GetExecutableQuantity(const std::unique_ptr<Msg> & ipMsg, OrderWay iWay) const
+        OrderContainer<TOrder, TEventHandler>::GetExecutableQuantity(const std::unique_ptr<Msg> & ipMsg) const
         {
-            switch (iWay)
+            switch (ipMsg->GetWay())
             {
                 case OrderWay::BUY:
                 {
-                    volume_type MaxQty = GetExecutableQuantity(m_AskOrders, ipMsg->GetPrice());
-                    return (std::min)(MaxQty, static_cast<volume_type>(ipMsg->GetQuantity()));
+                    return GetExecutableQuantity(m_AskOrders, ipMsg->GetPrice(), (volume_type)ipMsg->GetQuantity());
+
                 }
                 case OrderWay::SELL:
                 {
-                    volume_type MaxQty = GetExecutableQuantity(m_BidOrders, ipMsg->GetPrice());
-                    return (std::min)(MaxQty, static_cast<volume_type>(ipMsg->GetQuantity()));
+                    return GetExecutableQuantity(m_BidOrders, ipMsg->GetPrice(), (volume_type)ipMsg->GetQuantity());
                 }
                 default:
                     return 0_volume;
@@ -112,12 +121,12 @@ namespace exchange
 
             while (iMatchQty > 0_volume)
             {
-                auto OrderToHitIt = Index.begin();
-                auto OrderToHit   = *(OrderToHitIt);
+                auto OrderToHitIt  = Index.begin();
+                auto * OrderToHit  = *(OrderToHitIt);
 
                 // Get the exec price and the exec quantity
                 auto ExecQty = (std::min)(OrderToHit->GetQuantity(), iMsg->GetQuantity());
-                auto ExecPrice = (std::min)(OrderToHit->GetPrice(), iMsg->GetPrice());
+                auto ExecPrice = OrderToHit->GetPrice();
 
                 // Update quantity of both orders
                 iMsg->RemoveQuantity(ExecQty);
@@ -128,15 +137,15 @@ namespace exchange
                 iMatchQty -= ExecQty;
 
                 // Generate the deal
-                std::unique_ptr<Deal> pDeal = nullptr;
+                typename TEventHandler::deal_ptr_type pDeal = nullptr;
 
                 if (OrderToHit->GetWay() == OrderWay::BUY)
                 {
-                    pDeal = std::make_unique<Deal>(ExecPrice, ExecQty, OrderToHit->GetClientID(), OrderToHit->GetOrderID(), iMsg->GetClientID(), GetAggressorID(iMsg));
+                    pDeal = m_EventHandler.CreateDeal(ExecPrice, ExecQty, OrderToHit->GetClientID(), OrderToHit->GetOrderID(), iMsg->GetClientID(), GetAggressorID(iMsg));
                 }
                 else
                 {
-                    pDeal = std::make_unique<Deal>(ExecPrice, ExecQty, iMsg->GetClientID(), GetAggressorID(iMsg), OrderToHit->GetClientID(), OrderToHit->GetOrderID());
+                    pDeal = m_EventHandler.CreateDeal(ExecPrice, ExecQty, iMsg->GetClientID(), GetAggressorID(iMsg), OrderToHit->GetClientID(), OrderToHit->GetOrderID());
                 }
 
                 m_EventHandler.OnDeal(std::move(pDeal));
@@ -171,7 +180,7 @@ namespace exchange
         {
             if (Match)
             {
-                volume_type MatchQty = (std::min)(GetExecutableQuantity(ipOrder, ipOrder->GetWay()), static_cast<volume_type>(ipOrder->GetQuantity()));
+                volume_type MatchQty = GetExecutableQuantity(ipOrder);
 
                 if (MatchQty != 0_volume)
                 {
@@ -240,8 +249,7 @@ namespace exchange
             {
                 if (Match)
                 {
-                    volume_type MaxExecQty = GetExecutableQuantity(iOrderReplace, iOrderReplace->GetWay());
-                    volume_type MatchQty = (std::min)(MaxExecQty, static_cast<volume_type>(iOrderReplace->GetQuantity()));
+                    volume_type MatchQty = GetExecutableQuantity(iOrderReplace);
 
                     if (MatchQty != 0_volume)
                     {
@@ -314,8 +322,8 @@ namespace exchange
 
             for (auto & order : m_AskOrders)
             {
-                volume_type BidQty = GetExecutableQuantity(m_BidOrders, order->GetPrice());
-                volume_type AskQty = GetExecutableQuantity(m_AskOrders, order->GetPrice());
+                volume_type BidQty = GetExecutableQuantity(m_BidOrders, order->GetPrice(), volume_type::max());
+                volume_type AskQty = GetExecutableQuantity(m_AskOrders, order->GetPrice(), volume_type::max());
 
                 volume_type CurrentQty = (std::min)(BidQty, AskQty);
 
@@ -358,7 +366,8 @@ namespace exchange
                     AskIndex.modify(AskOrderIt, QuantityUpdater<OrderPtrType>(AskOrder->GetQuantity() - ExecutedQty));
                     BidIndex.modify(BidOrderIt, QuantityUpdater<OrderPtrType>(BidOrder->GetQuantity() - ExecutedQty));
 
-                    std::unique_ptr<Deal> pDeal = std::make_unique<Deal>(MatchingPrice, ExecutedQty, BidOrder->GetClientID(), BidOrder->GetOrderID(), AskOrder->GetClientID(), AskOrder->GetOrderID());
+                    auto pDeal = m_EventHandler.CreateDeal(MatchingPrice, ExecutedQty, BidOrder->GetClientID(), BidOrder->GetOrderID(), AskOrder->GetClientID(), AskOrder->GetOrderID());
+
                     m_EventHandler.OnDeal(std::move(pDeal));
 
                     MatchingQty -= ExecutedQty;
