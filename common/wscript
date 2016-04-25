@@ -1,17 +1,7 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-import glob
-import os
-import ntpath
 import sys
-import subprocess
-import string
-
-def run_command(Cmd, Arg):
-    p = subprocess.Popen([Cmd, Arg], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    return out.rstrip('\r\n')
 
 def run_tests(ctx):
     sys.path.append(ctx.top_dir)
@@ -26,7 +16,6 @@ def configure(cfg):
     if cfg.env.with_unittest:
         cfg.env.append_value('LIB',['gtest'])
 
-    #system lib
     cfg.env.append_value('LIB',['pthread'])
 
     # boost lib
@@ -46,7 +35,6 @@ def build(bld):
     bld.stlib( source = sources_files, target="common", use="BOOST", includes=IncludePaths )
 
     #Unit test related stuff
-    
     if bld.env.with_unittest:
         waf_tools.build_tests(bld, "common", IncludePaths)
 
