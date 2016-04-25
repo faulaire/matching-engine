@@ -1,4 +1,8 @@
+#include <thread>
+#include <vector>
+
 #include <Logger.h>
+#include <Engine_MatchingEngine.h>
 
 // f8 headers
 #include <fix8/f8includes.hpp>
@@ -10,7 +14,7 @@
 #include "Gateway_session.hpp"
 
 bool term_received(false);
-bool quiet(true);
+bool quiet(false);
 
 void sig_handler(int sig)
 {
@@ -26,6 +30,10 @@ void sig_handler(int sig)
             break;
     }
 }
+
+void server_process(FIX8::ServerSessionBase *srv, int scnt);
+
+unsigned next_send(0), next_receive(0);
 
 int main( int argc, char** argv )
 {
@@ -54,41 +62,43 @@ int main( int argc, char** argv )
         return 2;
     }
 
+    exchange::engine::MatchingEngine<> _MatchingEngine;
+
     boost::property_tree::ini_parser::read_ini(s_matching_config, aConfig);
     Logger.Init(aConfig);
+
+    if( !_MatchingEngine.Configure(aConfig) )
+    {
+        std::cerr << "Could not configure matching engine" << std::endl;
+        return 3;
+    }
 
     signal(SIGTERM, sig_handler);
     signal(SIGINT, sig_handler);
 
-    unsigned next_send(0), next_receive(0);
-
     try
     {
-        std::unique_ptr<FIX8::ServerSessionBase> ms(new FIX8::ServerSession<Gateway_session_server>(FIX8::GateWay::ctx(), s_gateway_config, "TEX1"));
-        for (unsigned scnt(0); !term_received; )
+        FIX8::f8_atomic<unsigned> scnt(0);
+
+        std::unique_ptr<FIX8::ServerManager> sm(new FIX8::ServerManager);
+        sm->add(new FIX8::ServerSession<Gateway_session_server>(FIX8::GateWay::ctx(), s_gateway_config, "TEX1"));
+
+        std::vector<std::thread> thrds;
+        while (!term_received)
         {
-            if (!ms->poll())
-                continue;
-            std::unique_ptr<FIX8::SessionInstanceBase> inst(ms->create_server_instance());
-            if (!quiet)
-                inst->session_ptr()->control() |= FIX8::Session::print;
-            std::ostringstream sostr;
-            sostr << "client(" << ++scnt << ") connection established.";
-            FIX8::GlobalLogger::log(sostr.str());
-            const FIX8::ProcessModel pm(ms->get_process_model(ms->_ses));
-            inst->start(pm == FIX8::pm_pipeline, next_send, next_receive);
-            std::cout << (pm == FIX8::pm_pipeline ? "Pipelined" : "Threaded") << " mode." << std::endl;
-            if (inst->session_ptr()->get_connection()->is_secure())
-                std::cout << "Session is secure (SSL)" << std::endl;
-            if (pm != FIX8::pm_pipeline)
-                while (!inst->session_ptr()->is_shutdown())
-                    FIX8::hypersleep<FIX8::h_milliseconds>(100);
-            std::cout << "Session(" << scnt << ") finished." << std::endl;
-            inst->stop();
-#if defined FIX8_CODECTIMING
-            FIX8::Message::report_codec_timings("server");
-#endif
+            FIX8::ServerSessionBase *srv(sm->select());
+            if (srv)
+            {
+                thrds.push_back(std::thread ([&]() { server_process(srv, ++scnt); }));
+                FIX8::hypersleep<FIX8::h_milliseconds>(10);
+            }
+            else
+            {
+                _MatchingEngine.EngineListen();
+            }
         }
+        for_each(thrds.begin(), thrds.end(), [](std::thread& tt) { if (tt.joinable()) tt.join(); });
+
     }
     catch ( std::exception & e )
     {
@@ -96,3 +106,20 @@ int main( int argc, char** argv )
         return 4;
     }
 }
+
+void server_process(FIX8::ServerSessionBase *srv, int scnt)
+{
+    std::unique_ptr<FIX8::SessionInstanceBase> inst(srv->create_server_instance());
+    if (!quiet)
+        inst->session_ptr()->control() |= FIX8::Session::print;
+    glout_info << "client(" << scnt << ") connection established.";
+    const FIX8::ProcessModel pm(srv->get_process_model(srv->_ses));
+    std::cout << (pm == FIX8::pm_pipeline ? "Pipelined" : "Threaded") << " mode." << std::endl;
+    inst->start(pm == FIX8::pm_pipeline, next_send, next_receive);
+    if (pm != FIX8::pm_pipeline)
+        while (!inst->session_ptr()->is_shutdown())
+            FIX8::hypersleep<FIX8::h_milliseconds>(10);
+    std::cout << "Session(" << scnt << ") finished." << std::endl;
+    inst->stop();
+}
+

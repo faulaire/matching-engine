@@ -3,23 +3,24 @@
 	<session name="TEX1"
 				role = "acceptor"
 				fix_version="1100"
-			   no_chksum="true"
+			     	no_chksum="true"
 				active="true"
 				heartbeat_interval="10"
 				ip="127.0.0.1" port="11002"
-				sender_comp_id="TEX_DLD"
+				session_log="session_log"
+				protocol_log="protocol_log"
+				persist="bdb0"
+				sender_comp_id="ORDERMATCH"
+				reset_sequence_numbers="true"
 				tcp_nodelay="false"
-			   tcp_recv_buffer="100663296"
-			   tcp_send_buffer="100663296"
-			   process_model="threaded" />
+			   	tcp_recv_buffer="100663296"
+			   	tcp_send_buffer="100663296"
+			   	process_model="threaded" />
 
 	<persist name="bdb0"
-				type="bdb"
+				type="file"
 				dir="./run"
 				db="hf_server.db"/>
-
-	<persist name="mem0"
-				type="mem"/>
 
 	<log 		name="session_log"
 				type="session"
@@ -32,13 +33,4 @@
 				filename="./run/hf_server_protocol.log"
 				rotation="5"
 				flags="sequence|append|direction|inbound|outbound"/>
-
-	<log 		name="protocol_log_pipe"
-				type="protocol"
-				filename="|/bin/cat"
-				flags="sequence|append|direction|inbound|outbound"/>
-
-	<log 		name="protocol_log_null"
-				type="protocol"
-				filename="/dev/null"/>
 </fix8>
