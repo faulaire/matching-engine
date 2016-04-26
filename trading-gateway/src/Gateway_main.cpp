@@ -4,17 +4,13 @@
 #include <Logger.h>
 #include <Engine_MatchingEngine.h>
 
-// f8 headers
-#include <fix8/f8includes.hpp>
-#include <fix8/usage.hpp>
+#include "Gateway_Application.h"
 
-#include "Gateway_types.hpp"
-#include "Gateway_router.hpp"
-#include "Gateway_classes.hpp"
-#include "Gateway_session.hpp"
+#include "quickfix/FileStore.h"
+#include "quickfix/SocketAcceptor.h"
+
 
 bool term_received(false);
-bool quiet(false);
 
 void sig_handler(int sig)
 {
@@ -31,21 +27,16 @@ void sig_handler(int sig)
     }
 }
 
-void server_process(FIX8::ServerSessionBase *srv, int scnt);
-
-unsigned next_send(0), next_receive(0);
-
 int main( int argc, char** argv )
 {
-    if (argc != 3)
+    if (argc != 2)
     {
         std::cerr << "usage: " << argv[0]
-        << " MATCHING_CONFIG."<< " GATEWAY_CONFIG" << std::endl;
+        << "CONFIG" << std::endl;
         return 1;
     }
 
     std::string s_matching_config = argv[1];
-    std::string s_gateway_config  = argv[2];
 
     auto & Logger = LoggerHolder::GetInstance();
 
@@ -53,12 +44,6 @@ int main( int argc, char** argv )
     if (!boost::filesystem::exists(s_matching_config))
     {
         std::cerr << "File " << s_matching_config << " doesn't exists" << std::endl;
-        return 2;
-    }
-
-    if (!boost::filesystem::exists(s_gateway_config))
-    {
-        std::cerr << "File " << s_gateway_config << " doesn't exists" << std::endl;
         return 2;
     }
 
@@ -78,48 +63,26 @@ int main( int argc, char** argv )
 
     try
     {
-        FIX8::f8_atomic<unsigned> scnt(0);
+        FIX::SessionSettings settings( s_matching_config );
 
-        std::unique_ptr<FIX8::ServerManager> sm(new FIX8::ServerManager);
-        sm->add(new FIX8::ServerSession<Gateway_session_server>(FIX8::GateWay::ctx(), s_gateway_config, "TEX1"));
+        exchange::gateway::Application application;
+        FIX::FileStoreFactory storeFactory( settings );
+        FIX::ScreenLogFactory logFactory( settings );
+        FIX::SocketAcceptor acceptor( application, storeFactory, settings, logFactory );
 
-        std::vector<std::thread> thrds;
-        while (!term_received)
+        //acceptor.start();
+        while ( !term_received )
         {
-            FIX8::ServerSessionBase *srv(sm->select());
-            if (srv)
-            {
-                thrds.push_back(std::thread ([&]() { server_process(srv, ++scnt); }));
-                FIX8::hypersleep<FIX8::h_milliseconds>(10);
-            }
-            else
-            {
-                _MatchingEngine.EngineListen();
-            }
+            _MatchingEngine.EngineListen();
+            acceptor.poll();
         }
-        for_each(thrds.begin(), thrds.end(), [](std::thread& tt) { if (tt.joinable()) tt.join(); });
-
+        acceptor.stop();
+        return 0;
     }
     catch ( std::exception & e )
     {
         std::cout << e.what() << std::endl;
         return 4;
     }
-}
-
-void server_process(FIX8::ServerSessionBase *srv, int scnt)
-{
-    std::unique_ptr<FIX8::SessionInstanceBase> inst(srv->create_server_instance());
-    if (!quiet)
-        inst->session_ptr()->control() |= FIX8::Session::print;
-    glout_info << "client(" << scnt << ") connection established.";
-    const FIX8::ProcessModel pm(srv->get_process_model(srv->_ses));
-    std::cout << (pm == FIX8::pm_pipeline ? "Pipelined" : "Threaded") << " mode." << std::endl;
-    inst->start(pm == FIX8::pm_pipeline, next_send, next_receive);
-    if (pm != FIX8::pm_pipeline)
-        while (!inst->session_ptr()->is_shutdown())
-            FIX8::hypersleep<FIX8::h_milliseconds>(10);
-    std::cout << "Session(" << scnt << ") finished." << std::endl;
-    inst->stop();
 }
 

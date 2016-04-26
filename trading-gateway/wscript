@@ -10,7 +10,7 @@ def run_tests(ctx):
 
 
 def configure(cfg):
-    cfg.env.append_value('LIB',['fix8', 'PocoNet', 'PocoFoundation'])
+    cfg.env.append_value('LIB',['quickfix'])
 
 def build(bld):
 
