@@ -70,6 +70,10 @@ namespace exchange
 
                 /**/
                 virtual ~OrderBook();
+                
+                /* No copy constructor and assigment operator */
+                OrderBook(const OrderBook & other) = delete;
+                OrderBook & operator= (const OrderBook & other) = delete;
 
             public:
 
@@ -122,12 +126,6 @@ namespace exchange
                 /*
                 */
                 inline bool SetTradingPhase(TradingPhase iNewPhase);
-
-            private:
-
-                /* No copy constructor and assigment operator */
-                OrderBook(const OrderBook & other);
-                OrderBook & operator= (const OrderBook & other);
 
             protected:
 
