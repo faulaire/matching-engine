@@ -78,11 +78,11 @@ namespace exchange
             public:
 
                 /**/
-                Status Insert(std::unique_ptr<TOrder> & ipOrder);
+                Status Insert(std::unique_ptr<TOrder> ipOrder);
 
                 /**/
                 template <typename TOrderReplace>
-                Status Modify(std::unique_ptr<TOrderReplace> & ipOrderReplace);
+                Status Modify(std::unique_ptr<TOrderReplace> ipOrderReplace);
 
                 /**/
                 Status Delete(Order::client_orderid_type iOrderID, Order::client_id_type iClientID, OrderWay iWay);

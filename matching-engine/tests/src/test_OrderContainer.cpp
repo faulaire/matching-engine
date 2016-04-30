@@ -59,11 +59,11 @@ class EventHandler
 
 #define CREATE_REPLACE(Way, Qty, Price, OldOrderID, NewOrderID, ClientID) ( std::make_unique<OrderReplace>(Way, Qty, Price, OldOrderID, NewOrderID, ClientID) )
 
-#define INSERT_ORDER(Container, pOrder) ( Container.Insert( pOrder ) )
-#define INSERT_MATCHING_ORDER(Container, pOrder) ( Container.Insert( pOrder, true ) )
+#define INSERT_ORDER(Container, pOrder) ( Container.Insert( std::move(pOrder) ) )
+#define INSERT_MATCHING_ORDER(Container, pOrder) ( Container.Insert( std::move(pOrder), true ) )
 
-#define MODIFY_ORDER(Container, pReplace) ( Container.Modify( pReplace, false ) )
-#define MODIFY_MATCHING_ORDER(Container, pReplace) ( Container.Modify( pReplace, true ) )
+#define MODIFY_ORDER(Container, pReplace) ( Container.Modify( std::move(pReplace), false ) )
+#define MODIFY_MATCHING_ORDER(Container, pReplace) ( Container.Modify( std::move(pReplace), true ) )
 
 // To use a test fixture, derive a class from testing::Test.
 class OrderContainerTest : public testing::Test
@@ -95,13 +95,13 @@ class OrderContainerTest : public testing::Test
             for (auto & order : m_BidOrders)
             {
                 m_sBidOrders.push_back( std::unique_ptr<Order>(order) );
-                ASSERT_EQ(Status::Ok, m_Container.Insert( *m_sBidOrders.rbegin() ));
+                ASSERT_EQ(Status::Ok, m_Container.Insert( std::move(*m_sBidOrders.rbegin() )));
             }
 
             for (auto & order : m_AskOrders)
             {
                 m_sAskOrders.push_back(std::unique_ptr<Order>(order));
-                ASSERT_EQ(Status::Ok, m_Container.Insert(*m_sAskOrders.rbegin()));
+                ASSERT_EQ(Status::Ok, m_Container.Insert( std::move(*m_sAskOrders.rbegin())));
             }
         }
 

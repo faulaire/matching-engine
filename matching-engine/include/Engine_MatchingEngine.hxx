@@ -174,12 +174,12 @@ namespace exchange
         }
 
         template <typename Clock>
-        Status MatchingEngine<Clock>::Insert(std::unique_ptr<Order> & ipOrder, std::uint32_t iProductID)
+        Status MatchingEngine<Clock>::Insert(std::unique_ptr<Order> ipOrder, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())
             {
-                return OrderBookIt->second->Insert( ipOrder );
+                return OrderBookIt->second->Insert( std::move(ipOrder) );
             }
             else
             {
@@ -188,12 +188,12 @@ namespace exchange
         }
 
         template <typename Clock>
-        Status MatchingEngine<Clock>::Modify(std::unique_ptr<OrderReplace> & ipOrderReplace, std::uint32_t iProductID)
+        Status MatchingEngine<Clock>::Modify(std::unique_ptr<OrderReplace> ipOrderReplace, std::uint32_t iProductID)
         {
             auto OrderBookIt = m_OrderBookContainer.find(iProductID);
             if (OrderBookIt != m_OrderBookContainer.end())
             {
-                return OrderBookIt->second->Modify(ipOrderReplace);
+                return OrderBookIt->second->Modify( std::move(ipOrderReplace) );
             }
             else
             {

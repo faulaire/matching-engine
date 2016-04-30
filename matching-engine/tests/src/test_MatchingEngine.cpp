@@ -111,8 +111,8 @@ class MatchingEngineTest : public testing::Test
 #define CREATE_ORDER(Way, Qty, Price, iOrderID, iClientID) ( std::make_unique<Order>(Way, Qty, Price, iOrderID, iClientID) )
 #define CREATE_REPLACE(Way, Qty, Price, OldOrderID, NewOrderID, iClientID) ( std::make_unique<OrderReplace>(Way, Qty, Price, OldOrderID, NewOrderID, iClientID) )
 
-#define INSERT_ORDER(Engine, pOrder, ProductID) ( Engine->Insert( pOrder, ProductID) )
-#define MODIFY_ORDER(Engine, pReplace, ProductID) ( Engine->Modify( pReplace, ProductID) )
+#define INSERT_ORDER(Engine, pOrder, ProductID) ( Engine->Insert( std::move(pOrder), ProductID) )
+#define MODIFY_ORDER(Engine, pReplace, ProductID) ( Engine->Modify( std::move(pReplace), ProductID) )
 
 
 TEST_F(MatchingEngineTest, Should_configuration_success_when_valid_configuration_file)

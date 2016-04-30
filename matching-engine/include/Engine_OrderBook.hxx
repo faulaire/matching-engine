@@ -88,14 +88,14 @@ namespace exchange
         }
 
         template <typename TOrder, typename TMatchingEngine>
-        Status OrderBook<TOrder, TMatchingEngine>::Insert(std::unique_ptr<TOrder> & ipOrder)
+        Status OrderBook<TOrder, TMatchingEngine>::Insert(std::unique_ptr<TOrder> ipOrder)
         {
             if (m_Phase != TradingPhase::CLOSE)
             {
                 auto status = CheckOrder(ipOrder);
                 if (Status::Ok == status)
                 {
-                    return m_Orders.Insert(ipOrder, TradingPhase::CONTINUOUS_TRADING == m_Phase);
+                    return m_Orders.Insert(std::move(ipOrder), TradingPhase::CONTINUOUS_TRADING == m_Phase);
                 }
                 else
                 {
@@ -107,7 +107,7 @@ namespace exchange
 
         template <typename TOrder, typename TMatchingEngine>
         template <typename TOrderReplace>
-        Status OrderBook<TOrder, TMatchingEngine>::Modify(std::unique_ptr<TOrderReplace> & ipOrderReplace)
+        Status OrderBook<TOrder, TMatchingEngine>::Modify(std::unique_ptr<TOrderReplace> ipOrderReplace)
         {
             if (m_Phase != TradingPhase::CLOSE)
             {
@@ -115,7 +115,7 @@ namespace exchange
 
                 if (Status::Ok == status)
                 {
-                    return m_Orders.Modify(ipOrderReplace, TradingPhase::CONTINUOUS_TRADING == m_Phase);
+                    return m_Orders.Modify(std::move(ipOrderReplace), TradingPhase::CONTINUOUS_TRADING == m_Phase);
                 }
                 else
                 {

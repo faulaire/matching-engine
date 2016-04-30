@@ -26,9 +26,7 @@ namespace exchange
         namespace bmi = boost::multi_index;
 
         struct order_id_tag{};
-        struct client_id_tag{};
         struct price_tag{};
-
 
 
         template <typename TOrder>
@@ -70,13 +68,10 @@ namespace exchange
                     bmi::hashed_unique<
                     bmi::tag<order_id_tag>, OrderIDGenerator<TOrder*>, Hasher<OrderID> >,
 
-                    bmi::hashed_non_unique<
-                    bmi::tag<client_id_tag>, bmi::const_mem_fun<TOrder, client_id_type, &TOrder::GetClientID>, Hasher<client_id_type> >,
-
                     bmi::ordered_non_unique<
                     bmi::tag<price_tag>, bmi::const_mem_fun<TOrder, typename TOrder::price_type, &TOrder::GetPrice>, SortingPredicate>
                 >
-            > order_set;
+            > open_orders_container;
         };
 
         template<typename TOrder, typename TEventHandler> class OrderContainer;
@@ -117,17 +112,21 @@ namespace exchange
 
                 using OrderPtrType = TOrder*;
 
-                typedef std::greater<price_type>                                           BidPredicate;
-                typedef typename OrderStorage<TOrder, BidPredicate>::order_set             BidStorage;
+                /* Index all orders */
+                using orders_container = std::multimap<client_id_type, std::unique_ptr<TOrder> >;
 
-                typedef std::less<price_type>                                              AskPredicate;
-                typedef typename OrderStorage<TOrder, AskPredicate>::order_set             AskStorage;
+                /* Index only open orders */
+                typedef std::greater<price_type>                                            BidPredicate;
+                typedef typename OrderStorage<TOrder, BidPredicate>::open_orders_container  BidStorage;
 
-                typedef typename boost::multi_index::index<BidStorage, price_tag>::type    bid_index_type;
-                typedef typename boost::multi_index::index<AskStorage, price_tag>::type    ask_index_type;
+                typedef std::less<price_type>                                               AskPredicate;
+                typedef typename OrderStorage<TOrder, AskPredicate>::open_orders_container  AskStorage;
 
-                typedef typename bid_index_type::iterator                                  price_index_iterator;
-                typedef typename BidStorage::iterator                                      hashed_index_iterator;
+                typedef typename boost::multi_index::index<BidStorage, price_tag>::type     bid_index_type;
+                typedef typename boost::multi_index::index<AskStorage, price_tag>::type     ask_index_type;
+
+                typedef typename bid_index_type::iterator                                   price_index_iterator;
+                typedef typename BidStorage::iterator                                       hashed_index_iterator;
 
             public:
 
@@ -139,12 +138,12 @@ namespace exchange
 
                 /**
                 */
-                Status Insert(std::unique_ptr<TOrder>&  ipOrder, bool Match = false);
+                Status Insert(std::unique_ptr<TOrder> ipOrder, bool Match = false);
 
                 /**
                 */
                 template <typename TOrderReplace>
-                Status Modify(std::unique_ptr<TOrderReplace> & iOrderReplace, bool Match = false);
+                Status Modify(std::unique_ptr<TOrderReplace> iOrderReplace, bool Match = false);
 
                 /**
                 */
@@ -180,13 +179,13 @@ namespace exchange
 
             protected:
 
-                bool AuctionInsert(std::unique_ptr<TOrder> & ipOrde);
+                bool AuctionInsert(TOrder * ipOrder);
 
                 template <typename Container>
                 volume_type GetExecutableQuantity(const Container & Orders, price_type iPrice, volume_type iMaxVolume) const;
 
                 template <typename Msg>
-                volume_type GetExecutableQuantity(const std::unique_ptr<Msg> & ipMsg) const;
+                volume_type GetExecutableQuantity(const Msg & ipMsg) const;
 
                 template <typename Container, typename Msg>
                 void ProcessDeals(Container & Orders, Msg & iMsg, volume_type iMatchQty);
@@ -216,6 +215,8 @@ namespace exchange
                 OrderContainer & operator= (const OrderContainer & other);
 
             protected:
+                /* */
+                orders_container m_OrderContainer;
                 /* */
                 BidStorage       m_BidOrders;
                 /* */

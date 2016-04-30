@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <type_traits>
 #include <iosfwd>
 #include <Engine_Types.h>
 
@@ -21,6 +22,18 @@ namespace exchange
             BUY = 0,
             SELL,
             MAX_WAY
+        };
+
+        /*!
+         * OrderState
+         */
+        enum class OrderState
+        {
+            UNDEF = 0,
+            ACK,
+            CANCEL,
+            EXEC,
+            MAX_STATE
         };
 
         const char * OrderWayToString(OrderWay iPhase);
@@ -73,23 +86,31 @@ namespace exchange
                 Order(const Order & rhs) = delete;
                 Order& operator=(const Order & rhs) = delete;
 
-                inline OrderWay            GetWay()      const;
-                inline qty_type            GetQuantity() const;
-                inline price_type          GetPrice()    const;
-                inline client_orderid_type GetOrderID()  const;
-                inline client_id_type      GetClientID() const;
+                inline OrderWay            GetWay()               const;
+                inline OrderState          GetState()             const;
+
+                inline qty_type            GetOpenQuantity()      const;
+                inline qty_type            GetQuantity()          const;
+                inline qty_type            GetExecutedQuantity()  const;
+                inline qty_type            GetCancelledQuantity() const;
+
+                inline price_type          GetPrice()             const;
+                inline client_orderid_type GetOrderID()           const;
+                inline client_id_type      GetClientID()          const;
 
                 inline void                SetQuantity(qty_type iQty);
                 inline void                SetOrderID(client_orderid_type iOrderID);
                 inline void                SetPrice(price_type iPrice);
-                                  
-                inline void                RemoveQuantity(qty_type iDelta);
+
+                inline void                AddExecutedQuantity(qty_type iQty);
 
                 inline bool operator==(const Order & rhs) const;
 
             protected:
-
-                Layout m_Layout;
+                Layout      m_Layout;
+                OrderState  m_OrderState   = OrderState::UNDEF;
+                qty_type    m_ExecutedQty  = 0_qty;
+                qty_type    m_CancelledQty = 0_qty;
         };
 
         std::ostream& operator<<(std::ostream& o, const Order & x);
@@ -99,9 +120,29 @@ namespace exchange
             return m_Layout.m_Way;
         }
 
+        inline OrderState Order::GetState() const
+        {
+            return m_OrderState;
+        }
+
         inline Order::qty_type Order::GetQuantity() const
         {
             return m_Layout.m_Qty;
+        }
+
+        inline Order::qty_type Order::GetOpenQuantity() const
+        {
+            return m_Layout.m_Qty - GetExecutedQuantity() - GetCancelledQuantity();
+        }
+
+        inline Order::qty_type Order::GetExecutedQuantity() const
+        {
+            return m_ExecutedQty;
+        }
+
+        inline Order::qty_type Order::GetCancelledQuantity() const
+        {
+            return m_CancelledQty;
         }
 
         inline Order::price_type Order::GetPrice() const
@@ -134,11 +175,10 @@ namespace exchange
             m_Layout.m_Price = iPrice;
         }
 
-        inline void Order::RemoveQuantity(qty_type iDelta)
+        inline void Order::AddExecutedQuantity(qty_type iQty)
         {
-            m_Layout.m_Qty -= iDelta;
+            m_ExecutedQty += iQty;
         }
-
 
         inline bool Order::operator==(const Order & rhs) const
         {
@@ -184,7 +224,7 @@ namespace exchange
                         price_type           m_Price           = price_type(0);
                         client_orderid_type  m_ExistingOrderID = client_orderid_type(0);
                         client_orderid_type  m_ReplacedOrderID = client_orderid_type(0);
-                        client_id_type        m_ClientID       = client_id_type(0);
+                        client_id_type       m_ClientID        = client_id_type(0);
                     };
                 #pragma pack()
 
@@ -216,9 +256,6 @@ namespace exchange
                                            
                 inline OrderWay             GetWay() const;
                 inline void                 SetWay(OrderWay iWay);
-                                           
-                inline void                 RemoveQuantity(qty_type iDelta);
-
 
             protected:
 
@@ -288,11 +325,6 @@ namespace exchange
             m_Layout.m_Way = iWay;
         }
 
-        inline void OrderReplace::RemoveQuantity(qty_type iDelta)
-        {
-            m_Layout.m_Qty -= iDelta;
-        }
-
         /*!
         *  \brief Functor to update a field of an order
         *
@@ -301,26 +333,24 @@ namespace exchange
         *  \tparam Operator : Accessor to call
         *
         */
-        
         template <typename Order>
-        class QuantityUpdater
+        class ExecQuantityUpdater
         {
             public:
 
-                using OrderType = typename std::remove_pointer<Order>::type;
+                using OrderType = std::remove_pointer_t<Order>;
                 using qty_type  = typename OrderType::qty_type;
 
             public:
 
-                QuantityUpdater(qty_type NewValue) :m_new_value(NewValue){}
+                ExecQuantityUpdater(qty_type NewValue) :m_new_value(NewValue){}
 
                 void operator()(Order& iOrder) const
                 {
-                    iOrder->SetQuantity(m_new_value);
+                    iOrder->AddExecutedQuantity(m_new_value);
                 }
 
             private:
-
                 /*!< New value to set */
                 qty_type m_new_value;
         };

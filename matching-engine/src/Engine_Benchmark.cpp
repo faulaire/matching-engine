@@ -10,7 +10,7 @@ using OrderBookType = engine_type::OrderBookType;
 
 
 #define CREATE_ORDER(Way, Qty, Price, OrderID, ClientID) (  std::make_unique<Order>(Way, Qty, Price, OrderID, ClientID) )
-#define INSERT_ORDER(OrderBook, iOrder) ( OrderBook->Insert( iOrder ) )
+#define INSERT_ORDER(OrderBook, iOrder) ( OrderBook->Insert( std::move(iOrder) ) )
 
 int main(int argc, char ** argv)
 {

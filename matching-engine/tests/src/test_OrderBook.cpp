@@ -57,7 +57,7 @@ TEST_F(OrderBookTest, Should_post_auction_price_be_the_previous_close_price_when
 }
 
 #define CREATE_ORDER(Way, Qty, Price, OrderID, ClientID) ( std::make_unique<Order>(Way, Qty, Price, OrderID, ClientID) )
-#define INSERT_ORDER(OrderBook, Order) ( OrderBook->Insert(Order) )
+#define INSERT_ORDER(OrderBook, Order) ( OrderBook->Insert(std::move(Order)) )
 
 TEST_F(OrderBookTest, Should_open_price_be_the_price_computed_after_opening_auction)
 {
