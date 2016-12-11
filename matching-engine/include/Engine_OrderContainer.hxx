@@ -50,13 +50,13 @@ namespace exchange
         typename OrderContainer<TOrder, TEventHandler>::volume_type
         OrderContainer<TOrder, TEventHandler>::GetExecutableQuantity(const Container & Orders, price_type iPrice, volume_type iMaxVolume) const
         {
-            auto & Index = bmi::get<price_tag>(Orders);
+            const auto & Index = bmi::get<price_tag>(Orders);
             volume_type Qty = 0_volume;
 
-            typedef decltype(Index.key_comp())                                          SortingPredicate;
-            typedef typename ExecutableQtyPredHelper<TOrder, SortingPredicate>::value   Predicate;
+            using SortingPredicate = decltype(Index.key_comp());
+            using Predicate        = typename ExecutableQtyPredHelper<TOrder, SortingPredicate>::value;
 
-            for (auto & order : Index)
+            for (const auto & order : Index)
             {
                 if (Predicate()(order->GetPrice(), iPrice))
                 {
@@ -93,6 +93,7 @@ namespace exchange
                     return GetExecutableQuantity(m_BidOrders, ipMsg->GetPrice(), (volume_type)ipMsg->GetQuantity());
                 }
                 default:
+                    assert(false && "Invalid order way");
                     return 0_volume;
             }
         }
@@ -126,15 +127,18 @@ namespace exchange
             while (iMatchQty > 0_volume)
             {
                 auto OrderToHitIt  = Index.begin();
+
+                assert(OrderToHitIt != Index.end());
+
                 auto * OrderToHit  = *(OrderToHitIt);
 
                 // Get the exec price and the exec quantity
-                auto ExecQty = (std::min)(OrderToHit->GetOpenQuantity(), iMsg->GetQuantity());
+                auto ExecQty = (std::min)(OrderToHit->GetOpenQuantity(), iMsg->GetOpenQuantity());
                 auto ExecPrice = OrderToHit->GetPrice();
 
                 // Update quantity of both orders
                 iMsg->AddExecutedQuantity(ExecQty);
-
+                // TODO : Why the pointer on the order is not used ?
                 Index.modify(OrderToHitIt, ExecQuantityUpdater<OrderPtrType>(ExecQty));
 
                 // Decrease the matching quantity
@@ -212,6 +216,7 @@ namespace exchange
         template <typename TOrder, typename TEventHandler>
         bool OrderContainer<TOrder, TEventHandler>::AuctionInsert(TOrder * ipOrder)
         {
+            assert(ipOrder && "Input order is null!");
             /*
             *  insert return a pair, the second element indicate
             *  if the insertion fail or not.

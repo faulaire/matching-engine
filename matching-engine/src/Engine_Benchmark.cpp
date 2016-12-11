@@ -1,4 +1,5 @@
 #include <memory>
+#include <forward_list>
 
 #include <Engine_Order.h>
 #include <Engine_MatchingEngine.h>
@@ -16,6 +17,7 @@ int main(int argc, char ** argv)
 {
     if( argc < 2)
     {
+        std::cerr << "Usage : " << argv[0] << "NbOrderToInsert" << std::endl;
         return 1;
     }
 
@@ -33,12 +35,13 @@ int main(int argc, char ** argv)
     }
     else
     {
+        std::cerr << "No such file or directory : config.ini" << std::endl;
         return 2;
     }
 
     pOrderBook->SetTradingPhase(TradingPhase::CONTINUOUS_TRADING);
 
-    std::set< std::unique_ptr<Order> > m_Orders;
+    std::forward_list< std::unique_ptr<Order> > m_Orders;
 
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -46,8 +49,8 @@ int main(int argc, char ** argv)
 
     for (auto i = 0; i < nb_order_to_insert; i++)
     {
-        m_Orders.insert(CREATE_ORDER(OrderWay::BUY, Quantity(dis(gen)), Price(dis(gen)), ClientOrderID(i + 1), 5_clientid));
-        m_Orders.insert(CREATE_ORDER(OrderWay::SELL, Quantity(dis(gen)), Price(dis(gen)), ClientOrderID(i + 1), 6_clientid));
+        m_Orders.push_front(CREATE_ORDER(OrderWay::BUY, Quantity(dis(gen)), Price(dis(gen)), ClientOrderID(i + 1), 5_clientid));
+        m_Orders.push_front(CREATE_ORDER(OrderWay::SELL, Quantity(dis(gen)), Price(dis(gen)), ClientOrderID(i + 1), 6_clientid));
     }
 
     std::string s;
@@ -63,7 +66,7 @@ int main(int argc, char ** argv)
 
     for (auto & pOrder : m_Orders)
     {
-        INSERT_ORDER(pOrderBook, const_cast<std::unique_ptr<Order>&>(pOrder));
+        INSERT_ORDER(pOrderBook, pOrder);
     }
 
     end = std::chrono::high_resolution_clock::now();
@@ -73,7 +76,7 @@ int main(int argc, char ** argv)
 
     std::cout << "finished computation at " << std::ctime(&end_time)
     << "elapsed time: " << elapsed_seconds.count() << "s" << std::endl;
-    std::cout << "numer of generated deals : " << pOrderBook->GetDealCounter() << std::endl;
+    std::cout << "number of generated deals : " << pOrderBook->GetDealCounter() << std::endl;
 
     std::cout << "Disable callgrind" << std::endl;
     std::cin >> s;

@@ -90,6 +90,8 @@ namespace exchange
         template <typename TOrder, typename TMatchingEngine>
         Status OrderBook<TOrder, TMatchingEngine>::Insert(std::unique_ptr<TOrder> ipOrder)
         {
+            assert(ipOrder != nullptr);
+
             if (m_Phase != TradingPhase::CLOSE)
             {
                 auto status = CheckOrder(ipOrder);
