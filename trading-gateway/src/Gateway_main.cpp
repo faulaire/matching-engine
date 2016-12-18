@@ -3,12 +3,11 @@
 
 #include <Logger.h>
 #include <Engine_MatchingEngine.h>
+#include <Gateway_Server.h>
 
-#include "Gateway_Application.h"
+#include <boost/asio.hpp>
 
-#include "quickfix/FileStore.h"
-#include "quickfix/SocketAcceptor.h"
-
+using boost::asio::ip::tcp;
 
 bool term_received(false);
 
@@ -31,8 +30,7 @@ int main( int argc, char** argv )
 {
     if (argc != 2)
     {
-        std::cerr << "usage: " << argv[0]
-        << "CONFIG" << std::endl;
+        std::cerr << "usage: " << argv[0] << " CONFIG" << std::endl;
         return 1;
     }
 
@@ -61,22 +59,18 @@ int main( int argc, char** argv )
     signal(SIGTERM, sig_handler);
     signal(SIGINT, sig_handler);
 
+    boost::asio::io_service service;
+    exchange::gateway::TCPServer server(service, 5001);
+
     try
     {
-        FIX::SessionSettings settings( s_matching_config );
+        server.start();
 
-        exchange::gateway::Application application;
-        FIX::FileStoreFactory storeFactory( settings );
-        FIX::ScreenLogFactory logFactory( settings );
-        FIX::SocketAcceptor acceptor( application, storeFactory, settings, logFactory );
-
-        //acceptor.start();
         while ( !term_received )
         {
             _MatchingEngine.EngineListen();
-            acceptor.poll();
+            service.poll();
         }
-        acceptor.stop();
         return 0;
     }
     catch ( std::exception & e )

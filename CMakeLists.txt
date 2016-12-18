@@ -4,8 +4,10 @@ project(matching_engine)
 set(CMAKE_CXX_STANDARD 14)
 
 include_directories(common/include
+                    common/include/logger
                     matching-engine/include
-                    trading-gateway/include)
+                    trading-gateway/include
+                    ../third_party)
 
 set(SOURCE_FILES
     common/include/logger/ILogger.h
@@ -50,10 +52,7 @@ set(SOURCE_FILES
     matching-engine/tests/src/test_OrderContainer.cpp
     matching-engine/wscript
     trading-gateway/config/config.ini
-    trading-gateway/config/FIX42.xml
-    trading-gateway/include/Gateway_Application.h
-    trading-gateway/src/Gateway_application.cpp
-    trading-gateway/src/Gateway_main.cpp
+        trading-gateway/src/Gateway_main.cpp
     trading-gateway/tests/config/pom.xml
     trading-gateway/wscript
     waf_tools/__init__.py
@@ -62,6 +61,6 @@ set(SOURCE_FILES
     LICENSE
     README.md
     waf
-    wscript)
+    wscript trading-gateway/include/Gateway_Server.h trading-gateway/include/Gateway_Session.h trading-gateway/include/Gateway_Message.h trading-gateway/src/Gateway_Session.cpp)
 
 add_executable(matching_engine ${SOURCE_FILES})

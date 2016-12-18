@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 # encoding: utf-8
 import sys
+import os
+from subprocess import call
 
 def run_tests(ctx):
     sys.path.append(ctx.top_dir)
@@ -8,9 +10,20 @@ def run_tests(ctx):
 
     waf_tools.run_tests(ctx)
 
+def generate_protobuf_api(bld):
+    saved_dir = os.getcwd()
+    os.chdir( "%s/config/"%bld.path.relpath() )
+    call(["protoc", "protocol.proto", "--cpp_out=protocol"])
+    call(["mv", "protocol/protocol.pb.h", "../include"])
+    call(["mv", "protocol/protocol.pb.cc", "../src/protocol.pb.cpp"])
+    os.chdir( saved_dir )
 
 def configure(cfg):
-    cfg.env.append_value('LIB',['quickfix'])
+    cfg.check(features='cxx cxxprogram', lib=['protobuf'], uselib_store='PROTOBUF')
+    cfg.find_program('protoc', var='PROTOC')
+    cfg.env.append_value('LIB',['protobuf'])
+
+    generate_protobuf_api(cfg)
 
 def build(bld):
 
@@ -20,6 +33,8 @@ def build(bld):
     IncludePaths =  waf_tools.get_module_include_dirs(bld,'common')
     IncludePaths =  IncludePaths  + waf_tools.get_module_include_dirs(bld,'matching-engine')
     IncludePaths.append('include')
+
+    bld(rule='cp ${SRC} ${TGT}', source='config/config.ini', target='bin/config.ini')
 
     #Build the static library
     # find all .cpp files ( exclude unit tests )

@@ -22,7 +22,7 @@ typedef exch_logger::LoggerHolder<ExchangeLoggers>                              
 #define EXPANIC(MSG) do { LoggerHolder::GetInstance() << exch_logger::header_panic << MSG << exch_logger::eos; } while (0)
 
 #define EXLOG(Category, Verbosity, MSG)                                                    \
-    do { if ( LoggerHolder::GetInstance().IsReporting( Category, Verbosity ) )                  \
+    do { if ( LoggerHolder::GetInstance().IsReporting( Category, Verbosity ) )             \
     {                                                                                      \
         LoggerHolder::GetInstance() << exch_logger::header_info << MSG << exch_logger::eos;\
     } } while (0)
