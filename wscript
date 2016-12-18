@@ -71,6 +71,9 @@ def configure(cfg):
 
     if cfg.options.with_unittest:
         cfg.check(header_name='gtest/gtest.h', features='cxx cxxprogram')
+        cfg.check(features='cxx cxxprogram', lib=['gtest'], uselib_store='GTEST')
+        cfg.find_program('valgrind', var='VALGRIND')
+        cfg.find_program('gcovr', var='GCOVR')
      
     if cfg.options.with_sanitizer:
         cfg.env.append_value('CXXFLAGS', ['-fsanitize=address'])
