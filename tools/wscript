@@ -1,0 +1,38 @@
+#! /usr/bin/env python
+# encoding: utf-8
+import sys
+import subprocess
+
+def run_tests(ctx):
+    pass
+
+def configure(cfg):
+    cfg.find_program('python-config', var='PYTHON_CONFIG')
+    cfg.env.append_value('CXXFLAGS', ['-fPIC'])
+
+def build(bld):
+
+    sys.path.append(bld.top_dir)
+    import waf_tools
+
+    IncludePaths =  waf_tools.get_module_include_dirs(bld,'common')
+    IncludePaths = IncludePaths + waf_tools.get_module_include_dirs(bld,'pybind11')
+    IncludePaths = IncludePaths + waf_tools.get_module_include_dirs(bld,'matching-engine')
+    IncludePaths.append('include')
+
+    cflags = subprocess.Popen("python-config --includes", shell=True, stdout=subprocess.PIPE).stdout.read()[:-1]
+    ldflags = subprocess.Popen("python-config --ldflags", shell=True, stdout=subprocess.PIPE).stdout.read()[:-1]
+
+    #Build the static library
+    # find all .cpp files ( exclude unit tests )
+    bin_sources_files =  bld.path.ant_glob('**/*.cpp',excl=['**/test_*.cpp'])
+
+    editor_lib = bld.shlib( source = bin_sources_files,
+                 target="bin/instrument_editor",
+                 use='matching-engine common LEVELDB PYTHON',
+                 includes=IncludePaths,
+                 cxxflags=cflags.split(' '),
+                 ldflags=ldflags.split(' ')
+                 )
+
+    editor_lib.env.cxxshlib_PATTERN = '%s.so'

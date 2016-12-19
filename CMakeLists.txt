@@ -7,6 +7,7 @@ include_directories(common/include
                     common/include/logger
                     matching-engine/include
                     trading-gateway/include
+                    pybind11/include
                     ../third_party)
 
 set(SOURCE_FILES
@@ -61,6 +62,6 @@ set(SOURCE_FILES
     LICENSE
     README.md
     waf
-    wscript trading-gateway/include/Gateway_Server.h trading-gateway/include/Gateway_Session.h trading-gateway/include/Gateway_Message.h trading-gateway/src/Gateway_Session.cpp)
+    wscript trading-gateway/include/Gateway_Server.h trading-gateway/include/Gateway_Session.h trading-gateway/include/Gateway_Message.h trading-gateway/src/Gateway_Session.cpp tools/InstrumentEditor.cpp)
 
 add_executable(matching_engine ${SOURCE_FILES})

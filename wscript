@@ -88,7 +88,7 @@ def configure(cfg):
             cfg.env.append_value('CXXFLAGS', ['--coverage','-fPIC'])
             cfg.env.append_value('LINKFLAGS', ['--coverage'])
     
-    cfg.recurse('common matching-engine trading-gateway')
+    cfg.recurse('common matching-engine trading-gateway tools')
 
 def build(bld):
-    bld.recurse('common matching-engine trading-gateway')
+    bld.recurse('common matching-engine trading-gateway tools')
