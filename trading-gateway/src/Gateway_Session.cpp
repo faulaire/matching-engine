@@ -1,4 +1,5 @@
 #include <Gateway_Session.h>
+#include <Logger.h>
 
 namespace exchange
 {
@@ -26,7 +27,7 @@ namespace exchange
                                      [self](boost::system::error_code ec, std::size_t /*length*/){});
 
             boost::asio::async_write(m_socket, boost::asio::buffer(sBuffer.c_str(), sBuffer.length()),
-                                     [self](boost::system::error_code ec, std::size_t /*length*/){});
+                                     [self](boost::system::error_code /* ec */, std::size_t /*length*/){});
         }
 
         void Session::do_read_header()
@@ -63,7 +64,7 @@ namespace exchange
                                             }
                                             else
                                             {
-                                                std::cerr << "Protobuf decoding error, closing socket" << std::endl;
+                                                EXERR("Session::do_read_body : Protobuf decoding error, closing socket");
                                                 m_socket.close();
                                             }
 
@@ -83,17 +84,36 @@ namespace exchange
                 case protocol::OneMessage_Type_NEW_ORDER:
                     if (rMsg.has_new_order_msg())
                     {
-                        const auto & new_order_msg = rMsg.new_order_msg();
+                        process_new_order_message(rMsg.new_order_msg());
                     }
                     else
                     {
-                        std::cerr << "Message is flagged as new order but no new order message available" << std::endl;
+                        EXERR("Session::process_message : Message type is NEW_ORDER "
+                                      << "but no new_order message available");
                     }
                     break;
                 case protocol::OneMessage_Type_MOD_ORDER:
-                    std::cout << "Mod Order Message received" << std::endl;
+                    if (rMsg.has_mod_order_msg())
+                    {
+                        process_mod_order_message(rMsg.mod_order_msg());
+                    }
+                    else
+                    {
+                        EXERR("Session::process_message : Message type is MOD_ORDER "
+                                      << "but no mod_order message available");
+                    }
                     break;
                 case protocol::OneMessage_Type_CAN_ORDER:
+                    if (rMsg.has_can_order_msg())
+                    {
+                        process_can_order_message(rMsg.can_order_msg());
+                    }
+                    else
+                    {
+                        EXERR("Session::process_message : Message type is CAN_ORDER "
+                                      << "but no can_order message available");
+                    }
+                    break;
                 case protocol::OneMessage_Type_LOGON:
                     if( rMsg.has_logon_msg())
                     {
@@ -101,22 +121,54 @@ namespace exchange
                     }
                     else
                     {
-                        std::cerr << "Message is flagged as logon but no logon message available" << std::endl;
+                        EXERR("Session::process_message : Message type is LOGON "
+                                      << "but no logon message available");
                     }
                     break;
                 case protocol::OneMessage_Type_HEARTBEAT:
+                    if( rMsg.has_heartbeat_msg())
+                    {
+                        process_heartbeat_message(rMsg.heartbeat_msg());
+                    }
+                    else
+                    {
+                        EXERR("Session::process_message : Message type is LOGON "
+                                      << "but no logon message available");
+                    }
                     break;
                 default:
-                    std::cerr << "Unhandled message type : " << rMsg.type() << std::endl;
+                    EXERR("Session::process_message : Unhandled message type : " << rMsg.type());
                     break;
             }
         }
 
         void Session::process_logon_message(const protocol::Logon & rLogon)
         {
-            std::cout << "Logon Message" << std::endl;
-            std::cout << rLogon.user_name() << ":"  << rLogon.password() << std::endl;
+            EXINFO("Logon Message received");
+            EXINFO(rLogon.user_name() << ":"  << rLogon.password());
             write_message();
+        }
+
+        void Session::process_new_order_message(const protocol::NewOrder & rNewOrder)
+        {
+            EXINFO("New Order Message received");
+            EXINFO("InstrumentID : " << rNewOrder.instrument_id() << " ; Side : " << rNewOrder.side()
+                        << " ; " << rNewOrder.order_quantity() << "@" << rNewOrder.limit_price());
+        }
+
+        void Session::process_mod_order_message(const protocol::ModOrder & rModOrder)
+        {
+            EXINFO("Mod Order Message received");
+        }
+
+        void Session::process_can_order_message(const protocol::CanOrder & rCanOrder)
+        {
+            EXINFO("Can Order Message received");
+        }
+
+        void Session::process_heartbeat_message(const protocol::Hearbeat & rHeartBeat)
+        {
+            EXINFO("HeartBeat Message received");
         }
     }
 }

@@ -35,6 +35,10 @@ namespace exchange
             void process_message(const protocol::OneMessage & rMsg);
 
             void process_logon_message(const protocol::Logon & rLogon);
+            void process_new_order_message(const protocol::NewOrder & rNewOrder);
+            void process_mod_order_message(const protocol::ModOrder & rModOrder);
+            void process_can_order_message(const protocol::CanOrder & rCanOrder);
+            void process_heartbeat_message(const protocol::Hearbeat & rHeartBeat);
 
         private:
             tcp::socket m_socket;

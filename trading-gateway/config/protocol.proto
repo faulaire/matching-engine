@@ -6,7 +6,7 @@ package protocol;
 message NewOrder
 {
 	required uint64 client_order_id = 1;
-	required string instrument_id   = 2;
+	required uint64 instrument_id   = 2;
 	
 	enum OrderType
 	{
@@ -61,7 +61,7 @@ message ModOrder
 {
 	required uint64 client_order_id = 1;
 	required uint64 order_id 	    = 2;
-	required string instrument_id   = 3;
+	required uint64 instrument_id   = 3;
 	required int32  order_quantity  = 4;
 	required double limit_price     = 5;
 }
@@ -70,7 +70,7 @@ message CanOrder
 {
 	required uint64 client_order_id = 1;
 	required uint64 order_id 	    = 2;
-	required string instrument_id   = 3;
+	required uint64 instrument_id   = 3;
 }
 
 message ExecutionReport
