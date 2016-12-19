@@ -16,7 +16,8 @@ namespace exchange
 
                 if (!status.ok())
                 {
-                    EXERR("InstrumentManager::InitializeDB : Failed to initialize DB. Reason[" << status.ToString() << "]");
+                    EXERR("InstrumentManager::InitializeDB : Failed to initialize DB ["<< m_DBFilePath <<"]."
+                            " Reason[" << status.ToString() << "]");
                     return false;
                 }
             }

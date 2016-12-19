@@ -161,7 +161,7 @@ namespace exchange
             public:
 
                 LevelDBStorage(const std::string & DBPath)
-                    :m_DBFilePath(DBPath), m_db(nullptr)
+                    :m_DBFilePath(DBPath)
                 {}
 
                 bool InitializeDB();
@@ -177,8 +177,8 @@ namespace exchange
 
             private:
 
-                const std::string & m_DBFilePath;
-                leveldb::DB*        m_db;
+                const std::string   m_DBFilePath;
+                leveldb::DB*        m_db = nullptr;
         };
 
         template <typename TCallBack>
