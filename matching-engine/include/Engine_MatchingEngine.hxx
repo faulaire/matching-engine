@@ -146,7 +146,8 @@ namespace exchange
             {
                 auto InstrumentHandler = [this](const Instrument<Order> & Instrument)
                 {
-                    EXINFO("MatchingEngine::LoadInstruments : Adding Instrument : " << Instrument.GetName());
+                    EXINFO("MatchingEngine::LoadInstruments : Adding Instrument : " << Instrument.GetName() <<
+                            " ; ProductID : " << Instrument.GetProductId());
 #ifdef __INTEL_COMPILER
                     auto pIterator = m_OrderBookContainer.insert( std::make_pair(Instrument.GetProductId(),
                                                                   std::make_unique<OrderBookType>(Instrument, *this)));
