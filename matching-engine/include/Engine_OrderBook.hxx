@@ -140,6 +140,8 @@ namespace exchange
         template <typename TOrder, typename TMatchingEngine>
         void OrderBook<TOrder,TMatchingEngine>::ProcessDeal(const Deal * ipDeal)
         {
+            EXINFO("ProcessDeal : Price[" << ipDeal->GetPrice() << "] Quantity[" << ipDeal->GetQuantity() << "]");
+
             SetTurnover(GetTurnover() + ipDeal->GetQuantity()*ipDeal->GetPrice());
             SetDailyVolume( GetDailyVolume() + ipDeal->GetQuantity() );
             SetLastPrice( ipDeal->GetPrice() );

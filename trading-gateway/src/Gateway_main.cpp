@@ -2,7 +2,6 @@
 #include <vector>
 
 #include <Logger.h>
-#include <Engine_MatchingEngine.h>
 #include <Gateway_Server.h>
 
 #include <boost/asio.hpp>
@@ -60,7 +59,7 @@ int main( int argc, char** argv )
     signal(SIGINT, sig_handler);
 
     boost::asio::io_service service;
-    exchange::gateway::TCPServer server(service, 5001);
+    exchange::gateway::TCPServer server(_MatchingEngine, service, 5001);
 
     try
     {

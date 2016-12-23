@@ -14,9 +14,9 @@ namespace exchange
         class TCPServer
         {
         public:
-            TCPServer(boost::asio::io_service& io_service, std::uint32_t service)
+            TCPServer(engine::MatchingEngine<> & rMatchinEngine, boost::asio::io_service& io_service, std::uint32_t service)
                     : m_acceptor(io_service, tcp::endpoint(tcp::v4(), service)),
-                      m_socket(io_service)
+                      m_socket(io_service), m_matching_engine(rMatchinEngine)
             {}
 
             void start()
@@ -32,7 +32,7 @@ namespace exchange
                                        {
                                            if (!ec)
                                            {
-                                               std::make_shared<Session>(std::move(m_socket))->start();
+                                               std::make_shared<Session>(std::move(m_socket), m_matching_engine)->start();
                                            }
 
                                            do_accept();
@@ -40,8 +40,9 @@ namespace exchange
             }
 
         private:
-            tcp::acceptor m_acceptor;
-            tcp::socket   m_socket;
+            tcp::acceptor              m_acceptor;
+            tcp::socket                m_socket;
+            engine::MatchingEngine<> & m_matching_engine;
         };
     }
 }
