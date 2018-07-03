@@ -20,8 +20,11 @@ def build(bld):
     IncludePaths = IncludePaths + waf_tools.get_module_include_dirs(bld,'matching-engine')
     IncludePaths.append('include')
 
-    cflags = subprocess.Popen("python-config --includes", shell=True, stdout=subprocess.PIPE).stdout.read()[:-1]
-    ldflags = subprocess.Popen("python-config --ldflags", shell=True, stdout=subprocess.PIPE).stdout.read()[:-1]
+    cflags, _ = subprocess.Popen(["python-config", "--includes"], stdout=subprocess.PIPE).communicate()
+    ldflags, _ = subprocess.Popen(["python-config", "--ldflags"], stdout=subprocess.PIPE).communicate()
+
+    cflags = cflags.decode().strip('\n')
+    ldflags = ldflags.decode().strip('\n')
 
     #Build the static library
     # find all .cpp files ( exclude unit tests )

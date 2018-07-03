@@ -13,6 +13,7 @@ def run_tests(ctx):
 def generate_protobuf_api(bld):
     saved_dir = os.getcwd()
     os.chdir( "%s/config/"%bld.path.relpath() )
+    call(["mkdir", "-p", "protocol"])
     call(["protoc", "protocol.proto", "--cpp_out=protocol"])
     call(["mv", "protocol/protocol.pb.h", "../include"])
     call(["mv", "protocol/protocol.pb.cc", "../src/protocol.pb.cpp"])
