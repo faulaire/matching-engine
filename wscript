@@ -43,7 +43,7 @@ def options(opt):
     opt.add_option('--with_sanitizer', action='store_true', default=False, help='Activate address sanitizer')
 
 def configure(cfg):
-    cfg.check_waf_version(mini='1.7.5')
+    cfg.check_waf_version(mini='2.0.0')
 
     cfg.load('compiler_cxx')
 

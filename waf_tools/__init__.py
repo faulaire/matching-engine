@@ -1,7 +1,6 @@
 import os
-import fnmatch
 import glob
-
+import subprocess
 """
 """
 
@@ -61,23 +60,24 @@ def run_tests(Context):
     
     bin_dir = Context.out_dir + os.sep + Context.path.relpath() + os.sep + 'bin'
     
-    if ( not os.path.isdir( bin_dir ) ):
+    if not os.path.isdir(bin_dir):
         # Directory doesn't exist.
         return
 
     saved_dir = os.getcwd()
     os.chdir( bin_dir )
-        
+
     unit_tests = glob.glob("test_*")
-    
+
     for test in unit_tests:
 
         JUNIT_RESULT    = "xunit-%s-report.xml"% (test)
         VALGRIND_RESULT = "valgrind-%s-report.xml"% (test)
 
-        Cmd = "valgrind --xml=yes --xml-file=%s ./%s --gtest_output=xml:%s " %( VALGRIND_RESULT, test, JUNIT_RESULT )
+        Cmd = ["valgrind", "--xml=yes", '--xml-file=%s'%VALGRIND_RESULT,
+               './%s'% test, '--gtest_output=xml:%s' %JUNIT_RESULT ]
+        subprocess.Popen(Cmd).communicate()
 
-        Context.exec_command( Cmd )
     
     os.chdir( Context.top_dir )
     
