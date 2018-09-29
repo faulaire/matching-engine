@@ -3,39 +3,43 @@
 import sys
 import subprocess
 
+
 def run_tests(ctx):
     pass
 
+
 def configure(cfg):
-    cfg.find_program('python-config', var='PYTHON_CONFIG')
+    cfg.find_program('python3-config', var='PYTHON_CONFIG')
     cfg.env.append_value('CXXFLAGS', ['-fPIC'])
+
 
 def build(bld):
 
     sys.path.append(bld.top_dir)
     import waf_tools
 
-    IncludePaths =  waf_tools.get_module_include_dirs(bld,'common')
-    IncludePaths = IncludePaths + waf_tools.get_module_include_dirs(bld,'pybind11')
-    IncludePaths = IncludePaths + waf_tools.get_module_include_dirs(bld,'matching-engine')
+    IncludePaths = waf_tools.get_module_include_dirs(bld, 'common')
+    IncludePaths = IncludePaths + waf_tools.get_module_include_dirs(bld, 'pybind11')
+    IncludePaths = IncludePaths + waf_tools.get_module_include_dirs(bld, 'matching-engine')
     IncludePaths.append('include')
 
-    cflags, _ = subprocess.Popen(["python-config", "--includes"], stdout=subprocess.PIPE).communicate()
-    ldflags, _ = subprocess.Popen(["python-config", "--ldflags"], stdout=subprocess.PIPE).communicate()
+    cflags, _ = subprocess.Popen(["python3-config", "--includes"],
+                                 stdout=subprocess.PIPE).communicate()
+    ldflags, _ = subprocess.Popen(["python3-config", "--ldflags"],
+                                  stdout=subprocess.PIPE).communicate()
 
     cflags = cflags.decode().strip('\n')
     ldflags = ldflags.decode().strip('\n')
 
-    #Build the static library
+    # Build the static library
     # find all .cpp files ( exclude unit tests )
-    bin_sources_files =  bld.path.ant_glob('**/*.cpp',excl=['**/test_*.cpp'])
+    bin_sources_files = bld.path.ant_glob('**/*.cpp', excl=['**/test_*.cpp'])
 
-    editor_lib = bld.shlib( source = bin_sources_files,
-                 target="bin/instrument_editor",
-                 use='matching-engine common LEVELDB PYTHON',
-                 includes=IncludePaths,
-                 cxxflags=cflags.split(' '),
-                 ldflags=ldflags.split(' ')
-                 )
+    editor_lib = bld.shlib(source=bin_sources_files,
+                           target="bin/instrument_editor",
+                           use='matching-engine common LEVELDB PYTHON',
+                           includes=IncludePaths,
+                           cxxflags=cflags.split(' '),
+                           ldflags=ldflags.split(' '))
 
     editor_lib.env.cxxshlib_PATTERN = '%s.so'
