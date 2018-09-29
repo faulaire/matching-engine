@@ -23,7 +23,7 @@ before_install:
   if [ "$TRAVIS_OS_NAME" = "linux" ]; then
     EXTRA_PACKAGES+=" g++-$GCC"
     export CXX=g++-$GCC CC=gcc-$GCC
-    
+
     if [ "$GCC" = "6" ]; then DOCKER=debian:stretch
     elif [ "$GCC" = "7" ]; then DOCKER=debian:buster
     fi
@@ -52,7 +52,12 @@ install:
     $SCRIPT_RUN_PREFIX sh -c "for s in 0 15; do sleep \$s; \
       apt-get -qy --no-install-recommends install \
         $PY_DEBUG python$PYTHON-dev python$PY-pytest \
-        libboost-dev cmake make ${EXTRA_PACKAGES} && break; done"
+        libboost-dev libz-dev libssl-dev libgtest-dev ${EXTRA_PACKAGES} && break; done"
+    $SCRIPT_RUN_PREFIX sh -c 'for s in 0 15; do sleep $s; \
+        wget https://github.com/google/leveldb/archive/v1.20.tar.gz && \
+        tar -xzf v1.20.tar.gz && cd leveldb-1.20 && make -j3 && \
+        mv out-shared$/libleveldb.* /usr/local/lib && ldconfig && \
+        cd include && cp -R leveldb /usr/local/include && break; done'
   fi
   set +e
 

@@ -1,4 +1,4 @@
-[![Build Status](https://drone.io/github.com/Vladec/matching-engine/status.png)](https://drone.io/github.com/Vladec/matching-engine/latest)
+[![Build Status](https://travis-ci.org/faulaire/matching-engine.svg?branch=master)](https://travis-ci.org/faulaire/matching-engine)
 
 matching-engine
 ===============
@@ -15,9 +15,9 @@ Version 0.1.x:
 
 Prerequisites:
 * [Boost 1.55+](http://www.boost.org/)
-* [LevelDB 1.18+](http://leveldb.org/)
+* [LevelDB 1.20+](http://leveldb.org/)
 * [Google Test 1.7.*](https://code.google.com/p/googletest/)
-* [Clang 3.6+](http://clang.llvm.org/) or [Gcc 4.9+](https://gcc.gnu.org/)
+* [Clang 3.6+](http://clang.llvm.org/) or [Gcc 6.0+](https://gcc.gnu.org/)
 
 ## Notes
 
@@ -26,7 +26,7 @@ and contributions are welcome.
 
 ## Bugs and Contributing
 
-Please report issues via https://github.com/Vladec/matching-engine/issues.<br />
+Please report issues via https://github.com/faulaire/matching-engine/issues.<br />
 Patches are best submitted as pull requests, or via email
 (fabien.aulaire@gmail.com).
 
