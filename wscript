@@ -2,23 +2,25 @@
 # encoding: utf-8
 
 import os
+from waflib.Build import BuildContext
 
 top = '.'
 out = 'build'
 APPNAME = 'matching-engine'
 VERSION = '0.1'
 
-from waflib.Build import BuildContext
 
 class RunTestCtx(BuildContext):
         cmd = 'run_tests'
         fun = 'run_tests'
 
+
 def IsClangCompiler(cfg):
-   for compiler in cfg.env["CXX"]:
-      if compiler.find("clang") != -1:
-         return True
-   return False
+    for compiler in cfg.env["CXX"]:
+        if compiler.find("clang") != -1:
+            return True
+    return False
+
 
 def CheckCompilerVersion(cfg):
     (major, minor, patch) = cfg.env['CC_VERSION']
@@ -35,12 +37,14 @@ def CheckCompilerVersion(cfg):
 def run_tests(ctx):
     ctx.recurse('common matching-engine trading-gateway')
 
+
 def options(opt):
     opt.load('compiler_cxx')
     opt.add_option('--release', action='store_true', default=False, help='Compile in release mode')
     opt.add_option('--coverage', action='store_true', default=False, help='Activate coverage')
     opt.add_option('--with_unittest', action='store_true', default=False, help='Activate unittest building')
     opt.add_option('--with_sanitizer', action='store_true', default=False, help='Activate address sanitizer')
+
 
 def configure(cfg):
     cfg.check_waf_version(mini='2.0.0')
@@ -63,32 +67,33 @@ def configure(cfg):
 
     cfg.env.with_unittest = cfg.options.with_unittest
 
-    cfg.env.append_value('CXXFLAGS', ['-std=c++14','-W','-Wall','-Wno-unused-local-typedefs','-D_GLIBCXX_USE_CXX11_ABI=1',])
-    
+    cfg.env.append_value('CXXFLAGS', ['-std=c++14', '-W', '-Wall', '-Wno-unused-local-typedefs','-D_GLIBCXX_USE_CXX11_ABI=1',])
+
     if IsClangCompiler(cfg):
         # We need to link again libstdc++ and libm with clang
-        cfg.env.append_value('LINKFLAGS', ['-lstdc++','-lm'])
+        cfg.env.append_value('LINKFLAGS', ['-lstdc++', '-lm'])
 
     if cfg.options.with_unittest:
         cfg.check(header_name='gtest/gtest.h', features='cxx cxxprogram')
         cfg.check(features='cxx cxxprogram', lib=['gtest'], uselib_store='GTEST')
         cfg.find_program('valgrind', var='VALGRIND')
         cfg.find_program('gcovr', var='GCOVR')
-     
+
     if cfg.options.with_sanitizer:
         cfg.env.append_value('CXXFLAGS', ['-fsanitize=address'])
         cfg.env.append_value('LINKFLAGS', ['-fsanitize=address'])
 
     if cfg.options.release:
-        cfg.env.append_value('CXXFLAGS', ['-ggdb3','-O3','-march=native', '-mtune=native', '-DNDEBUG'])
+        cfg.env.append_value('CXXFLAGS', ['-ggdb3', '-O3', '-march=native', '-mtune=native', '-DNDEBUG'])
     else:
-        cfg.env.append_value('CXXFLAGS', ['-ggdb3','-O0','-fno-inline','-fno-omit-frame-pointer'])
+        cfg.env.append_value('CXXFLAGS', ['-ggdb3', '-O0', '-fno-inline', '-fno-omit-frame-pointer'])
 
         if cfg.options.coverage:
             cfg.env.append_value('CXXFLAGS', ['--coverage','-fPIC'])
             cfg.env.append_value('LINKFLAGS', ['--coverage'])
-    
+
     cfg.recurse('common matching-engine trading-gateway tools')
+
 
 def build(bld):
     bld.recurse('common matching-engine trading-gateway tools')
