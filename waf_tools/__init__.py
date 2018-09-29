@@ -66,22 +66,13 @@ def run_tests(Context):
 
     saved_dir = os.getcwd()
     os.chdir( bin_dir )
-
     unit_tests = glob.glob("test_*")
-
     for test in unit_tests:
-
         JUNIT_RESULT    = "xunit-%s-report.xml"% (test)
         VALGRIND_RESULT = "valgrind-%s-report.xml"% (test)
 
         Cmd = ["valgrind", "--xml=yes", '--xml-file=%s'%VALGRIND_RESULT,
                './%s'% test, '--gtest_output=xml:%s' %JUNIT_RESULT ]
         subprocess.Popen(Cmd).communicate()
-
-    
-    os.chdir( Context.top_dir )
-    
-    Context.exec_command( "gcovr -x -r . > %s/gcovr-report.xml" % (bin_dir) )
-    Context.exec_command( "gcovr -r . --html --html-details -o %s/coverage-report.html" % (bin_dir) )
 
     os.chdir( saved_dir )

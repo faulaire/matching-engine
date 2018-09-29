@@ -1,41 +1,62 @@
 language: cpp
+dist: trusty
+sudo: false
+matrix:
+  include:
 
-compiler:
-  - gcc
-  - clang
+  - sudo: true
+    services: docker
+    env: PYTHON=3.6 CPP=14 GCC=6
+  - sudo: true
+    services: docker
+    env: PYTHON=3.6 CPP=17 GCC=7
 
-env:
-  global:
-    - GCC_VERSION="4.8"
-    
+cache:
+  directories:
+  - $HOME/.local/bin
+  - $HOME/.local/lib
+  - $HOME/.local/include
+  - $HOME/Library/Python
 before_install:
-  - echo $LANG
-  - echo $LC_ALL
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  - sudo apt-get update -qq
-  - sudo apt-get install -y llvm-3.4 llvm-3.4-dev
-  - sudo apt-get install -y libssl-dev libmysqlclient-dev libgtest-dev libboost-all-dev libz-dev
+- |
+  # Configure build variables
+  if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+    if [ "$GCC" = "6" ]; then DOCKER=debian:stretch
+    elif [ "$GCC" = "7" ]; then DOCKER=debian:buster
+    fi
+  fi
+  if [ -n "$CPP" ]; then CPP=-std=c++$CPP; fi
+- |
+  # Initialize environment
+  set -e
+  if [ -n "$DOCKER" ]; then
+    docker pull $DOCKER
 
+    containerid=$(docker run --detach --tty \
+      --volume="$PWD":/matching-engine --workdir=/matching-engine \
+      --env="CC=$CC" --env="CXX=$CXX" --env="DEBIAN_FRONTEND=$DEBIAN_FRONTEND" \
+      --env=GCC_COLORS=\  \
+      $DOCKER)
+    SCRIPT_RUN_PREFIX="docker exec --tty $containerid"
+    $SCRIPT_RUN_PREFIX sh -c 'for s in 0 15; do sleep $s; apt-get update && apt-get -qy dist-upgrade && break; done'
+  fi
+  set +e
 install:
-  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq "g++-${GCC_VERSION}"; fi
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-${GCC_VERSION}" CC="gcc-${GCC_VERSION}"; fi
-  - if [ "$CXX" = "clang++" ]; then sudo apt-get install -qq "libstdc++-${GCC_VERSION}-dev"; fi
-  
+- |
+  # Install dependencies
+  set -e
+  if [ -n "$DOCKER" ]; then
+    $SCRIPT_RUN_PREFIX sh -c "for s in 0 15; do sleep \$s; \
+      apt-get -qy --no-install-recommends install \
+        $PY_DEBUG python$PYTHON-dev python$PY-pytest \
+        libboost-dev cmake make ${EXTRA_PACKAGES} && break; done"
+  fi
+  set +e
+
 script:
-  - ./bootstrap.py
-  - ./waf configure
-  - ./waf build
+- $SCRIPT_RUN_PREFIX ./bootstrap.py
+- $SCRIPT_RUN_PREFIX ./waf configure
+- $SCRIPT_RUN_PREFIX ./waf build -j2
 
-branches:
-  only:
-    - master
-
-notifications:
-  email: false
-
-env:
-  - LANG="en_US.UTF-8"
-
-os:
-  - linux
-
+after_script:
+- if [ -n "$DOCKER" ]; then docker stop "$containerid"; docker rm "$containerid"; fi
