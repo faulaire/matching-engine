@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # encoding: utf-8
 import sys
 import subprocess
@@ -8,8 +8,15 @@ def run_tests(ctx):
     pass
 
 
+def get_python_config():
+    version_info = sys.version_info
+    pythonconfig = "python{major}.{minor}".format(major=version_info.major,
+                                                  minor=version_info.minor)
+    return pythonconfig
+
+
 def configure(cfg):
-    cfg.find_program('python3-config', var='PYTHON_CONFIG')
+    cfg.find_program(get_python_config(), var='PYTHON_CONFIG')
     cfg.env.append_value('CXXFLAGS', ['-fPIC'])
 
 
@@ -23,9 +30,9 @@ def build(bld):
     IncludePaths = IncludePaths + waf_tools.get_module_include_dirs(bld, 'matching-engine')
     IncludePaths.append('include')
 
-    cflags, _ = subprocess.Popen(["python3-config", "--includes"],
+    cflags, _ = subprocess.Popen([get_python_config(), "--includes"],
                                  stdout=subprocess.PIPE).communicate()
-    ldflags, _ = subprocess.Popen(["python3-config", "--ldflags"],
+    ldflags, _ = subprocess.Popen([get_python_config(), "--ldflags"],
                                   stdout=subprocess.PIPE).communicate()
 
     cflags = cflags.decode().strip('\n')
