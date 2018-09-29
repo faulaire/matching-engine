@@ -30,7 +30,7 @@ def CheckCompilerVersion(cfg):
         if version_number < 360:
             cfg.fatal(error_string)
     else:
-        if version_number < 490:
+        if version_number < 600:
             cfg.fatal(error_string)
 
 
@@ -42,8 +42,10 @@ def options(opt):
     opt.load('compiler_cxx')
     opt.add_option('--release', action='store_true', default=False, help='Compile in release mode')
     opt.add_option('--coverage', action='store_true', default=False, help='Activate coverage')
-    opt.add_option('--with_unittest', action='store_true', default=False, help='Activate unittest building')
-    opt.add_option('--with_sanitizer', action='store_true', default=False, help='Activate address sanitizer')
+    opt.add_option('--with_unittest', action='store_true', default=False,
+                   help='Activate unittest building')
+    opt.add_option('--with_sanitizer', action='store_true', default=False,
+                   help='Activate address sanitizer')
 
 
 def configure(cfg):
@@ -55,19 +57,21 @@ def configure(cfg):
 
     cfg.check(features='cxx cxxprogram', lib=['pthread'], uselib_store='PTHREAD')
     cfg.check(features='cxx cxxprogram', lib=['m'], uselib_store='M')
-    
+
     cfg.check(features='cxx cxxprogram', lib=['leveldb'], uselib_store='LEVELDB')
 
     cfg.check(features='cxx cxxprogram', lib=['boost_system'], uselib_store='BOOST_SYSTEM')
     cfg.check(features='cxx cxxprogram', lib=['boost_filesystem'], uselib_store='BOOST_FILESYSTEM')
     cfg.check(features='cxx cxxprogram', lib=['boost_date_time'], uselib_store='BOOST_DATE_TIME')
-    cfg.check(features='cxx cxxprogram', lib=['boost_serialization'], uselib_store='BOOST_SERIALIZATION')
-    
+    cfg.check(features='cxx cxxprogram', lib=['boost_serialization'],
+              uselib_store='BOOST_SERIALIZATION')
+
     cfg.check(header_name='leveldb/db.h', features='cxx cxxprogram')
 
     cfg.env.with_unittest = cfg.options.with_unittest
 
-    cfg.env.append_value('CXXFLAGS', ['-std=c++14', '-W', '-Wall', '-Wno-unused-local-typedefs','-D_GLIBCXX_USE_CXX11_ABI=1',])
+    cfg.env.append_value('CXXFLAGS', ['-std=c++14', '-W', '-Wall', '-Wno-unused-local-typedefs',
+                         '-D_GLIBCXX_USE_CXX11_ABI=1'])
 
     if IsClangCompiler(cfg):
         # We need to link again libstdc++ and libm with clang
@@ -84,12 +88,14 @@ def configure(cfg):
         cfg.env.append_value('LINKFLAGS', ['-fsanitize=address'])
 
     if cfg.options.release:
-        cfg.env.append_value('CXXFLAGS', ['-ggdb3', '-O3', '-march=native', '-mtune=native', '-DNDEBUG'])
+        cfg.env.append_value('CXXFLAGS', ['-ggdb3', '-O3', '-march=native', '-mtune=native',
+                             '-DNDEBUG'])
     else:
-        cfg.env.append_value('CXXFLAGS', ['-ggdb3', '-O0', '-fno-inline', '-fno-omit-frame-pointer'])
+        cfg.env.append_value('CXXFLAGS', ['-ggdb3', '-O0', '-fno-inline',
+                             '-fno-omit-frame-pointer'])
 
         if cfg.options.coverage:
-            cfg.env.append_value('CXXFLAGS', ['--coverage','-fPIC'])
+            cfg.env.append_value('CXXFLAGS', ['--coverage', '-fPIC'])
             cfg.env.append_value('LINKFLAGS', ['--coverage'])
 
     cfg.recurse('common matching-engine trading-gateway tools')

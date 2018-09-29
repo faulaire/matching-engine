@@ -14,10 +14,10 @@ Version 0.1.x:
 ## Installation
 
 Prerequisites:
-* [Boost 1.55+](http://www.boost.org/)
+* [Boost 1.65+](http://www.boost.org/)
 * [LevelDB 1.20+](http://leveldb.org/)
-* [Google Test 1.7.*](https://code.google.com/p/googletest/)
-* [Clang 3.6+](http://clang.llvm.org/) or [Gcc 6.0+](https://gcc.gnu.org/)
+* [Google Test 1.8.*](https://code.google.com/p/googletest/)
+* [Clang 3.6+](http://clang.llvm.org/) or [GCC 6.0+](https://gcc.gnu.org/)
 
 ## Notes
 

@@ -51,13 +51,19 @@ install:
   if [ -n "$DOCKER" ]; then
     $SCRIPT_RUN_PREFIX sh -c "for s in 0 15; do sleep \$s; \
       apt-get -qy --no-install-recommends install \
-        $PY_DEBUG python$PYTHON-dev python$PY-pytest \
-        libboost-dev libz-dev libssl-dev libgtest-dev make wget ${EXTRA_PACKAGES} && break; done"
+        $PY_DEBUG python$PYTHON-dev python$PY-pytest libboost-dev libboost-system-dev libboost-filesystem-dev \
+        libboost-serialization-dev libboost-date-time-dev valgrind \
+        libz-dev libssl-dev libgtest-dev make cmake wget ${EXTRA_PACKAGES} && break; done"
+    # leveldb
     $SCRIPT_RUN_PREFIX sh -c 'for s in 0 15; do sleep $s; \
         wget --no-check-certificate https://github.com/google/leveldb/archive/v1.20.tar.gz && \
         tar -xzf v1.20.tar.gz && cd leveldb-1.20 && make -j3 && \
         mv out-shared/libleveldb.* /usr/local/lib && ldconfig && \
         cd include && cp -R leveldb /usr/local/include && break; done'
+    # google test
+    $SCRIPT_RUN_PREFIX sh -c 'for s in 0 15; do sleep $s; \
+      cd /usr/src/gtest && cmake CMakeLists.txt && make \
+      cp *.a /usr/lib && break; done'
   fi
   set +e
 
