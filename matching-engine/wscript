@@ -2,30 +2,35 @@
 # encoding: utf-8
 import sys
 
+
 def run_tests(ctx):
     sys.path.append(ctx.top_dir)
     import waf_tools
-    
+
     waf_tools.run_tests(ctx)
 
 
 def configure(cfg):
     pass
 
+
 def build(bld):
 
     sys.path.append(bld.top_dir)
     import waf_tools
 
-    IncludePaths =  waf_tools.get_module_include_dirs(bld,'common')
+    IncludePaths = waf_tools.get_module_include_dirs(bld, 'common')
     IncludePaths.append('include')
 
-    #Build the static library
+    # Build the static library
     # find all .cpp files ( exclude unit tests )
-    lib_sources_files =  bld.path.ant_glob('**/*.cpp',excl=['**/test_*.cpp', '**/Engine_Benchmark.cpp'])
-    bin_sources_files =  bld.path.ant_glob('**/*.cpp',excl=['**/test_*.cpp'])
+    lib_sources_files = bld.path.ant_glob('**/*.cpp', excl=['**/test_*.cpp',
+                                          '**/Engine_Benchmark.cpp'])
+    bin_sources_files = bld.path.ant_glob('**/*.cpp', excl=['**/test_*.cpp'])
 
-    bld.stlib( source = lib_sources_files, target="matching-engine", use="common", includes=IncludePaths )
-    bld.program( source = bin_sources_files, target="bin/benchmark", use="matching-engine common LEVELDB", includes=IncludePaths )
+    bld.stlib(source=lib_sources_files, target="matching-engine", use="common",
+              includes=IncludePaths)
+    bld.program(source=bin_sources_files, target="bin/benchmark",
+                use="matching-engine common LEVELDB", includes=IncludePaths)
     if bld.env.with_unittest:
         waf_tools.build_tests(bld, "common matching-engine GTEST", IncludePaths)

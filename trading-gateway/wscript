@@ -4,42 +4,47 @@ import sys
 import os
 from subprocess import call
 
+
 def run_tests(ctx):
     sys.path.append(ctx.top_dir)
     import waf_tools
 
     waf_tools.run_tests(ctx)
 
+
 def generate_protobuf_api(bld):
     saved_dir = os.getcwd()
-    os.chdir( "%s/config/"%bld.path.relpath() )
+    os.chdir("%s/config/" % bld.path.relpath())
     call(["mkdir", "-p", "protocol"])
     call(["protoc", "protocol.proto", "--cpp_out=protocol"])
     call(["mv", "protocol/protocol.pb.h", "../include"])
     call(["mv", "protocol/protocol.pb.cc", "../src/protocol.pb.cpp"])
-    os.chdir( saved_dir )
+    os.chdir(saved_dir)
+
 
 def configure(cfg):
     cfg.check(features='cxx cxxprogram', lib=['protobuf'], uselib_store='PROTOBUF')
     cfg.find_program('protoc', var='PROTOC')
-    cfg.env.append_value('LIB',['protobuf'])
+    cfg.env.append_value('LIB', ['protobuf'])
 
     generate_protobuf_api(cfg)
+
 
 def build(bld):
 
     sys.path.append(bld.top_dir)
     import waf_tools
 
-    IncludePaths =  waf_tools.get_module_include_dirs(bld,'common')
-    IncludePaths =  IncludePaths  + waf_tools.get_module_include_dirs(bld,'matching-engine')
+    IncludePaths = waf_tools.get_module_include_dirs(bld, 'common')
+    IncludePaths = IncludePaths + waf_tools.get_module_include_dirs(bld, 'matching-engine')
     IncludePaths.append('include')
 
     bld(rule='cp ${SRC} ${TGT}', source='config/config.ini', target='bin/config.ini')
 
-    #Build the static library
+    # Build the static library
     # find all .cpp files ( exclude unit tests )
-    bin_sources_files =  bld.path.ant_glob('**/*.cpp',excl=['**/test_*.cpp'])
-    bld.program( source = bin_sources_files, target="bin/trading-gateway", use="matching-engine common LEVELDB", includes=IncludePaths )
+    bin_sources_files = bld.path.ant_glob('**/*.cpp', excl=['**/test_*.cpp'])
+    bld.program(source=bin_sources_files, target="bin/trading-gateway",
+                use="matching-engine common LEVELDB", includes=IncludePaths)
     if bld.env.with_unittest:
         waf_tools.build_tests(bld, "common matching-engine GTEST", IncludePaths)

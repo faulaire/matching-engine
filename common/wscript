@@ -3,38 +3,41 @@
 
 import sys
 
+
 def run_tests(ctx):
     sys.path.append(ctx.top_dir)
     import waf_tools
 
     waf_tools.run_tests(ctx)
 
+
 def configure(cfg):
 
-    cfg.env.append_value('LIB',['leveldb'])
+    cfg.env.append_value('LIB', ['leveldb'])
 
     if cfg.env.with_unittest:
-        cfg.env.append_value('LIB',['gtest'])
+        cfg.env.append_value('LIB', ['gtest'])
 
-    cfg.env.append_value('LIB',['pthread'])
+    cfg.env.append_value('LIB', ['pthread'])
 
     # boost lib
-    cfg.env.append_value('LIB',['boost_system','boost_filesystem','boost_date_time','boost_serialization'])
+    cfg.env.append_value('LIB', ['boost_system', 'boost_filesystem', 'boost_date_time',
+                         'boost_serialization'])
+
 
 def build(bld):
-    
+
     sys.path.append(bld.top_dir)
     import waf_tools
 
-    IncludePaths = waf_tools.get_module_include_dirs(bld,'common')
+    IncludePaths = waf_tools.get_module_include_dirs(bld, 'common')
     IncludePaths.append('include')
 
-    #Build the static library
+    # Build the static library
     # find all .cpp files ( exclude unit tests )
-    sources_files =  bld.path.ant_glob('**/*.cpp',excl=['**/test_*.cpp'])
-    bld.stlib( source = sources_files, target="common", use="BOOST", includes=IncludePaths )
+    sources_files = bld.path.ant_glob('**/*.cpp', excl=['**/test_*.cpp'])
+    bld.stlib(source=sources_files, target="common", use="BOOST", includes=IncludePaths)
 
-    #Unit test related stuff
+    # Unit test related stuff
     if bld.env.with_unittest:
         waf_tools.build_tests(bld, "common", IncludePaths)
-
