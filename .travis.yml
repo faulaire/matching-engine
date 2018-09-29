@@ -49,10 +49,12 @@ install:
   # Install dependencies
   set -e
   if [ -n "$DOCKER" ]; then
+    # Python, boost, valgrind, gcovr, protobuf, gtest...
     $SCRIPT_RUN_PREFIX sh -c "for s in 0 15; do sleep \$s; \
       apt-get -qy --no-install-recommends install \
         $PY_DEBUG python$PYTHON-dev python$PY-pytest libboost-dev libboost-system-dev libboost-filesystem-dev \
         libboost-serialization-dev libboost-date-time-dev valgrind gcovr protobuf-compiler libprotobuf10 \
+        libprotobuf-dev libprotobuf-lite10 libprotoc10 python-protobuf \
         libz-dev libssl-dev libgtest-dev make cmake wget ${EXTRA_PACKAGES} && break; done"
     # leveldb
     $SCRIPT_RUN_PREFIX sh -c 'for s in 0 15; do sleep $s; \
