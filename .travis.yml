@@ -70,10 +70,10 @@ install:
   set +e
 
 script:
-- $SCRIPT_RUN_PREFIX ./bootstrap.py
-- $SCRIPT_RUN_PREFIX ./waf configure --with_unittest
-- $SCRIPT_RUN_PREFIX ./waf -v build -j2
-- $SCRIPT_RUN_PREFIX ./waf -v run_tests
+- $SCRIPT_RUN_PREFIX python$PYTHON ./bootstrap.py
+- $SCRIPT_RUN_PREFIX python$PYTHON ./waf configure --with_unittest
+- $SCRIPT_RUN_PREFIX python$PYTHON ./waf -v build -j2
+- $SCRIPT_RUN_PREFIX python$PYTHON ./waf -v run_tests
 
 after_script:
 - if [ -n "$DOCKER" ]; then docker stop "$containerid"; docker rm "$containerid"; fi

@@ -10,8 +10,8 @@ def run_tests(ctx):
 
 def get_python_config():
     version_info = sys.version_info
-    pythonconfig = "python{major}.{minor}".format(major=version_info.major,
-                                                  minor=version_info.minor)
+    pythonconfig = "python{major}.{minor}-config".format(major=version_info.major,
+                                                         minor=version_info.minor)
     return pythonconfig
 
 
