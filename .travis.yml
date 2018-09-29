@@ -52,7 +52,7 @@ install:
     $SCRIPT_RUN_PREFIX sh -c "for s in 0 15; do sleep \$s; \
       apt-get -qy --no-install-recommends install \
         $PY_DEBUG python$PYTHON-dev python$PY-pytest libboost-dev libboost-system-dev libboost-filesystem-dev \
-        libboost-serialization-dev libboost-date-time-dev valgrind gcovr protobuf-compiler \
+        libboost-serialization-dev libboost-date-time-dev valgrind gcovr protobuf-compiler libprotobuf10 \
         libz-dev libssl-dev libgtest-dev make cmake wget ${EXTRA_PACKAGES} && break; done"
     # leveldb
     $SCRIPT_RUN_PREFIX sh -c 'for s in 0 15; do sleep $s; \
