@@ -52,7 +52,7 @@ install:
     $SCRIPT_RUN_PREFIX sh -c "for s in 0 15; do sleep \$s; \
       apt-get -qy --no-install-recommends install \
         $PY_DEBUG python$PYTHON-dev python$PY-pytest \
-        libboost-dev libz-dev libssl-dev libgtest-dev wget ${EXTRA_PACKAGES} && break; done"
+        libboost-dev libz-dev libssl-dev libgtest-dev make wget ${EXTRA_PACKAGES} && break; done"
     $SCRIPT_RUN_PREFIX sh -c 'for s in 0 15; do sleep $s; \
         wget --no-check-certificate https://github.com/google/leveldb/archive/v1.20.tar.gz && \
         tar -xzf v1.20.tar.gz && cd leveldb-1.20 && make -j3 && \
