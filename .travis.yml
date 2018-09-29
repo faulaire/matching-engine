@@ -6,7 +6,7 @@ matrix:
 
   - sudo: true
     services: docker
-    env: PYTHON=3.6 CPP=14 GCC=6
+    env: PYTHON=3.5 CPP=14 GCC=6
   - sudo: true
     services: docker
     env: PYTHON=3.6 CPP=17 GCC=7
@@ -21,6 +21,9 @@ before_install:
 - |
   # Configure build variables
   if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+    EXTRA_PACKAGES+=" g++-$GCC"
+    export CXX=g++-$GCC CC=gcc-$GCC
+    
     if [ "$GCC" = "6" ]; then DOCKER=debian:stretch
     elif [ "$GCC" = "7" ]; then DOCKER=debian:buster
     fi
